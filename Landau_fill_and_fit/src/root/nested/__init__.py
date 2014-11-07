@@ -3,9 +3,8 @@ import numpy as np
 import ROOT
 from ROOT import TCanvas, TF1, TH1F
 
-
+import root_functions
 from root_functions import LanGausFit, LandauFit
-
 
 if __name__ == '__main__':
     
@@ -28,7 +27,7 @@ if __name__ == '__main__':
     langaus_func, dummy = LanGausFit(landau_hist, 200,1000)# returns a TF1
     langaus_func.SetNpx(1000)
     langaus_func.Draw("same")
-    
+#    
     landau_func = LandauFit(landau_hist, 200,1000, True) #bool supresses the drawing during the fit
     landau_func.SetNpx(1000)
     landau_func.SetLineStyle(5)
@@ -37,7 +36,7 @@ if __name__ == '__main__':
     landau_func.Draw("same")
     
     
-    c1.SaveAs('/home/mmmerlin/output/test_landau.pdf')
+    c1.SaveAs('/home/mmmerlin/temp/test_landau.pdf')
     del c1
     del landau_hist
     

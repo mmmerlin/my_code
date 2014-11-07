@@ -8,20 +8,24 @@ import lsst.afw.display.utils as displayUtils
 import lsst.afw.display.ds9   as ds9
 import lsst.afw.image as afwImg
 
+import ROOT
 from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
 import numpy as np
 from numpy.core.defchararray import zfill
 
 
+
 # my stuff
-from root_functions import DoubleGausFit
+from root_functions import DoubleGausFit, CANVAS_HEIGHT, CANVAS_WIDTH
 from image_assembly import GetImage_SingleAmp, MakeBiasImage_SingleAmp
-from my_image_tools import FastHistogramImage_JustData
+from my_image_tools import FastHistogramImageData
 
 ##########################################################################################
 # path options
-OUTPUT_PATH = "/home/mmmerlin/dl/QE/"
-PICKLE_PATH = '/home/mmmerlin/dl/QE/pickles/fe55/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/'
+#OUTPUT_PATH = "/home/mmmerlin/dl/QE/"
+#PICKLE_PATH = '/home/mmmerlin/dl/QE/pickles/fe55/'
+PICKLE_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/pickles/'
 FILE_TYPE = ".png"
 N_AMPS = 16
 
@@ -40,13 +44,14 @@ SPECIFIC_FILE = None
 SINGLE_POINT = False
 QUIET = False
 #PROCESS_FILE_LIMIT = None
-PROCESS_FILE_LIMIT = 999999
+PROCESS_FILE_LIMIT = 9999
 
 
 # Post processing options
 MAKE_FE55_SPECTRA = True
 GLOBAL_OUT = []
-OUTFILE = "/home/mmmerlin/dl/QE/noise.txt"
+#OUTFILE = "/home/mmmerlin/dl/QE/noise.txt"
+OUTFILE = '/mnt/hgfs/VMShared/output/Fe55_John/noise.txt'
 
 
 def DoAnalysis(input_path):
@@ -69,7 +74,8 @@ def DoAnalysis(input_path):
     for thisfile in dircontents:
         if str(thisfile).find('coadded')!= -1: continue # skip coadd files
         if str(thisfile).find('.DS')    != -1: continue # skip weird files
-        if str(thisfile).find('bias')   != -1: continue # skip bias  files
+#        if str(thisfile).find('bias')   != -1: continue # skip bias  files #CHANGEBACK
+        if str(thisfile).find('frame')   != -1: continue # skip bias  files
         if isfile(input_path + thisfile): file_list.append(thisfile) # skip dirs
     
     
@@ -80,7 +86,7 @@ def DoAnalysis(input_path):
         
         
     # make bias images from all bias files in dir and put in an array
-    bias_images = [MakeBiasImage_SingleAmp(input_path, ampnum) for ampnum in range(N_AMPS)]
+#    bias_images = [MakeBiasImage_SingleAmp(input_path, ampnum) for ampnum in range(N_AMPS)]
     
     
     # loop over all Fe55 files, getting spectrum from each and pickling
@@ -96,7 +102,7 @@ def DoAnalysis(input_path):
             ##### DMStack background subtraction:
             image = GetImage_SingleAmp(input_path + filename, True, amp)
 
-            ##### Bias File background subtraction:
+            ##### Bias 0File background subtraction:
 #            image = afwImg.ImageF(input_path + filename, amp + 2)
 #            image -= bias_images[amp]
             ###########################################
@@ -104,21 +110,21 @@ def DoAnalysis(input_path):
             maskedImg = afwImg.MaskedImageF(image)
             exposure = afwImg.ExposureF(maskedImg)
             
-            # histogram the background / fit the noise, write to file
-#            c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-            hist, d1, d2 = FastHistogramImage_JustData(image.getArray())
-            hist.GetXaxis().SetRangeUser(-50,3000)
-            hist.Fit('gaus')
-            fitfunc = hist.GetFunction('gaus')
-#            fitfunc.SetNpx(1000) #draw it nicely
-            mean = fitfunc.GetParameter(1)
-            mean_error = fitfunc.GetParError(1)
-            sigma = fitfunc.GetParameter(2)
-            sigma_error = fitfunc.GetParError(2)
-#            hist.Draw() #if you want to see the plot
-#            c1.SaveAs(OUTPUT_PATH + "baseline_amp_" + str(amp) + ".pdf") #if you want to see the plot
-            with open(OUTFILE, 'a') as this_file:
-                this_file.write(str(amp) + '\t' + str(mean) + '\t' + str(mean_error) + '\t' + str(sigma) + '\t' + str(sigma_error) + '\n')
+#            # histogram the background / fit the noise, write to file
+##            c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
+#            hist, d1, d2 = FastHistogramImage_JustData(image.getArray())
+#            hist.GetXaxis().SetRangeUser(-50,3000)
+#            hist.Fit('gaus')
+#            fitfunc = hist.GetFunction('gaus')
+##            fitfunc.SetNpx(1000) #draw it nicely
+#            mean = fitfunc.GetParameter(1)
+#            mean_error = fitfunc.GetParError(1)
+#            sigma = fitfunc.GetParameter(2)
+#            sigma_error = fitfunc.GetParError(2)
+##            hist.Draw() #if you want to see the plot
+##            c1.SaveAs(OUTPUT_PATH + "baseline_amp_" + str(amp) + ".pdf") #if you want to see the plot
+#            with open(OUTFILE, 'a') as this_file:
+#                this_file.write(str(amp) + '\t' + str(mean) + '\t' + str(mean_error) + '\t' + str(sigma) + '\t' + str(sigma_error) + '\n')
 
             
             # Find the clusters
@@ -145,7 +151,7 @@ def DoAnalysis(input_path):
     print "Data analysed in %.2f seconds, %s total footprints found" %(dt,total_found) 
     
     t0 = time.time()
-    pickle.dump(amplist, open(PICKLE_PATH + "npx_2_gr_2_thr_25_bgsub_bias", 'wb'))
+    pickle.dump(amplist, open(PICKLE_PATH + "npx_2_gr_2_thr_25_bgsub_DM", 'wb'))
     dt = time.time() - t0
     print "Data pickled in %.2f seconds" %dt 
 #===============================================================================
@@ -154,10 +160,10 @@ def GetGains_Fe55(amplist):
     
     from root_functions import GetLeftRightBinsAtPercentOfMax
 
-    histmin = 200
-    histmax = 700
-    nbins = 250
-    fit_threshold_in_percent = 1.0
+    histmin = 2000
+    histmax = 3000
+    nbins = 100
+    fit_threshold_in_percent = .5
     
     hist_array = []
 
@@ -169,7 +175,24 @@ def GetGains_Fe55(amplist):
     chisqrs = []
     
     for amp in range(N_AMPS):
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
+        if amp == 2:
+            histmin = 1800
+            histmax = 2800
+#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
+#            fitmin, fitmax = 1900, 2600   
+        elif amp <= 7: #CHANGEBACK
+            histmin = 2000
+            histmax = 3000
+#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
+#            fitmin, fitmax = 2250, 2800
+        else:
+            histmin = 1500
+            histmax = 2500
+#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
+#            fitmin, fitmax = 1600,2100
+        
+        
+        c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
         hist = TH1F('hist', '^{55}Fe Spectrum - Amp ' + str(amp),nbins,histmin,histmax)
         for flux in amplist[amp]:
             hist.Fill(flux)
@@ -177,7 +200,8 @@ def GetGains_Fe55(amplist):
         hist.GetXaxis().SetTitle('Charge (ADU)')
         hist.GetYaxis().SetTitle('Frequency')
         
-        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent)
+        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
+            
         
         fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
         fitfunc.Draw("same")
@@ -202,9 +226,9 @@ def GetGains_Fe55(amplist):
         del c3
         del hist
 
-    print "amp \t K_a \t K_a_width \t K_b \t K_b_width"
+    print "amp \t K_a \t K_a_width \t K_b \t K_b_width \t K_a_error"
     for amp in range(N_AMPS):
-        print "%s\t%.3f\t%.3f\t%.3f\t%.3f\t" %(amp,K_Alphas[amp], K_Alphas_widths[amp], K_Betas[amp], K_Betas_widths[amp])
+        print "%s\t%.3f\t%.3f\t%.3f\t%.3f\t%.3f" %(amp,K_Alphas[amp], K_Alphas_widths[amp], K_Betas[amp], K_Betas_widths[amp], K_Alpha_errors[amp])
 
     return K_Alphas, K_Alpha_errors, chisqrs
 
@@ -214,11 +238,12 @@ if __name__ == '__main__':
     import cPickle as pickle
     print "Running Fe55 Gain Analysis for QE\n"
     
-    input_path = '/home/mmmerlin/dl/QE/fe55/20140709-112014/'
+#    input_path = '/home/mmmerlin/dl/QE/fe55/20140709-112014/'
+    input_path = '/mnt/hgfs/VMShared/Data/John/light/'
     
 #===============================================================================
 
-#    DoAnalysis(input_path)
+#     DoAnalysis(input_path)
 #    exit()   
 
 
@@ -226,7 +251,7 @@ if __name__ == '__main__':
     if MAKE_FE55_SPECTRA:
         t0 = time.time()
         
-        amplist = pickle.load(open(PICKLE_PATH + 'npx_2_gr_2_thr_25_bgsub_bias', 'rb'))
+        amplist = pickle.load(open(PICKLE_PATH + 'npx_2_gr_2_thr_25_bgsub_DM', 'rb'))
         
         means, mean_errors, chisqrs = GetGains_Fe55(amplist)
     

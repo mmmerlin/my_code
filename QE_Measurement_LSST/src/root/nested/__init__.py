@@ -8,6 +8,7 @@ import lsst.afw.display.ds9 as ds9
 import os
 from os.path import join
 
+import ROOT
 from ROOT import TCanvas, TH1F
 from root_functions import Browse, CANVAS_HEIGHT, CANVAS_WIDTH
 
@@ -22,7 +23,7 @@ if __name__ == '__main__':
     print "Running LSST QE Measurement"
 
     FILE_TYPE = '.pdf'    
-    OUTPUT_PATH = "/home/mmmerlin/output/QE_LSST/"
+    OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/"
 
     metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
     path = '/mnt/hgfs/VMShared/Data/QE_LSST/wl/20140709-112014/'
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     gains = [3.315808402,3.327915473,3.378822094,3.344825272,3.32604176, 3.380261393,3.339747603,3.357838184,3.294004911,3.245531036,3.219743995,3.225160702,3.254285149,3.294630888,3.231197772,3.25006113]  # DM subtraction
 #    gains = [3.541729119,3.571020775,3.641136857,3.589221983,3.540086205,3.668066435,3.576249221,3.519930087,3.526646634,3.488946929,3.467217943,3.451805651,3.492744071,3.569686091,3.463400864,3.401701491] # bias subtraction
 
-#    ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
+    ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
     
     wavelength_selection = ['1050']
 #    wavelength_selection = ['0320', '0645', '1050']
@@ -57,44 +58,31 @@ if __name__ == '__main__':
         if wavelength not in wavelength_selection: continue
         
         
-        
-        f = pf.open(filename)
-        
-        print f[17].data
-#        exit()
-        
-        junk0, junk1, t, y = zip(*f[17].data)
-        
-        print (junk0)
-        print (junk1)
-        
-        
-#        print len(junk0)
-#        print len(junk1)
-#        print len(t)
-#        print len(y)
-#        exit()
-        
-        
-        stats, loc = monodiode_current(f)
-        
-        
-        pl.figure()
-#        pl.plot(t, y, "-")
-        pl.plot(junk0, junk1, "-")
-        pl.title(wavelength)
-        pl.xlabel("Time (?)")
-        pl.ylabel("Current (pA)")
-        pl.grid(True)
-        pl.figure()
-        pl.plot(t[loc[0]:loc[1]], y[loc[0]:loc[1]], "-o")
-        pl.xlabel("Time (?)")
-        pl.ylabel("Current (pA)")
-        pl.title(wavelength + "$\mu = %.3f$ $\sigma= %.3f$" % (stats[0], stats[1]))
-        pl.grid(True)
-        pl.show()
-        
-        continue
+#        f = pf.open(filename)
+##        print f[17].data
+##        exit()
+#        junk0, junk1, t, y = zip(*f[17].data)
+#        print (junk0)
+#        print (junk1)
+#        
+#        stats, loc = monodiode_current(f)
+#        
+#        pl.figure()
+##        pl.plot(t, y, "-")
+#        pl.plot(junk0, junk1, "-")
+#        pl.title(wavelength)
+#        pl.xlabel("Time (?)")
+#        pl.ylabel("Current (pA)")
+#        pl.grid(True)
+#        pl.figure()
+#        pl.plot(t[loc[0]:loc[1]], y[loc[0]:loc[1]], "-o")
+#        pl.xlabel("Time (?)")
+#        pl.ylabel("Current (pA)")
+#        pl.title(wavelength + "$\mu = %.3f$ $\sigma= %.3f$" % (stats[0], stats[1]))
+#        pl.grid(True)
+#        pl.show()
+#        
+#        continue
         
         
         
@@ -112,12 +100,12 @@ if __name__ == '__main__':
         
         image = AssembleImage(filename, metadata_filename, subtract_background = False, gain_correction_list = gains, ADC_Offsets = ADC_Offsets)
   
-#        try:
-#            ds9.initDS9(False)
-#        except ds9.Ds9Error:
-#            print 'DS9 launch bug error thrown away (probably)'
-#        ds9.mtv(image)
-#        print"done"
+        try:
+            ds9.initDS9(False)
+        except ds9.Ds9Error:
+            print 'DS9 launch bug error thrown away (probably)'
+        ds9.mtv(image)
+        print"done"
 #        exit()
         
     
@@ -135,7 +123,7 @@ if __name__ == '__main__':
         
         
         suffix = ''
-        prefix = 'corrected_'
+        prefix = 'aaacorrected_'
         c3.SaveAs(OUTPUT_PATH + prefix + str(wavelengths[filenum] + suffix + FILE_TYPE))
         c3.SaveAs(OUTPUT_PATH + "QE_animation" + ".gif+10")
        
