@@ -13,6 +13,7 @@ from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
 import numpy as np
 from numpy.core.defchararray import zfill
 
+import cPickle as pickle
 
 
 # my stuff
@@ -22,10 +23,18 @@ from my_image_tools import FastHistogramImageData
 
 ##########################################################################################
 # path options
-OUTPUT_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/'
-#OUTPUT_PATH = "/home/mmmerlin/dl/QE/"
-#PICKLE_PATH = '/home/mmmerlin/dl/QE/pickles/fe55/'
-PICKLE_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/pickles/'
+input_path = '/mnt/hgfs/VMShared/Data/QE_LSST/fe55/20140709-112014/'
+OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/"
+
+PICKLE_PATH = '/mnt/hgfs/VMShared/Data/QE_LSST/pickles/'
+PICKLE_NAME = 'temp'
+OUTFILE = OUTPUT_PATH + 'noise.txt'
+
+# input_path = '/mnt/hgfs/VMShared/Data/John/light/'
+# PICKLE_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/pickles/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/'
+
+
 FILE_TYPE = ".png"
 N_AMPS = 16
 
@@ -43,15 +52,12 @@ ISOTROPIC = False
 SPECIFIC_FILE = None
 SINGLE_POINT = False
 QUIET = False
-#PROCESS_FILE_LIMIT = None
-PROCESS_FILE_LIMIT = 9999
+PROCESS_FILE_LIMIT = 99999
 
 
 # Post processing options
 MAKE_FE55_SPECTRA = True
 GLOBAL_OUT = []
-#OUTFILE = "/home/mmmerlin/dl/QE/noise.txt"
-OUTFILE = '/mnt/hgfs/VMShared/output/Fe55_John/noise.txt'
 
 
 def DoAnalysis(input_path):
@@ -74,8 +80,7 @@ def DoAnalysis(input_path):
     for thisfile in dircontents:
         if str(thisfile).find('coadded')!= -1: continue # skip coadd files
         if str(thisfile).find('.DS')    != -1: continue # skip weird files
-#        if str(thisfile).find('bias')   != -1: continue # skip bias  files #CHANGEBACK
-        if str(thisfile).find('frame')   != -1: continue # skip bias  files
+        if str(thisfile).find('bias')   != -1: continue # skip bias  files
         if isfile(input_path + thisfile): file_list.append(thisfile) # skip dirs
     
     
@@ -151,7 +156,7 @@ def DoAnalysis(input_path):
     print "Data analysed in %.2f seconds, %s total footprints found" %(dt,total_found) 
     
     t0 = time.time()
-    pickle.dump(amplist, open(PICKLE_PATH + "npx_2_gr_2_thr_25_bgsub_DM", 'wb'))
+    pickle.dump(amplist, open(PICKLE_PATH + PICKLE_NAME, 'wb'))
     dt = time.time() - t0
     print "Data pickled in %.2f seconds" %dt 
 #===============================================================================
@@ -160,13 +165,11 @@ def GetGains_Fe55(amplist):
     
     from root_functions import GetLeftRightBinsAtPercentOfMax
 
-    histmin = 2000
-    histmax = 3000
-    nbins = 100
-    fit_threshold_in_percent = .5
+    histmin = 200
+    histmax = 700
+    nbins = 200
+    fit_threshold_in_percent = 0.5
     
-    hist_array = []
-
     K_Alphas = []
     K_Alpha_errors = []
     K_Alphas_widths = []
@@ -175,22 +178,6 @@ def GetGains_Fe55(amplist):
     chisqrs = []
     
     for amp in range(N_AMPS):
-        if amp == 2:
-            histmin = 1800
-            histmax = 2800
-#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
-#            fitmin, fitmax = 1900, 2600   
-        elif amp <= 7: #CHANGEBACK
-            histmin = 2000
-            histmax = 3000
-#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
-#            fitmin, fitmax = 2250, 2800
-        else:
-            histmin = 1500
-            histmax = 2500
-#            fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
-#            fitmin, fitmax = 1600,2100
-        
         
         c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
         hist = TH1F('hist', '^{55}Fe Spectrum - Amp ' + str(amp),nbins,histmin,histmax)
@@ -200,8 +187,7 @@ def GetGains_Fe55(amplist):
         hist.GetXaxis().SetTitle('Charge (ADU)')
         hist.GetYaxis().SetTitle('Frequency')
         
-        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent) #CHANGEBACK
-            
+        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent)            
         
         fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
         fitfunc.Draw("same")
@@ -235,23 +221,19 @@ def GetGains_Fe55(amplist):
 
 if __name__ == '__main__':
     start_time = time.time()
-    import cPickle as pickle
     print "Running Fe55 Gain Analysis for QE\n"
     
-#    input_path = '/home/mmmerlin/dl/QE/fe55/20140709-112014/'
-    input_path = '/mnt/hgfs/VMShared/Data/John/light/'
-    
+
 #===============================================================================
 
 #     DoAnalysis(input_path)
-#    exit()   
+#     exit()   
 
 
-    #= Fe55 - Get Gains =========================================================================
+#= Fe55 - Get Gains =========================================================================
     if MAKE_FE55_SPECTRA:
-        t0 = time.time()
         
-        amplist = pickle.load(open(PICKLE_PATH + 'npx_2_gr_2_thr_25_bgsub_DM', 'rb'))
+        amplist = pickle.load(open(PICKLE_PATH + PICKLE_NAME, 'rb'))
         
         means, mean_errors, chisqrs = GetGains_Fe55(amplist)
     
@@ -262,7 +244,7 @@ if __name__ == '__main__':
         print 'Max error = %.4f%%' %max(rel_errors)
 
 
-    #===========================================================================
+#===========================================================================
 
 
 
