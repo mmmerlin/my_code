@@ -52,7 +52,7 @@ ISOTROPIC = False
 SPECIFIC_FILE = None
 SINGLE_POINT = False
 QUIET = False
-PROCESS_FILE_LIMIT = 99999
+PROCESS_FILE_LIMIT = 20
 
 
 # Post processing options

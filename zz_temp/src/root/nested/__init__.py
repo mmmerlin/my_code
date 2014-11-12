@@ -11,9 +11,15 @@ if __name__ == '__main__':
 
     print "running"
 
-    filename = '/mnt/hgfs/VMShared/Data/QE_LSST/diode_data/test.txt'
-    
+#     filename = '/mnt/hgfs/VMShared/Data/QE_LSST/diode_data/test.txt'
+    filename = '/mnt/hgfs/VMShared/Data/QE_LSST/diode_data/ratio.txt'
     ts, ys = np.loadtxt(filename, skiprows = 1, delimiter = '\t', unpack = True, usecols = (0,1))
+
+#     filename = '/mnt/hgfs/VMShared/Data/QE_LSST/diode_data/sensitivity.txt'
+#     ts, ys = np.loadtxt(filename, skiprows = 1, delimiter = '\t', unpack = True, usecols = (0,4))
+    
+#     print ts
+#     print ys
     
 #     tlist = []
 #     ylist = []
@@ -33,28 +39,22 @@ if __name__ == '__main__':
 #     graph.Draw("AP")
 #     c1.SaveAs('/mnt/hgfs/VMShared/output/QE_LSST/diode_data/test.pdf')
 
+
+    wavelengths = [320,325,330,335,340,345,350,355,360,365,370,375,380,385,390,395,400,405,410,415,420,425,430,435,440,445,450,465,480,495,510,525,540,555,570,585,600,615,630,645,660,675,690,705,720,735,750,765,780,795,810,825,840,855,870,885,900,915,930,945,950,955,960,965,970,975,980,985,990,995,1000,1005,1010,1015,1020,1025,1030,1035,1040,1045,1050,1055,1060,1065,1070,1075,1080]
+
+
     from scipy.interpolate import interp1d
-
-    # >>> x = np.linspace(0, 10, 10)
-    # >>> y = np.cos(-x**2/8.0)
-    # >>> f = interp1d(x, y)
-    # >>> f2 = interp1d(x, y, kind='cubic')
-    # 
-    # >>> xnew = np.linspace(0, 10, 40)
-    # >>> import matplotlib.pyplot as plt
-    # >>> plt.plot(x,y,'o',xnew,f(xnew),'-', xnew, f2(xnew),'--')
-    # >>> plt.legend(['data', 'linear', 'cubic'], loc='best')
-    # >>> plt.show()
-
-
-    interp1 = interp1d(ts, ys)
+#     interp1 = interp1d(ts, ys)
     interp2 = interp1d(ts, ys, kind='cubic')
-    
+
     
     t_new = np.linspace(min(ts), max(ts), len(ts)*20)
+#     pl.plot(ts,ys,'o',wavelengths,interp2(wavelengths),'-')
     pl.plot(ts,ys,'o',t_new,interp2(t_new),'-')
     pl.show()
-
+    
+    for w in wavelengths:
+        print str(w) + '\t' + str(interp2(w))
 
     print '\n***End code***'
 
