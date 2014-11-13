@@ -63,31 +63,32 @@ if __name__ == '__main__':
         
         
 #         if wavelength not in wavelength_selection: continue
-        if wavelength != '0400': continue
+        if wavelength != '0440': continue
         
 
 ##############################################
 ###### for plotting the photodiode curves in python
 ##############################################
-#         hdulist = pf.open(filename)
-#         import pylab as pl
-#         import matplotlib
-#         junk0, junk1, t, y = zip(*hdulist[17].data)
-#         stats, loc = monodiode_current(hdulist)
-#         pl.figure()
+        hdulist = pf.open(filename)
+        import pylab as pl
+        import matplotlib
+        junk0, junk1, t, y = zip(*hdulist[17].data)
+        stats, loc = monodiode_current(hdulist)
+        pl.figure()
 #         pl.plot(t, y, "-")
-# #         pl.plot(junk0, junk1, "-")
-#         pl.title(wavelength)
-#         pl.xlabel("Time (?)")
-#         pl.ylabel("Current (pA)")
-#         pl.grid(True)
-#         pl.figure()
-#         pl.plot(t[loc[0]:loc[1]], y[loc[0]:loc[1]], "-o")
-#         pl.xlabel("Time (?)")
-#         pl.ylabel("Current (pA)")
-#         pl.title(wavelength + "$\mu = %.3f$ $\sigma= %.3f$" % (stats[0], stats[1]))
-#         pl.grid(True)
-#         pl.show()
+        pl.plot(junk0, junk1, "-")
+        pl.title(wavelength)
+        pl.xlabel("Time (?)")
+        pl.ylabel("Current (pA)")
+        pl.grid(True)
+        pl.figure()
+        pl.plot(t[loc[0]:loc[1]], y[loc[0]:loc[1]], "-o")
+        pl.xlabel("Time (?)")
+        pl.ylabel("Current (pA)")
+        pl.title(wavelength + "$\mu = %.3f$ $\sigma= %.3f$" % (stats[0], stats[1]))
+        pl.grid(True)
+        pl.show()
+#         exit()
 #         continue
 ##############################################
 
@@ -121,6 +122,7 @@ if __name__ == '__main__':
             peak_value = np.average(y_true[turnon_time + 4:turnoff_time + 1])   
             light_time = max(exptime, (t[turnoff_time]-t[turnon_time]))
             integral = -1. * light_time * (peak_value - baseline)
+
              
              
             line = '%s\t%s\t%s\t%s\t%s'%(wavelength, baseline, peak_value, light_time, integral)
