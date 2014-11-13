@@ -24,46 +24,52 @@ N_AMPS = 16
 
 if __name__ == '__main__':
     print "Running LSST QE Measurement"
+    outlist = []
 
     FILE_TYPE = '.png'    
-    OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/"
+    OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/112-04/"
 
     metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
-    path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/wl/20140709-112014/'
-    outlist = []
+#     path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/wl/20140709-112014/'
+#     calib_file = '/mnt/hgfs/VMShared/output/QE_LSST/113-03/calib.txt'
+    
+    path        = '/mnt/hgfs/VMShared/Data/QE_LSST/112-04/wl/20140419-190507/'
+    calib_file  = '/mnt/hgfs/VMShared/output/QE_LSST/112-04/calib.txt'
+    
 
     files_in_dir = os.listdir(path)
     files_in_dir.sort()
     
-    wavelengths = [filename[14:18] for filename in files_in_dir if filename[14:18] != 'bias']
-    files = [join(path, filename)  for filename in files_in_dir if filename[14:18] != 'bias']   # exclude bias file
+    
+#     wavelengths = [filename[14:18] for filename in files_in_dir if filename[14:18] != 'bias']
+#     files = [join(path, filename)  for filename in files_in_dir if filename[14:18] != 'bias']   # exclude bias file
+    
+    wavelengths = [filename[14:18] for filename in files_in_dir if filename.find('bias') != -1]
+    files = [join(path, filename)  for filename in files_in_dir if filename.find('bias') == -1]   # exclude bias file
     bias_files = [join(path, filename) for filename in files_in_dir if filename.find('bias') != -1]   # make list of bias file
 
 
-    gains = [3.315808402,3.327915473,3.378822094,3.344825272,3.32604176, 3.380261393,3.339747603,3.357838184,3.294004911,3.245531036,3.219743995,3.225160702,3.254285149,3.294630888,3.231197772,3.25006113]  # DM subtraction
-#     gains = [3.541729119,3.571020775,3.641136857,3.589221983,3.540086205,3.668066435,3.576249221,3.519930087,3.526646634,3.488946929,3.467217943,3.451805651,3.492744071,3.569686091,3.463400864,3.401701491] # bias subtraction
-
-    ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
-    
-
+#     ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
 #     wavelength_selection = ['1050']
-
+    
+#     wavelengths = [320,325,330,335,340,345,350,355,360,365,370,375,380,385,390,395,400,405,410,415,420,425,430,435,440,445,450,465,480,495,510,525,540,555,570,585,600,615,630,645,660,675,690,705,720,735,750,765,780,795,810,825,840,855,870,885,900,915,930,945,950,955,960,965,970,975,980,985,990,995,1000,1005,1010,1015,1020,1025,1030,1035,1040,1045,1050,1055,1060,1065,1070,1075,1080]
+    
+    gains, ADC_Offsets, NoiseFactors = np.loadtxt(calib_file, skiprows = 1, delimiter = '\t', unpack = True, usecols = (1,2,3))
 
     for filenum in range(len(files)):
         
         wavelength = wavelengths[filenum]
         filename = files[filenum]
         
+        
 #         if wavelength not in wavelength_selection: continue
-        if wavelength != '1050': continue
+        if wavelength != '0400': continue
         
-        
-#         hdulist = pf.open(filename)
 
 ##############################################
 ###### for plotting the photodiode curves in python
 ##############################################
-
+#         hdulist = pf.open(filename)
 #         import pylab as pl
 #         import matplotlib
 #         junk0, junk1, t, y = zip(*hdulist[17].data)
@@ -89,38 +95,40 @@ if __name__ == '__main__':
 ##############################################
 ###### extract photodiode data
 # ##############################################
-#         exptime = hdulist[0].header['exptime']
-#         
-#         t, y, t_alt, y_alt = zip(*hdulist[17].data)
-# #         for i in range(len(t)):
-# #             print str(t[i]) + '\t' + str(y[i]) + '\t' + str(t_alt[i]) + '\t' + str(y_alt[i])
-#         
-# 
-#         stats, loc = monodiode_current(hdulist)
-#         turnon_time = loc[0]
-#         
-#         if len(loc) == 2:
-#             turnoff_time = loc[1]
-#         else:
-#             turnoff_time = 99
-#             
-#         if np.abs(np.average(y)) > 25:
-#             y_true = y
-#         else:
-#             y_true = y_alt
-#         
-#         baseline = np.average(y_true[0:turnon_time - 4])        
-#         peak_value = np.average(y_true[turnon_time + 4:turnoff_time + 1])   
-#         light_time = max(exptime, (t[turnoff_time]-t[turnon_time]))
-#         integral = -1. * light_time * (peak_value - baseline)
-#         
-#         
-#         line = '%s\t%s\t%s\t%s\t%s'%(wavelength, baseline, peak_value, light_time, integral)
-#         outlist.append(line)
-# #         print "baseline = ", baseline
-# #         print "peak_value = ", peak_value
-# #         print "light_time = ", light_time
-# #         print "integral = ", integral
+        if False:
+            hdulist = pf.open(filename)
+            exptime = hdulist[0].header['exptime']
+             
+            t, y, t_alt, y_alt = zip(*hdulist[17].data)
+    #         for i in range(len(t)):
+    #             print str(t[i]) + '\t' + str(y[i]) + '\t' + str(t_alt[i]) + '\t' + str(y_alt[i])
+             
+     
+            stats, loc = monodiode_current(hdulist)
+            turnon_time = loc[0]
+             
+            if len(loc) == 2:
+                turnoff_time = loc[1]
+            else:
+                turnoff_time = 99
+                 
+            if np.abs(np.average(y)) > 25:
+                y_true = y
+            else:
+                y_true = y_alt
+             
+            baseline = np.average(y_true[0:turnon_time - 4])        
+            peak_value = np.average(y_true[turnon_time + 4:turnoff_time + 1])   
+            light_time = max(exptime, (t[turnoff_time]-t[turnon_time]))
+            integral = -1. * light_time * (peak_value - baseline)
+             
+             
+            line = '%s\t%s\t%s\t%s\t%s'%(wavelength, baseline, peak_value, light_time, integral)
+            outlist.append(line)
+    #         print "baseline = ", baseline
+    #         print "peak_value = ", peak_value
+    #         print "light_time = ", light_time
+    #         print "integral = ", integral
 # ##############################################
         
         
@@ -129,33 +137,35 @@ if __name__ == '__main__':
 ##############################################
 ###### ADU subtract, gain correct and integrate images
 ##############################################   
-        image = AssembleImage(filename, metadata_filename, subtract_background = False, gain_correction_list = gains, ADC_Offsets = ADC_Offsets)
-  
-        try:
-            ds9.initDS9(False)
-        except ds9.Ds9Error:
-            print 'DS9 launch bug error thrown away (probably)'
-        ds9.mtv(image)
-        print 'done'
-        exit()
-     
-        c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
-        hist, power, n_power_points = FastHistogramImageData(image.getArray(), -50000)
-
-        hist.GetXaxis().SetRangeUser(0,30000)
-        hist.GetYaxis().SetRangeUser(0,700000)
-        hist.SetTitle(str(wavelength))
-        hist.Draw()
-        
-        line = str(wavelength) + '\t' + str(power) + '\t' + str(n_power_points)
-        outlist.append(line)
-        
-        suffix = ''
-        prefix = 'gain_corrected_'
-        c3.SaveAs(OUTPUT_PATH + prefix + str(wavelengths[filenum] + suffix + FILE_TYPE))
-        c3.SaveAs(OUTPUT_PATH + "QE_animation" + ".gif+15")
-       
-        del c3, hist
+        if True:
+            image = AssembleImage(filename, metadata_filename, subtract_background = False, gain_correction_list = gains, ADC_Offsets = ADC_Offsets)
+      
+            try:
+                ds9.initDS9(False)
+            except ds9.Ds9Error:
+                print 'DS9 launch bug error thrown away (probably)'
+            ds9.mtv(image)
+            print 'done'
+            exit()
+         
+            c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
+            hist, power, n_power_points = FastHistogramImageData(image.getArray(), -50000)
+    
+            hist.GetXaxis().SetRangeUser(0,30000)
+            hist.GetYaxis().SetRangeUser(0,700000)
+            hist.SetTitle(str(wavelength))
+            hist.Draw()
+            
+            line = str(wavelength) + '\t' + str(power) + '\t' + str(n_power_points)
+            outlist.append(line)
+            
+            suffix = ''
+            prefix = 'gain_corrected_'
+            c3.SaveAs(OUTPUT_PATH + prefix + str(wavelengths[filenum] + suffix + FILE_TYPE))
+            c3.SaveAs(OUTPUT_PATH + "QE_animation" + ".gif+15")
+           
+            del c3, hist
+##############################################   
         
         
 

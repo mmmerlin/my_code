@@ -10,6 +10,7 @@ import lsst.afw.image as afwImg
 
 import ROOT
 from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
+from root_functions import CANVAS_HEIGHT, CANVAS_WIDTH
 import numpy as np
 from numpy.core.defchararray import zfill
 
@@ -23,16 +24,18 @@ from my_image_tools import FastHistogramImageData
 
 ##########################################################################################
 # path options
-input_path = '/mnt/hgfs/VMShared/Data/QE_LSST/fe55/20140709-112014/'
-OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/"
+# input_path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/fe55/20140709-112014/'
+input_path = '/mnt/hgfs/VMShared/Data/QE_LSST/112-04/fe55/20140419-190507/'
+OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/112-04/"
 
-PICKLE_PATH = '/mnt/hgfs/VMShared/Data/QE_LSST/pickles/'
-PICKLE_NAME = 'temp'
+PICKLE_PATH = '/mnt/hgfs/VMShared/output/QE_LSST/pickles/112-04/'
+PICKLE_NAME = '113-03'
 OUTFILE = OUTPUT_PATH + 'noise.txt'
 
 # input_path = '/mnt/hgfs/VMShared/Data/John/light/'
 # PICKLE_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/pickles/'
 # OUTPUT_PATH = '/mnt/hgfs/VMShared/output/Fe55_John/'
+
 
 
 FILE_TYPE = ".png"
@@ -52,7 +55,7 @@ ISOTROPIC = False
 SPECIFIC_FILE = None
 SINGLE_POINT = False
 QUIET = False
-PROCESS_FILE_LIMIT = 20
+PROCESS_FILE_LIMIT = 1
 
 
 # Post processing options
@@ -81,6 +84,7 @@ def DoAnalysis(input_path):
         if str(thisfile).find('coadded')!= -1: continue # skip coadd files
         if str(thisfile).find('.DS')    != -1: continue # skip weird files
         if str(thisfile).find('bias')   != -1: continue # skip bias  files
+        if str(thisfile).find('dark')   != -1: continue # skip bias  files
         if isfile(input_path + thisfile): file_list.append(thisfile) # skip dirs
     
     
@@ -108,30 +112,46 @@ def DoAnalysis(input_path):
             image = GetImage_SingleAmp(input_path + filename, True, amp)
 
             ##### Bias 0File background subtraction:
-#            image = afwImg.ImageF(input_path + filename, amp + 2)
+#             image = afwImg.ImageF(input_path + filename, amp + 2)
 #            image -= bias_images[amp]
             ###########################################
 
             maskedImg = afwImg.MaskedImageF(image)
             exposure = afwImg.ExposureF(maskedImg)
             
-#            # histogram the background / fit the noise, write to file
-##            c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-#            hist, d1, d2 = FastHistogramImage_JustData(image.getArray())
-#            hist.GetXaxis().SetRangeUser(-50,3000)
-#            hist.Fit('gaus')
-#            fitfunc = hist.GetFunction('gaus')
-##            fitfunc.SetNpx(1000) #draw it nicely
-#            mean = fitfunc.GetParameter(1)
-#            mean_error = fitfunc.GetParError(1)
-#            sigma = fitfunc.GetParameter(2)
-#            sigma_error = fitfunc.GetParError(2)
-##            hist.Draw() #if you want to see the plot
-##            c1.SaveAs(OUTPUT_PATH + "baseline_amp_" + str(amp) + ".pdf") #if you want to see the plot
-#            with open(OUTFILE, 'a') as this_file:
-#                this_file.write(str(amp) + '\t' + str(mean) + '\t' + str(mean_error) + '\t' + str(sigma) + '\t' + str(sigma_error) + '\n')
-
+            # histogram the background / fit the noise, write to file
+            c1 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
+            hist, d1, d2 = FastHistogramImageData(image.getArray(),-100000)
+            hist.GetXaxis().SetRangeUser(-50,50)
+            hist.Fit('gaus')
+            fitfunc = hist.GetFunction('gaus')
+            fitfunc.SetNpx(1000) #draw it nicely
+            mean = fitfunc.GetParameter(1)
+            mean_error = fitfunc.GetParError(1)
+            sigma = fitfunc.GetParameter(2)
+            sigma_error = fitfunc.GetParError(2)
+            hist.Draw() #if you want to see the plot
+            c1.SaveAs(OUTPUT_PATH + "baseline_amp_" + str(amp) + ".png") #if you want to see the plot
+            del hist, c1, fitfunc
+            with open(OUTFILE, 'a') as this_file:
+                this_file.write(str(amp) + '\t' + str(mean) + '\t' + str(mean_error) + '\t' + str(sigma) + '\t' + str(sigma_error) + '\n')
+            continue
+   
             
+#             if amp < 12: continue
+#             try:
+#                 ds9.initDS9(False)
+#             except ds9.Ds9Error:
+#                 print 'DS9 launch bug error thrown away (probably)'
+#             ds9.mtv(image)
+#             print amp
+#             from time import sleep
+#             sleep(10)
+#             exit()
+#             continue
+
+
+        
             # Find the clusters
             threshold = afwDetect.Threshold(THRESHOLD, afwDetect.Threshold.VALUE)
             footPrintSet = afwDetect.FootprintSet(exposure.getMaskedImage(), threshold, "DETECTED", N_PIX_MIN)
@@ -226,8 +246,8 @@ if __name__ == '__main__':
 
 #===============================================================================
 
-#     DoAnalysis(input_path)
-#     exit()   
+    DoAnalysis(input_path)
+    exit()   
 
 
 #= Fe55 - Get Gains =========================================================================
@@ -244,9 +264,18 @@ if __name__ == '__main__':
         print 'Max error = %.4f%%' %max(rel_errors)
 
 
-#===========================================================================
+#= Calculate Noise and ADC offsets from bias files============================================
 
+    from my_image_tools import GetADC_OffsetsAndNoisesFromBiasFiles
+    calib_file = '/mnt/hgfs/VMShared/output/QE_LSST/113-03/calib.txt'
+    
+    ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(input_path)
+    
+    print "amp\tgain\tadc_offset\tnoisefactor\tnoise_in_e\n"
+    for i in range(16):
+        print str(i) + '\t' + str(1594./means[i]) + '\t' + str(ADC_Offsets[i]) + '\t' + str(NoiseFactors[i]) + '\t' + str(NoiseFactors[i]*(1594./means[i]) )
 
+    
 
 ############## END CODE ##############
     
