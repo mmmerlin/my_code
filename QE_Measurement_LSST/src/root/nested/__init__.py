@@ -29,7 +29,7 @@ if __name__ == '__main__':
     OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/"
 
     metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
-    path = '/mnt/hgfs/VMShared/Data/QE_LSST/wl/20140709-112014/'
+    path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/wl/20140709-112014/'
     outlist = []
 
     files_in_dir = os.listdir(path)
@@ -40,13 +40,13 @@ if __name__ == '__main__':
     bias_files = [join(path, filename) for filename in files_in_dir if filename.find('bias') != -1]   # make list of bias file
 
 
-#     gains = [3.315808402,3.327915473,3.378822094,3.344825272,3.32604176, 3.380261393,3.339747603,3.357838184,3.294004911,3.245531036,3.219743995,3.225160702,3.254285149,3.294630888,3.231197772,3.25006113]  # DM subtraction
-    gains = [3.541729119,3.571020775,3.641136857,3.589221983,3.540086205,3.668066435,3.576249221,3.519930087,3.526646634,3.488946929,3.467217943,3.451805651,3.492744071,3.569686091,3.463400864,3.401701491] # bias subtraction
+    gains = [3.315808402,3.327915473,3.378822094,3.344825272,3.32604176, 3.380261393,3.339747603,3.357838184,3.294004911,3.245531036,3.219743995,3.225160702,3.254285149,3.294630888,3.231197772,3.25006113]  # DM subtraction
+#     gains = [3.541729119,3.571020775,3.641136857,3.589221983,3.540086205,3.668066435,3.576249221,3.519930087,3.526646634,3.488946929,3.467217943,3.451805651,3.492744071,3.569686091,3.463400864,3.401701491] # bias subtraction
 
     ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
     
 
-#     wavelength_selection = ['0700']
+#     wavelength_selection = ['1050']
 
 
     for filenum in range(len(files)):
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         filename = files[filenum]
         
 #         if wavelength not in wavelength_selection: continue
-        if wavelength != '0675': continue
+        if wavelength != '1050': continue
         
         
 #         hdulist = pf.open(filename)
