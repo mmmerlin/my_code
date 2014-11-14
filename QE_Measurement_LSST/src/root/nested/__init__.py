@@ -30,11 +30,11 @@ if __name__ == '__main__':
     OUTPUT_PATH = "/mnt/hgfs/VMShared/output/QE_LSST/112-04/"
 
     metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
-#     path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/wl/20140709-112014/'
-#     calib_file = '/mnt/hgfs/VMShared/output/QE_LSST/113-03/calib.txt'
+    path = '/mnt/hgfs/VMShared/Data/QE_LSST/113-03/wl/20140709-112014/'
+    calib_file = '/mnt/hgfs/VMShared/output/QE_LSST/113-03/calib.txt'
     
-    path        = '/mnt/hgfs/VMShared/Data/QE_LSST/112-04/wl/20140419-190507/'
-    calib_file  = '/mnt/hgfs/VMShared/output/QE_LSST/112-04/calib.txt'
+#     path        = '/mnt/hgfs/VMShared/Data/QE_LSST/112-04/wl/20140419-190507/'
+#     calib_file  = '/mnt/hgfs/VMShared/output/QE_LSST/112-04/calib.txt'
     
 
     files_in_dir = os.listdir(path)
@@ -44,14 +44,15 @@ if __name__ == '__main__':
 #     wavelengths = [filename[14:18] for filename in files_in_dir if filename[14:18] != 'bias']
 #     files = [join(path, filename)  for filename in files_in_dir if filename[14:18] != 'bias']   # exclude bias file
     
-    wavelengths = [filename[14:18] for filename in files_in_dir if filename.find('bias') != -1]
+    wavelengths = [filename[14:18] for filename in files_in_dir if filename.find('bias') == -1]
     files = [join(path, filename)  for filename in files_in_dir if filename.find('bias') == -1]   # exclude bias file
     bias_files = [join(path, filename) for filename in files_in_dir if filename.find('bias') != -1]   # make list of bias file
 
+    print wavelengths
 
 #     ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(path)
 #     wavelength_selection = ['1050']
-    
+
 #     wavelengths = [320,325,330,335,340,345,350,355,360,365,370,375,380,385,390,395,400,405,410,415,420,425,430,435,440,445,450,465,480,495,510,525,540,555,570,585,600,615,630,645,660,675,690,705,720,735,750,765,780,795,810,825,840,855,870,885,900,915,930,945,950,955,960,965,970,975,980,985,990,995,1000,1005,1010,1015,1020,1025,1030,1035,1040,1045,1050,1055,1060,1065,1070,1075,1080]
     
     gains, ADC_Offsets, NoiseFactors = np.loadtxt(calib_file, skiprows = 1, delimiter = '\t', unpack = True, usecols = (1,2,3))
@@ -63,7 +64,7 @@ if __name__ == '__main__':
         
         
 #         if wavelength not in wavelength_selection: continue
-        if wavelength != '0440': continue
+        if wavelength != '1080': continue
         
 
 
