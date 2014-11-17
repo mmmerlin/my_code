@@ -25,7 +25,7 @@ import TrackFitting
 
 ##########################################################################################
 # things that won't really change
-OUTPUT_PATH = "/home/mmmerlin/output/PSF"
+OUTPUT_PATH = "/mnt/hgfs/VMShared/output/PSF/"
 FILE_TYPE = ".pdf"
 N_AMPS = 16
 
@@ -181,9 +181,9 @@ if __name__ == '__main__':
     home_dir = expanduser("~")
 
 
-#    cosmic_pickle_file = home_dir + '/output/datasets/temp'
-#    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
-    cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
+#     cosmic_pickle_file = home_dir + '/output/datasets/temp'
+    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
+#     cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
 
 #    input_path = home_dir + '/Desktop/VMShared/Data/small_dark_set/'
 #    input_path = home_dir + '/Desktop/VMShared/Data/all_darks/'
@@ -212,41 +212,42 @@ if __name__ == '__main__':
 
     ###################################################
 ####     Applying cuts, optionally re-saving dataset
-#    for stat in rawlist:
-#        rawstats +=1
-#        if stat.length_true_um >= TRACK_LENGTH_CUT:
-#            if stat.LineOfBestFit.R2 > 0.95:
-#                if stat.discriminator < 500:
-#                    if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
-##                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
-##                    if aspect_ratio > aspect_limit or aspect_ratio < (1/aspect_limit):
-##                        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/aspect' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-##                        aspect_rejected += 1
-##                    else:
-#                    post_cuts.append(stat); nstats += 1
+    for stat in rawlist:
+        rawstats +=1
+        if stat.length_true_um >= TRACK_LENGTH_CUT:
+            if stat.LineOfBestFit.R2 > 0.95:
+                if stat.discriminator < 500:
+                    if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
+#                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
+#                    if aspect_ratio > aspect_limit or aspect_ratio < (1/aspect_limit):
+#                        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/aspect' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
+#                        aspect_rejected += 1
+#                    else:
+                    post_cuts.append(stat); nstats += 1
     
     ###################################################
     # Produce indivual track profiles
-    for stat in rawlist:
-        rawstats +=1
-        if stat.length_true_um >= 800:
-            if stat.discriminator > 2000:
-#                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
-#                    if aspect_ratio < 0.05:
-#                        if aspect_rejected == 13:
-            
-                TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/delta' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-#                TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
-#                TrackFitting.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, 6, OUTPUT_PATH + '/aspect13Tgraph' + '.png')
-            
-            
-            aspect_rejected += 1
+    if True:
+        for stat in rawlist:
+            rawstats +=1
+            if stat.length_true_um >= 800:
+                if stat.discriminator > 2000:
+                        aspect_ratio = (stat.length_x_um / stat.length_y_um)
+                        if aspect_ratio < 0.05:
+#                             if aspect_rejected == 13:
+                
+                            TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/delta' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
+    #                TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
+    #                TrackFitting.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, 6, OUTPUT_PATH + '/aspect13Tgraph' + '.png')
+                
+                
+#                     aspect_rejected += 1
                         
                         
                         
 #            else:
 #                post_cuts.append(stat); nstats += 1
-    exit()    
+#     exit()    
     
     print "%s stats loaded" %len(rawlist)
     print "%s after cuts" %nstats
@@ -261,7 +262,7 @@ if __name__ == '__main__':
     make_n_plots = 0
     savepath = '/home/mmmerlin/output/PSF/'
     for i,stat in enumerate(post_cuts):
-        if i>= make_n_plots: break
+        if i >= make_n_plots: break
         legend_text = []
 #        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
 #        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
@@ -301,33 +302,31 @@ if __name__ == '__main__':
     
     ######################################################
     # All points on top of each other graph
-    from ROOT import TGraphErrors
-    c2 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) 
-    assert len(xpoints) == len(sigmas) == len(sigma_errors)
-    gr = TGraphErrors()
-    for i in range(len(xpoints)):
-        gr.SetPoint(int(i), float(xpoints[i]), float(sigmas[i]))
-        gr.SetPointError(i, float(0), float(sigma_errors[i]))
-    print "Added %s points to PSF Graph"%len(xpoints)
-    gr.SetLineColor(2)
-    gr.SetMarkerColor(2)
-    gr.Draw("AP")
-    gr.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
-    gr.GetXaxis().SetTitle('Av. Si Depth (#mum)')
-    c2.SaveAs(OUTPUT_PATH + '/psf_graph' + '.png')
+#     c2 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) 
+#     assert len(xpoints) == len(sigmas) == len(sigma_errors)
+#     gr = TGraphErrors()
+#     for i in range(len(xpoints)):
+#         gr.SetPoint(int(i), float(xpoints[i]), float(sigmas[i]))
+#         gr.SetPointError(i, float(0), float(sigma_errors[i]))
+#     print "Added %s points to PSF Graph"%len(xpoints)
+#     gr.SetLineColor(2)
+#     gr.SetMarkerColor(2)
+#     gr.Draw("AP")
+#     gr.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+#     gr.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+#     c2.SaveAs(OUTPUT_PATH + '/psf_graph' + '.png')
 
 
 
     ######################################################
     # Averaged points
-    c3 = TCanvas( 'canvas', 'canvas', 1600, CANVAS_HEIGHT)
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     gr2 = TGraphErrors()
     for i in range(nsecs):
         gr2.SetPoint(int(i), float(xpoints[i]), av_sigma[i])   
         gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
         
-    from ROOT import TF1
-    fit_func = TF1("line","[1]*x + [0]", -1, nsecs+1)
+    fit_func = TF1("line","[1]*x + [0]", 0,100)
     fit_func.SetNpx(1000)
     gr2.Fit(fit_func, "MEQ", "")
     a = fit_func.GetParameter(1) 
@@ -339,7 +338,7 @@ if __name__ == '__main__':
     gr2.SetLineColor(2)
     gr2.SetMarkerColor(2)
     gr2.Draw("AP")
-    fit_func.Draw("l same")
+    fit_func.Draw("same")
     gr2.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
     gr2.GetXaxis().SetTitle('Av. Si Depth (#mum)')
     
@@ -347,50 +346,61 @@ if __name__ == '__main__':
     legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
     legend_text.append('intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)))
     legend_text.append('R^{2} = ' + str(round(R2,3)))
-    from ROOT import TPaveText
     textbox = TPaveText(0.5,0.25,0.85,0.5,"NDC")
-    for line in legend_text:
-        print line
-        textbox.AddText(line)
+    for line in legend_text: textbox.AddText(line)
     textbox.SetFillColor(0)
     textbox.SetTextSize(1.4* textbox.GetTextSize())
     textbox.Draw("same")
     
     c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_' + str(nsecs) + '.png')
+ 
     ######################################################
     # y-intercept removed in quadrature
-    c3 = TCanvas( 'canvas', 'canvas', 1600, CANVAS_HEIGHT)
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     gr3 = TGraphErrors()
     for i in range(nsecs):
         gr3.SetPoint(int(i), float(xpoints[i]), (av_sigma[i]**2 - y_int**2)**0.5 )  
         gr3.SetPointError(int(i), float(0), (av_sigma_error[i]**2 + y_int_error**2)**0.5)    
 #        gr3.SetPointError(int(i), float(0), abs(av_sigma_error[i]**2 - y_int_error**2)**0.5)    
+      
+    xmin = 0.
+    xmax = 100.
+    ymin = 0.
+    ymax = float(6.)
+    gr_scale_dummy = TGraph()
+    gr_scale_dummy.SetPoint(0,xmin,ymin)
+    gr_scale_dummy.SetPoint(1,xmax,ymax)
+    gr_scale_dummy.SetMarkerColor(0)
+    gr_scale_dummy.SetMarkerSize(0)
+    gr_scale_dummy.Draw("AP") 
         
-    from ROOT import TF1
-    fit_func_2 = TF1("line","[1]*x + [0]", -1, nsecs+1)
+#     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
+    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
+#     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
+    fit_func_2.SetParameter(0,0.1)
+    fit_func_2.SetParameter(1,2.0)
     fit_func_2.SetNpx(1000)
-    gr3.Fit(fit_func_2, "MEQ0", "")
+    gr3.Fit(fit_func_2, "ME0", "")
     a = fit_func_2.GetParameter(1) 
     a_error = fit_func_2.GetParError(1)
     b = fit_func_2.GetParameter(0) 
     b_error = fit_func_2.GetParError(0)
     R2 = gr3.GetCorrelationFactor()**2
-            
-    gr3.SetLineColor(3)
-    gr3.SetMarkerColor(3)
-    fit_func_2.SetLineColor(3)
-    gr3.Draw("AP")
+             
+    gr3.SetLineColor(4)
+    gr3.SetMarkerColor(4)
+    fit_func_2.SetLineColor(4)
+    gr3.Draw("Psame")
     gr3.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
     gr3.GetXaxis().SetTitle('Av. Si Depth (#mum)')
-    gr2.Draw("same")
+    gr2.Draw("Psame")
     fit_func.Draw("same")
-    fit_func_2.Draw("same")
-    
+    fit_func_2.Draw("lsame")
+     
     legend_text = []
     legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
     legend_text.append('intercept = ' + str(round(b,2)) + ' #pm ' + str(round(b_error,2)))
     legend_text.append('R^{2} = ' + str(round(R2,3)))
-    from ROOT import TPaveText
     textbox = TPaveText(0.5,0.25,0.85,0.5,"NDC")
     for line in legend_text:
         print line
@@ -399,7 +409,7 @@ if __name__ == '__main__':
     textbox.SetTextSize(1.4* textbox.GetTextSize())
     textbox.Draw("same")
     
-    c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_quad_subtracted' + str(nsecs) + '.png')
+    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.png')
    
     
     exit()
