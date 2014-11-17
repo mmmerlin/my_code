@@ -20,7 +20,6 @@ from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauF
 from TrackFitting import *
 from ImageStat import Stat
 import TrackViewer as TV
-from uuid import UUID
 import TrackFitting
 
 
