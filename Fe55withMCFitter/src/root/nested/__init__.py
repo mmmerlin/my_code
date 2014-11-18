@@ -7,6 +7,8 @@ import lsst.afw.math        as math
 import lsst.afw.table       as afwTable
 import lsst.afw.image       as afwImg
 import lsst.afw.detection   as afwDetect
+import lsst.afw.display.ds9 as ds9
+
 
 import lsst.afw.geom.ellipses as Ellipses
 import lsst.afw.display.utils as displayUtils
@@ -19,11 +21,12 @@ from matplotlib import cm
 from numpy import log10, random
 
 from os import listdir
-from os.path import expanduser, isfile
+from os.path import expanduser, isfile, isdir
 
 from image_assembly import AssembleImage
 from fit_constraints import ExamplePrior
 from imprint import imprint
+
 
 import time
 
@@ -36,6 +39,7 @@ if __name__ == '__main__':
             
 # break the loop after Nmax hits if Nmax > 0
     Nmax = -1
+    FileLimit = 999999
 
 # define some arrays
     xcoords, ycoords, xvectors, yvectors, npixels, clusterI = [], [], [], [], [], []
@@ -60,20 +64,21 @@ if __name__ == '__main__':
     filenames = listdir(input_path_Fe55data)
 
     pickle_dir = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/pickles/'
-    pickle_filenames = listdir(pickle_dir)
-
     
 # loop over raw data to produce and save results
     for Fe55file in filenames:
+        if (FileLimit <= len(filenames)) and (Fe55file == filenames[FileLimit]): break
         if Fe55file.find('.DS_') != -1: continue
-        if isfile(Fe55file) != -1: continue # skip bias dir
+        if isdir(Fe55file) == True: continue # skip bias dir
         input_file = input_path_Fe55data + Fe55file    
         print input_file 
         
 # Merlin's magic to mosaic correctly
-        image = AssembleImage(input_file, metadata_file, subtract_background = True)
+        gains = [3.79509352,3.851916292,3.834108654,3.876996568,3.835078189,3.856641255,3.832781099,3.856389413,3.758698179,3.808504386,3.742609872,3.810088368,3.775578121,3.809432767,3.780270026,3.79986126]
+
+        image = AssembleImage(input_file, metadata_file, subtract_background = True, gain_correction_list= gains)
         maskedImage = afwImg.MaskedImageF(image)
-                
+        
 # get the stats and print them out
         statFlags = math.NPOINT | math.MEAN | math.STDEV | math.MAX | math.MIN | math.ERRORS| math.STDEVCLIP
         control = math.StatisticsControl()

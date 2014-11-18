@@ -35,3 +35,4 @@ class ExamplePrior(object):
             #raise GMixRangeError("flux is out of bounds")
 
         return 4
+    
