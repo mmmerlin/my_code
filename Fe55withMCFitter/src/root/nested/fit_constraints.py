@@ -36,3 +36,5 @@ class ExamplePrior(object):
 
         return 4
     
+    
+    

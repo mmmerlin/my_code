@@ -28,6 +28,7 @@ from fit_constraints import ExamplePrior
 from imprint import imprint
 
 
+
 import time
 
 if __name__ == '__main__':
@@ -39,7 +40,7 @@ if __name__ == '__main__':
             
 # break the loop after Nmax hits if Nmax > 0
     Nmax = -1
-    FileLimit = 999999
+    FileLimit = 99999
 
 # define some arrays
     xcoords, ycoords, xvectors, yvectors, npixels, clusterI = [], [], [], [], [], []
@@ -60,10 +61,14 @@ if __name__ == '__main__':
     home_dir = expanduser("~")
     metadata_file = home_dir + '/useful/herring_bone.fits'
 
-    input_path_Fe55data = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/'
+#     input_path_Fe55data = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/'
+#     pickle_dir =          '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/pickles_2/'
+    
+    input_path_Fe55data = '/mnt/hgfs/VMShared/Data/fe55/device112-04_sept13_900_files/'
+    pickle_dir =          '/mnt/hgfs/VMShared/Data/fe55/device112-04_sept13_900_files/pickles/'
+
     filenames = listdir(input_path_Fe55data)
 
-    pickle_dir = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/pickles/'
     
 # loop over raw data to produce and save results
     for Fe55file in filenames:
@@ -74,7 +79,8 @@ if __name__ == '__main__':
         print input_file 
         
 # Merlin's magic to mosaic correctly
-        gains = [3.79509352,3.851916292,3.834108654,3.876996568,3.835078189,3.856641255,3.832781099,3.856389413,3.758698179,3.808504386,3.742609872,3.810088368,3.775578121,3.809432767,3.780270026,3.79986126]
+#       gains = [3.79509352,3.851916292,3.834108654,3.876996568,3.835078189,3.856641255,3.832781099,3.856389413,3.758698179,3.808504386,3.742609872,3.810088368,3.775578121,3.809432767,3.780270026,3.79986126] #112-04 750 file set gains
+        gains = [3.863893926,3.889311364,3.839592821,3.880267774,3.829443828,3.859452995,3.8523837,3.826228492,3.913972084,3.952911679,3.844514444,3.9919436,3.897239172,3.957293714,3.879582217,3.888644858] #112-04 900 file set gains
 
         image = AssembleImage(input_file, metadata_file, subtract_background = True, gain_correction_list= gains)
         maskedImage = afwImg.MaskedImageF(image)

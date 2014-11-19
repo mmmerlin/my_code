@@ -22,3 +22,4 @@ def imprint(im, stream=sys.stdout, fmt=None):
             if col < (ncol-1):
                 stream.write(" ")
         stream.write("\n")
+        

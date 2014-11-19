@@ -30,8 +30,11 @@ from my_image_tools import FastHistogramImageData
 ##########################################################################################
 # path options
 
-INPUT_PATH = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/'
-PICKLE_PATH = '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/pickles/'
+# INPUT_PATH =      '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/'
+# PICKLE_PATH =     '/mnt/hgfs/VMShared/Data/fe55/device112-04_march13_750_files/pickles_1/'
+
+INPUT_PATH =        '/mnt/hgfs/VMShared/Data/fe55/device112-04_sept13_900_files/'
+PICKLE_PATH =       '/mnt/hgfs/VMShared/Data/fe55/device112-04_sept13_900_files/pickles/'
 
 DM_PICKLE_PREFIX = 'DM_'
 NG_PICKLE_PREFIX = 'NG_'
@@ -321,7 +324,7 @@ def GetGains_Fe55(amplist, file_prefix = ''):
     chisqrs = []
     
     for amp in range(N_AMPS):
-        if amp != 5: continue
+#         if amp != 11: continue
         
         c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) #create canvas
         hist = TH1F('hist', '^{55}Fe Spectrum - Amp ' + str(amp),nbins,histmin,histmax)
@@ -331,33 +334,43 @@ def GetGains_Fe55(amplist, file_prefix = ''):
         hist.GetXaxis().SetTitle('Charge (ADU)')
         hist.GetYaxis().SetTitle('Frequency')
         
-        #manual gaus fit
-        hist.Fit('gaus','gaus','',405.,426.)
-        mean = hist.GetFunction('gaus').GetParameter(1)
-        print mean
+####### manual gaus fit
+#         hist.Fit('gaus','gaus','',390.,418.)
+#         mean = hist.GetFunction('gaus').GetParameter(1)
+#         print mean
 #         exit()
         
-        
-#         fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent)            
-# #         fitmin, fitmax = 390.,480.       
-#         
-#         fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
-#         fitfunc.Draw("same")
-#         
-#         K_Alphas.append(fitfunc.GetParameter(0))
-#         K_Alpha_errors.append(fitfunc.GetParError(0))
-#         K_Alphas_widths.append(fitfunc.GetParameter(1))
-#         K_Betas.append(fitfunc.GetParameter(3))
-#         K_Betas_widths.append(fitfunc.GetParameter(4))
-#         chisqrs.append(chisqr)
-#         
-#         legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
-#         legend.SetTextAlign(12) 
-#         legend.SetFillColor(0) 
-#         legend.AddText("K_{#alpha} peak = " + str(round(K_Alphas[amp],2)) + " #pm " + str(round(K_Alpha_errors[amp],2)) + " ADU")
-#         legend.AddText("Entries = " + str(len(amplist[amp])))
-#         legend.AddText("#chi^{2}_{red} = " + str(round(chisqrs[amp],2)))
-#         legend.Draw("same")
+         
+        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist,fit_threshold_in_percent)            
+#         fitmin, fitmax = 390.,480.   
+
+### fit range overrides for 112-04 900 file dataset
+#         if amp == 6:
+#             fitmax = 475.
+#         if amp == 12:
+#             fitmin = 393.
+#         if amp == 13:
+#             fitmin = 390.
+#         if amp == 10:
+#             fitmin = 403.
+          
+        fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
+        fitfunc.Draw("same")
+          
+        K_Alphas.append(fitfunc.GetParameter(0))
+        K_Alpha_errors.append(fitfunc.GetParError(0))
+        K_Alphas_widths.append(fitfunc.GetParameter(1))
+        K_Betas.append(fitfunc.GetParameter(3))
+        K_Betas_widths.append(fitfunc.GetParameter(4))
+        chisqrs.append(chisqr)
+          
+        legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
+        legend.SetTextAlign(12) 
+        legend.SetFillColor(0) 
+        legend.AddText("K_{#alpha} peak = " + str(round(K_Alphas[amp],2)) + " #pm " + str(round(K_Alpha_errors[amp],2)) + " ADU")
+        legend.AddText("Entries = " + str(len(amplist[amp])))
+        legend.AddText("#chi^{2}_{red} = " + str(round(chisqrs[amp],2)))
+        legend.Draw("same")
         c3.SaveAs(OUTPUT_PATH + file_prefix + "fe55_amp_" + str(zfill(str(amp),2)) +"sprectrum" + FILE_TYPE)
         c3.SetLogy()
         c3.SaveAs(OUTPUT_PATH + file_prefix + "fe55_amp_" + str(zfill(str(amp),2)) +"sprectrum_logy" + FILE_TYPE)
@@ -385,40 +398,32 @@ if __name__ == '__main__':
 #= Fe55 - Get Gains =========================================================================
     if MAKE_FE55_SPECTRA:
         
-        DM_amplist = pickle.load(open(PICKLE_PATH + 'DM_gain_25_files', 'rb'))
-        NG_amplist = pickle.load(open(PICKLE_PATH + 'NG_gain_25_files', 'rb'))
+#         DM_amplist = pickle.load(open(PICKLE_PATH + 'DM_', 'rb'))
 #         DM_means, DM_mean_errors, DM_chisqrs = GetGains_Fe55(DM_amplist, 'DM')
+#         DM_rel_errors = [(100 * (DM_mean_errors[i]/DM_means[i])) for i in range(N_AMPS)]
+#         DM_average_error = np.asarray(DM_rel_errors, dtype = 'f8').sum()/16.0
+
+        NG_amplist = pickle.load(open(PICKLE_PATH + 'NG_', 'rb'))
         NG_means, NG_mean_errors, NG_chisqrs = GetGains_Fe55(NG_amplist, 'NG')
-        exit()
-        DM_rel_errors = [(100 * (DM_mean_errors[i]/DM_means[i])) for i in range(N_AMPS)]
-        DM_average_error = np.asarray(DM_rel_errors, dtype = 'f8').sum()/16.0
-        
         NG_rel_errors = [(100 * (NG_mean_errors[i]/NG_means[i])) for i in range(N_AMPS)]
         NG_average_error = np.asarray(NG_rel_errors, dtype = 'f8').sum()/16.0
+
+#         exit()
         
-        print 'Avg DM fit error = %.4f%%' %DM_average_error
-        print 'Max DM error = %.4f%%' %max(DM_rel_errors)
+        
+#         print 'Avg DM fit error = %.4f%%' %DM_average_error
+#         print 'Max DM error = %.4f%%' %max(DM_rel_errors)
         print
         print 'Avg NG fit error = %.4f%%' %NG_average_error
         print 'Max NG error = %.4f%%' %max(NG_rel_errors)
 
         for i in range(16):
-            print str(i) + '\t' + str(DM_means[i]) + '\t' + str(NG_means[i])
+#             print str(i) + '\t' + str(DM_means[i]) + '\t' + str(NG_means[i])
+#             print str(i) + '\t' + str(DM_means[i])
+            print str(i) + '\t' + str(NG_means[i])
 
     exit()
 
-#= Calculate Noise and ADC offsets from bias files============================================
-
-    from my_image_tools import GetADC_OffsetsAndNoisesFromBiasFiles
-    calib_file = '/mnt/hgfs/VMShared/output/QE_LSST/113-03/calib.txt'
-    
-    ADC_Offsets, NoiseFactors = GetADC_OffsetsAndNoisesFromBiasFiles(input_path)
-    
-    print "amp\tgain\tadc_offset\tnoisefactor\tnoise_in_e\n"
-    for i in range(16):
-        print str(i) + '\t' + str(1594./means[i]) + '\t' + str(ADC_Offsets[i]) + '\t' + str(NoiseFactors[i]) + '\t' + str(NoiseFactors[i]*(1594./means[i]) )
-
-    
 
 ############## END CODE ##############
     
