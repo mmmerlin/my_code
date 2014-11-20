@@ -52,90 +52,6 @@ R2_CUT           = 0.8
 GLOBAL_OUT = []
 
 
-def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None, SINGLE_POINT = False):
-    from image_assembly import AssembleImage
-    
-    t0 = time.time()
-    total_found = 0
-    
-#= Open image, assemble, background subtract ===============================================================
-    
-    metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
-
-    dircontents = listdir(input_path)
-    file_list = []
-    for thisfile in dircontents:
-        filename = input_path + thisfile
-        if str(filename).find('coadded') != -1: continue # skip coadd file
-        if str(filename).find('.DS') != -1: continue # skip coadd file
-        if isfile(filename): file_list.append(filename) # skip bias dir
-    
-    if SPECIFIC_FILE != None:
-        file_list = []
-        file_list.append(SPECIFIC_FILE)
-        SINGLE_FILE = True
-    
-    if not SINGLE_FILE: print "Processing %s files using settings:" %len(file_list)
-    print "THRESHOLD = %s" %THRESHOLD
-    print "N_PIX_MIN = %s" %N_PIX_MIN
-    print "GROW = %s" %GROW
-    print "ISOTROPIC = %s" %ISOTROPIC
-
-    statslist = []
-    
-    for i, filename in enumerate(file_list):
-        if PROCESS_FILE_LIMIT != None:
-            if i >= PROCESS_FILE_LIMIT: break
-        print "Processing %s of %s files (%.2f %% done)" %(i, len(file_list), 100 * float(i) / float(len(file_list)))
-        if not QUIET: print "Current file = %s..." %filename
-        
-        image = AssembleImage(filename, metadata_filename, True)
-        maskedImg = afwImg.MaskedImageF(image)
-        exposure = afwImg.ExposureF(maskedImg)
-        
-        if DISPLAY_LEVEL >= 1 and SINGLE_FILE == True: ds9.mtv(image)
-    
-    # = Do finding ====================================================================
-        threshold = afwDetect.Threshold(THRESHOLD, afwDetect.Threshold.VALUE)
-        footPrintSet = afwDetect.FootprintSet(exposure.getMaskedImage(), threshold, "DETECTED", N_PIX_MIN)
-        footPrintSet = afwDetect.FootprintSet(footPrintSet, GROW, ISOTROPIC)
-    
-        footPrints = footPrintSet.getFootprints()
-        if not QUIET: print "Found %s footprints in file %s"%(footPrints.size(), filename)
-        total_found += footPrints.size()
-   
-        if footPrints.size() >= 5000: # files with bright defects cause all sorts of problems
-            print "Bad file - skipping..."
-            continue
-
-#        pointlist = np.arange(10000)
-
-        for pointnum, footprint in enumerate(footPrints):
-#                if pointnum in pointlist:
-            heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
-            stat = GetTrackStats(heavy_footprint, image, filename, save_track_data = True, track_number=pointnum)
-            statslist.append(stat)
-#            if pointnum == pointlist[-1]: exit()
-#            if SINGLE_POINT == True: exit()
-        
-        if SINGLE_FILE == True: break
-    
-
-    dt = time.time() - t0
-    print "Data analysed in %.2f seconds, %s total footprints found" %(dt,total_found) 
-    
-    t0 = time.time()
-    pickle.dump(statslist, open(pickle_file, 'wb'), pickle.HIGHEST_PROTOCOL)
-#    pickle.dump(statslist, open(pickle_file, 'wb'))
-    dt = time.time() - t0
-    print "Data pickled in %.2f seconds" %dt 
-    
-#===============================================================================
-#===============================================================================
-
-
-
-
 
 def Cut_Length(stat, cut):
     if stat.length_true_um >= cut:
@@ -163,6 +79,19 @@ def Cut_EdgeTracks(stat):
 #    if stat.
         
     return True
+
+def Cut_GetEdgeTracks(stat):
+    edge_sum = stat.bottom_track + stat.top_track + stat.left_track + stat.right_track
+    if edge_sum > 0:
+        return True
+    else:
+        return False
+    
+def Cut_GetMidlineTracks(stat):
+    if stat.midline_track == True:
+        return True
+    else:
+        return False
     
 def Cut_R2(stat, cut):
     if stat.LineOfBestFit.R2 <= cut:
@@ -180,29 +109,18 @@ if __name__ == '__main__':
 
     home_dir = expanduser("~")
 
-
-#     cosmic_pickle_file = home_dir + '/output/datasets/temp'
-    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
-#     cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
-
-#    input_path = home_dir + '/Desktop/VMShared/Data/small_dark_set/'
-#    input_path = home_dir + '/Desktop/VMShared/Data/all_darks/'
-
-#    SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
-
-#===============================================================================
-
-    if SPECIFIC_FILE != None: SINGLE_FILE = True
-    
-#    DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-#    exit()
+    cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
     
     t0 = time.time()
     rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
     dt = time.time() - t0
-    print "Data unpickled in %.2f seconds" %dt 
+    print "%s tracks unpickled in %.2f seconds" %(len(rawlist),dt) 
     
-    post_cuts = []
+    print len(rawlist)
+    
+    edge_tracks = []
+    midline_tracks = []
+    
     nstats = 0
     rawstats = 0
     
@@ -214,48 +132,20 @@ if __name__ == '__main__':
 ####     Applying cuts, optionally re-saving dataset
     for stat in rawlist:
         rawstats +=1
-        if stat.length_true_um >= TRACK_LENGTH_CUT:
-            if stat.LineOfBestFit.R2 > 0.95:
-                if stat.discriminator < 500:
-                    if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
-#                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
-#                    if aspect_ratio > aspect_limit or aspect_ratio < (1/aspect_limit):
-#                        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/aspect' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-#                        aspect_rejected += 1
-#                    else:
-                    post_cuts.append(stat); nstats += 1
-    
-    ###################################################
-    # Produce indivual track profiles
-    if True:
-        for stat in rawlist:
-            rawstats +=1
-            if stat.length_true_um >= 800:
-                if stat.discriminator > 2000:
-                        aspect_ratio = (stat.length_x_um / stat.length_y_um)
-                        if aspect_ratio < 0.05:
-#                             if aspect_rejected == 13:
-                
-                            TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/delta' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-    #                TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
-    #                TrackFitting.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, 6, OUTPUT_PATH + '/aspect13Tgraph' + '.png')
-                
-                
-#                     aspect_rejected += 1
-                        
-                        
-                        
-#            else:
-#                post_cuts.append(stat); nstats += 1
-#     exit()    
-    
-    print "%s stats loaded" %len(rawlist)
-    print "%s after cuts" %nstats
+        
+        if Cut_GetEdgeTracks(stat) == True:
+            edge_tracks.append(stat)
+            continue
+        if Cut_GetMidlineTracks(stat) == True:
+            midline_tracks.append(stat)
+            continue
 
-#    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
-#    pickle.dump(post_cuts, open(cosmic_pickle_file, 'wb'), pickle.HIGHEST_PROTOCOL)
-#    exit()
+    midline = rawlist.where()
 
+    
+    print len(edge_tracks)
+    print len(midline_tracks)
+    exit()
 
     ############################################
     # Generating some plots
