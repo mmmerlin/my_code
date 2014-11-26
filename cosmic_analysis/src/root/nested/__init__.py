@@ -26,6 +26,7 @@ import time
 #dt = time.time() - t0
 #print "Time was %.2f seconds" %dt 
 
+FILE_LIMIT = 99999
 
 
 #===============================================================================
@@ -34,9 +35,9 @@ import time
 def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None, SINGLE_POINT = False):
     t0 = time.time()
     
-    thresholdValue = 25
+    thresholdValue = 200
     npixMin = 2
-    grow = 1
+    grow = 2
     isotropic = False
     
     if DISPLAY_LEVEL >= 1:
@@ -68,13 +69,14 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 
     nleft, nright, ntop, nbottom, nmidline = 0,0,0,0,0
     statslist = []
-    for filename in file_list:
+    
+    for i,filename in enumerate(file_list):
+        if i >= FILE_LIMIT: continue
         print "Processing %s..." %filename
         
-        image = AssembleImage(filename, metadata_filename, True)# make image, subtract background and assemble exposure
-#        image = GetImage_SingleAmp(filename, True, 1)
-#        image -= bias_image
-
+        gains = [3.315808402,3.327915473,3.378822094,3.344825272,3.32604176,3.380261393,3.339747603,3.357838184,3.294004911,3.245531036,3.219743995,3.225160702,3.254285149,3.294630888,3.231197772,3.25006113] #113-03 gains
+        
+        image = AssembleImage(filename, metadata_filename, True, gain_correction_list=gains)# make image, subtract background and assemble exposure
         maskedImg = afwImg.MaskedImageF(image)
         exposure = afwImg.ExposureF(maskedImg)
         
@@ -96,16 +98,36 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         for footprint in footPrints:
             heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
             stat = GetTrackStats(heavy_footprint, image, filename, False)
-            statslist.append(stat)
+#             statslist.append(stat)
             
-#            DrawStat(stat)
+#             DrawStat(stat)
             
-            if stat.left_track == True: nleft += 1
-            if stat.right_track == True: nright += 1
-            if stat.top_track == True: ntop += 1
-            if stat.bottom_track == True: nbottom += 1
-            if stat.midline_track == True: nmidline += 1
-            
+            if stat.left_track == True:
+                nleft += 1
+#                 DrawStat(stat)
+                statslist.append(stat)
+                 
+            if stat.right_track == True:
+                nright += 1
+#                 DrawStat(stat)
+                statslist.append(stat)
+                 
+            if stat.top_track == True:
+                ntop += 1
+#                 DrawStat(stat)
+                statslist.append(stat)
+                 
+            if stat.bottom_track == True:
+                nbottom += 1
+#                 DrawStat(stat)
+                statslist.append(stat)
+ 
+            if stat.midline_track == True:
+                nmidline += 1
+#                 DrawStat(stat)
+                statslist.append(stat)
+                
+                
             if SINGLE_POINT == True: break
         
         if SINGLE_FILE == True:
@@ -117,17 +139,16 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     dt = time.time() - t0
     print "Data analysed in %.2f seconds" %dt 
     
-    print "nmidline %s" %nmidline
-    print "nleft %s" %nleft
-    print "nright %s" %nright
-    print "ntop %s" %ntop
-    print "nbottom %s" %nbottom
-    
+    print "n midline %s" %nmidline
+    print "n left %s" %nleft
+    print "n right %s" %nright
+    print "n top %s" %ntop
+    print "n bottom %s" %nbottom
     
     t0 = time.time()
     pickle.dump(statslist, open(pickle_file, 'wb'))
     dt = time.time() - t0
-    print "Data pickled in %.2f seconds" %dt 
+    print "Pickled %s tracks in %.2f seconds" %(len(statslist),dt) 
 #===============================================================================
 
 
@@ -200,13 +221,11 @@ if __name__ == '__main__':
     SPECIFIC_FILE = None
 #    SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
 
-    home_dir = expanduser("~")
-    pickle_file = home_dir + '/output/datasets/temp'
-#    pickle_file = home_dir + '/output/datasets/cosmics_assembled_50th_gr0'
+    pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
+    input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
 
-    input_path = home_dir + '/Desktop/VMShared/Data/all_darks/'
-    SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/small_fe55_set/113-03_fe55_fe55_010.00_022_20140709224009.fits'
+#     SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/small_fe55_set/113-03_fe55_fe55_010.00_022_20140709224009.fits'
 
 #===============================================================================
 

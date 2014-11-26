@@ -10,6 +10,7 @@ import lsst.meas.algorithms   as measAlg
 import lsst.afw.image         as afwImg
 import lsst.afw.display.ds9   as ds9
 
+
 from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
 from array import array
 import numpy as np
@@ -75,10 +76,6 @@ def Cut_Chisq(stat, cut):
     else:
         return True
     
-def Cut_EdgeTracks(stat):
-#    if stat.
-        
-    return True
 
 def Cut_GetEdgeTracks(stat):
     edge_sum = stat.bottom_track + stat.top_track + stat.left_track + stat.right_track
@@ -107,45 +104,59 @@ if __name__ == '__main__':
     SINGLE_POINT = False
     SPECIFIC_FILE = None
 
-    home_dir = expanduser("~")
 
-    cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
+    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
+#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
     
     t0 = time.time()
     rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
     dt = time.time() - t0
     print "%s tracks unpickled in %.2f seconds" %(len(rawlist),dt) 
     
-    print len(rawlist)
-    
+    top_tracks = []
+    bottom_tracks = []
+    left_tracks = []
+    right_tracks = []
     edge_tracks = []
     midline_tracks = []
     
     nstats = 0
-    rawstats = 0
+    rawstats = len(rawlist)
     
-    TRACK_LENGTH_CUT = 1000
-    aspect_limit = 1
-    aspect_rejected = 0
 
     ###################################################
 ####     Applying cuts, optionally re-saving dataset
     for stat in rawlist:
-        rawstats +=1
-        
-        if Cut_GetEdgeTracks(stat) == True:
-            edge_tracks.append(stat)
-            continue
-        if Cut_GetMidlineTracks(stat) == True:
-            midline_tracks.append(stat)
-            continue
-
-    midline = rawlist.where()
-
+        if stat.left_track == True:
+            left_tracks.append(stat)            
+        if stat.right_track == True:
+            right_tracks.append(stat)            
+        if stat.top_track == True:
+            top_tracks.append(stat)            
+        if stat.bottom_track == True:
+            bottom_tracks.append(stat)            
+        if stat.midline_track == True:
+            midline_tracks.append(stat)      
+       
+    n_left = len(left_tracks)
+    n_right = len(right_tracks)    
+    n_top = len(top_tracks)    
+    n_bottom = len(bottom_tracks)    
+    n_midline = len(midline_tracks)      
     
-    print len(edge_tracks)
-    print len(midline_tracks)
+    print "left",   n_left
+    print "right",  n_right
+    print "top",    n_top
+    print "bottom", n_bottom
+    print "middle", n_midline
+        
     exit()
+    
+    
+
+
+
+
 
     ############################################
     # Generating some plots
