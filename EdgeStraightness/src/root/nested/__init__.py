@@ -22,11 +22,12 @@ from TrackFitting import *
 from ImageStat import Stat
 import TrackViewer as TV
 import TrackFitting
+from copy import copy
 
 
 ##########################################################################################
 # things that won't really change
-OUTPUT_PATH = "/mnt/hgfs/VMShared/output/PSF/"
+OUTPUT_PATH = "/mnt/hgfs/VMShared/output/edge_straightness/"
 FILE_TYPE = ".pdf"
 N_AMPS = 16
 
@@ -100,18 +101,15 @@ if __name__ == '__main__':
     start_time = time.time()
     import cPickle as pickle
     print "Running PSF Calculator\n"
-    SINGLE_FILE = False
-    SINGLE_POINT = False
-    SPECIFIC_FILE = None
 
-
-    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
+    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
+#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
 #     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
     
     t0 = time.time()
-    rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
+    all_tracks = pickle.load(open(cosmic_pickle_file, 'rb'))
     dt = time.time() - t0
-    print "%s tracks unpickled in %.2f seconds" %(len(rawlist),dt) 
+    print "%s tracks unpickled in %.2f seconds" %(len(all_tracks),dt) 
     
     top_tracks = []
     bottom_tracks = []
@@ -121,12 +119,21 @@ if __name__ == '__main__':
     midline_tracks = []
     
     nstats = 0
-    rawstats = len(rawlist)
+    rawstats = len(all_tracks)
     
+    discs = []
+    all_tracks_temp = []
 
     ###################################################
 ####     Applying cuts, optionally re-saving dataset
-    for stat in rawlist:
+    n_post_cut = 0
+    for stat in all_tracks:
+        if stat.length_true_um < 200: continue
+        if stat.discriminator > 2000: continue
+        
+        n_post_cut += 1
+        all_tracks_temp.append(stat)
+        
         if stat.left_track == True:
             left_tracks.append(stat)            
         if stat.right_track == True:
@@ -137,6 +144,8 @@ if __name__ == '__main__':
             bottom_tracks.append(stat)            
         if stat.midline_track == True:
             midline_tracks.append(stat)      
+
+    all_tracks = all_tracks_temp #remove cut tracks from the all_track dataset
        
     n_left = len(left_tracks)
     n_right = len(right_tracks)    
@@ -144,11 +153,79 @@ if __name__ == '__main__':
     n_bottom = len(bottom_tracks)    
     n_midline = len(midline_tracks)      
     
+    print "Total post cuts = %s" %n_post_cut
     print "left",   n_left
     print "right",  n_right
     print "top",    n_top
     print "bottom", n_bottom
     print "middle", n_midline
+        
+        
+    ListToHist([stat.discriminator for stat in all_tracks], OUTPUT_PATH + 'discs.png', histmin = 0, histmax = 5000, nbins = 50)#, log_z, nbins, histmin, histmax)
+    ListToHist([stat.LineOfBestFit.R2 for stat in all_tracks],OUTPUT_PATH + 'r2.png', histmin = 0, histmax = 1.1, nbins = 50)
+    ListToHist([stat.npix for stat in all_tracks], OUTPUT_PATH + 'npix.png', histmin = 0, histmax = 1000, nbins = 100)
+  
+ 
+    for i,stat in enumerate(all_tracks):
+        legend_text = []
+        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+        legend_text.append(TrackFitting.GetEdgeType(stat))
+        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+    
+    
+    exit()
+        
+        
+        
+        
+#         
+#         
+#         
+#     #get new coefficients as distance to line uses straight line of form ax + by + c = 0
+#     a = -1. * fitted_line.a
+#     b = 1
+#     c = -1. * fitted_line.b
+#     
+#     histmin = -1 * max(data.shape[0], data.shape[1])
+#     histmax = max(data.shape[0], data.shape[1])
+#     nbins = (histmax - histmin) * 2
+#     
+#     discriminator = 0
+#     for xcoord in range(data.shape[0]):
+#         for ycoord in range(data.shape[1]):
+#             x = xcoord + 0.5 #adjust for bin centers - NB This is important!
+#             y = ycoord + 0.5 #adjust for bin centers - NB This is important!
+#             value = float(data[xcoord,ycoord])
+#             distance = abs(a*x + b*y + c) / (a**2 + b**2)**0.5
+#             try:
+#                 discriminator += value * (math.e**(distance))
+#             except:
+#                 discriminator = 1e324
+#                 return discriminator
+#     discriminator /= ((data.shape[0])**2 + (data.shape[1])**2)**0.5        
+#     
+#         
+#         
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
     exit()
     
@@ -158,24 +235,7 @@ if __name__ == '__main__':
 
 
 
-    ############################################
-    # Generating some plots
-    make_n_plots = 0
-    savepath = '/home/mmmerlin/output/PSF/'
-    for i,stat in enumerate(post_cuts):
-        if i >= make_n_plots: break
-        legend_text = []
-#        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
-#        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-#        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + 'both.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-        TV.TrackToFile_ROOT_2D(stat.data, savepath + 'colz_' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit, plot_opt = 'colz' )
-        TV.TrackToFile_ROOT(stat.data, savepath + 'lego20_' + str(i) + '.png', legend_text=legend_text, plot_opt = 'lego2 0' )
-
-
-
     ######################################################
-    #do analysis, deal with averaging and compiling return values
     nsecs = 6 #3,5,9 
     
     xpoints, sigmas, sigma_errors = [], [], []
@@ -201,149 +261,19 @@ if __name__ == '__main__':
 
     
     
-    ######################################################
-    # All points on top of each other graph
-#     c2 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) 
-#     assert len(xpoints) == len(sigmas) == len(sigma_errors)
-#     gr = TGraphErrors()
-#     for i in range(len(xpoints)):
-#         gr.SetPoint(int(i), float(xpoints[i]), float(sigmas[i]))
-#         gr.SetPointError(i, float(0), float(sigma_errors[i]))
-#     print "Added %s points to PSF Graph"%len(xpoints)
-#     gr.SetLineColor(2)
-#     gr.SetMarkerColor(2)
-#     gr.Draw("AP")
-#     gr.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
-#     gr.GetXaxis().SetTitle('Av. Si Depth (#mum)')
-#     c2.SaveAs(OUTPUT_PATH + '/psf_graph' + '.png')
-
-
-
-    ######################################################
-    # Averaged points
-    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
-    gr2 = TGraphErrors()
-    for i in range(nsecs):
-        gr2.SetPoint(int(i), float(xpoints[i]), av_sigma[i])   
-        gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
-        
-    fit_func = TF1("line","[1]*x + [0]", 0,100)
-    fit_func.SetNpx(1000)
-    gr2.Fit(fit_func, "MEQ", "")
-    a = fit_func.GetParameter(1) 
-    a_error = fit_func.GetParError(1)
-    y_int = fit_func.GetParameter(0) 
-    y_int_error = fit_func.GetParError(0)
-    R2 = gr2.GetCorrelationFactor()**2
-            
-    gr2.SetLineColor(2)
-    gr2.SetMarkerColor(2)
-    gr2.Draw("AP")
-    fit_func.Draw("same")
-    gr2.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
-    gr2.GetXaxis().SetTitle('Av. Si Depth (#mum)')
-    
-    legend_text = []
-    legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
-    legend_text.append('intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)))
-    legend_text.append('R^{2} = ' + str(round(R2,3)))
-    textbox = TPaveText(0.5,0.25,0.85,0.5,"NDC")
-    for line in legend_text: textbox.AddText(line)
-    textbox.SetFillColor(0)
-    textbox.SetTextSize(1.4* textbox.GetTextSize())
-    textbox.Draw("same")
-    
-    c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_' + str(nsecs) + '.png')
- 
-    ######################################################
-    # y-intercept removed in quadrature
-    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
-    gr3 = TGraphErrors()
-    for i in range(nsecs):
-        gr3.SetPoint(int(i), float(xpoints[i]), (av_sigma[i]**2 - y_int**2)**0.5 )  
-        gr3.SetPointError(int(i), float(0), (av_sigma_error[i]**2 + y_int_error**2)**0.5)    
-#        gr3.SetPointError(int(i), float(0), abs(av_sigma_error[i]**2 - y_int_error**2)**0.5)    
-      
-    xmin = 0.
-    xmax = 100.
-    ymin = 0.
-    ymax = float(6.)
-    gr_scale_dummy = TGraph()
-    gr_scale_dummy.SetPoint(0,xmin,ymin)
-    gr_scale_dummy.SetPoint(1,xmax,ymax)
-    gr_scale_dummy.SetMarkerColor(0)
-    gr_scale_dummy.SetMarkerSize(0)
-    gr_scale_dummy.Draw("AP") 
-        
-#     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
-    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
-#     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
-    fit_func_2.SetParameter(0,0.1)
-    fit_func_2.SetParameter(1,2.0)
-    fit_func_2.SetNpx(1000)
-    gr3.Fit(fit_func_2, "ME0", "")
-    a = fit_func_2.GetParameter(1) 
-    a_error = fit_func_2.GetParError(1)
-    b = fit_func_2.GetParameter(0) 
-    b_error = fit_func_2.GetParError(0)
-    R2 = gr3.GetCorrelationFactor()**2
-             
-    gr3.SetLineColor(4)
-    gr3.SetMarkerColor(4)
-    fit_func_2.SetLineColor(4)
-    gr3.Draw("Psame")
-    gr3.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
-    gr3.GetXaxis().SetTitle('Av. Si Depth (#mum)')
-    gr2.Draw("Psame")
-    fit_func.Draw("same")
-    fit_func_2.Draw("lsame")
-     
-    legend_text = []
-    legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
-    legend_text.append('intercept = ' + str(round(b,2)) + ' #pm ' + str(round(b_error,2)))
-    legend_text.append('R^{2} = ' + str(round(R2,3)))
-    textbox = TPaveText(0.5,0.25,0.85,0.45,"NDC")
-    for line in legend_text:
-        print line
-        textbox.AddText(line)
-    textbox.SetFillColor(0)
-    textbox.SetTextSize(1.4* textbox.GetTextSize())
-    textbox.Draw("same")
-    
-    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.png')
-   
-    
-    exit()
-    
-    
-#    savepath = '/home/mmmerlin/output/PSF/'
-#    i = 0
-#    for stat in rawlist:
-#        if stat.npix <= 50:
-#            i += 1
-#            legend_text = []
-#            legend_text.append('npix = ' + str(stat.npix))
-#            TV.TrackToFile_ROOT_2D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-#            if i >25: break
-#            
-    
-    for i,stat in enumerate(post_cuts):
+    for i,stat in enumerate(some_list):
 #        if i <> 3: continue
         legend_text = []
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-#        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-#        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
     
     
     
     
     
-#    ListToHist([stat.LineOfBestFit.R2 for stat in post_cuts], '/home/mmmerlin/output/PSF/r2_dist.png')
-    ListToHist([stat.discriminator for stat in rawlist], '/home/mmmerlin/output/PSF/raw_disc.pdf', histmax = 5000)
-    ListToHist([stat.discriminator for stat in post_cuts], '/home/mmmerlin/output/PSF/post_cut_disc.pdf', histmin = 0, histmax = 500, nbins = 50)
-    ListToHist([stat.npix for stat in rawlist], '/home/mmmerlin/output/PSF/npx_hist.pdf', histmin = 0, histmax = 100, nbins = 100)
-        
+       
 #    ListVsList([stat.LineOfBestFit.R2 for stat in rawlist], [stat.LineOfBestFit.chisq_red for stat in rawlist],  '/home/mmmerlin/output/PSF/r2_vs_chisq.pdf', xmax = 1)
         
     exit()

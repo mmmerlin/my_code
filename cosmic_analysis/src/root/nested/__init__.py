@@ -28,6 +28,19 @@ import time
 
 FILE_LIMIT = 99999
 
+DISPLAY_LEVEL = 0
+SINGLE_FILE = False
+SINGLE_POINT = False
+SPECIFIC_FILE = None
+#SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
+
+# pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
+input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
+
+
+#SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/small_fe55_set/113-03_fe55_fe55_010.00_022_20140709224009.fits'
+
 
 #===============================================================================
 
@@ -97,34 +110,33 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
         for footprint in footPrints:
             heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
-            stat = GetTrackStats(heavy_footprint, image, filename, False)
+            stat = GetTrackStats(heavy_footprint, image, filename, save_track_data = True)
 #             statslist.append(stat)
-            
 #             DrawStat(stat)
             
             if stat.left_track == True:
-                nleft += 1
 #                 DrawStat(stat)
+                nleft += 1
                 statslist.append(stat)
                  
             if stat.right_track == True:
-                nright += 1
 #                 DrawStat(stat)
+                nright += 1
                 statslist.append(stat)
                  
             if stat.top_track == True:
-                ntop += 1
 #                 DrawStat(stat)
+                ntop += 1
                 statslist.append(stat)
                  
             if stat.bottom_track == True:
-                nbottom += 1
 #                 DrawStat(stat)
+                nbottom += 1
                 statslist.append(stat)
  
             if stat.midline_track == True:
-                nmidline += 1
 #                 DrawStat(stat)
+                nmidline += 1
                 statslist.append(stat)
                 
                 
@@ -215,17 +227,7 @@ def Cut_Ellipticity(stat, cut):
 if __name__ == '__main__':
     import pickle
     print "Running cosmic analysis\n"
-    DISPLAY_LEVEL = 0
-    SINGLE_FILE = False
-    SINGLE_POINT = False
-    SPECIFIC_FILE = None
-#    SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
 
-    pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
-    input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
-
-
-#     SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/small_fe55_set/113-03_fe55_fe55_010.00_022_20140709224009.fits'
 
 #===============================================================================
 
