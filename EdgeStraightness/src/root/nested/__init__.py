@@ -166,14 +166,71 @@ if __name__ == '__main__':
     ListToHist([stat.npix for stat in all_tracks], OUTPUT_PATH + 'npix.png', histmin = 0, histmax = 1000, nbins = 100)
   
  
-    for i,stat in enumerate(all_tracks):
-        legend_text = []
-        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
-        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-        legend_text.append(TrackFitting.GetEdgeType(stat))
-        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+    c1 = TCanvas( 'canvas', 'canvas', 1600,800) #create canvas
+    gr_left = TGraph() 
+    max_distance = 50
+    dev_max = 5 #in pixels
+        
+    deviations = np.zeros(max_distance, dtype = 'f8')
+    point_counter = np.zeros(max_distance, dtype = 'f8')
+        
+    for i,stat in enumerate(left_tracks):
+#         legend_text = []
+#         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+#         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+#         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+#         legend_text.append(TrackFitting.GetEdgeType(stat))
+#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+
+        data = stat.data
+        cols, rows = data.shape
+        
+        CoMs = np.zeros(cols, dtype = 'f8')
+        predicted_CoMs = np.zeros(cols, dtype = 'f8')
+        flip_track = False
+        
+        for col_num in range(cols):
+            #calculate Center of Mass of column
+            col = data[col_num,:] #get column
+            for pix_num in range(len(col)): #loop over pixels in column
+                CoMs[col_num] += col[pix_num] * (pix_num + 0.5) #CoM summing, account for center of pixel location
+            CoMs[col_num] /= col.sum() # calc CoM
+
+            #calc deviation as function of edge distance using track fit
+            predicted_CoMs[col_num] = stat.LineOfBestFit.a*(col_num + 0.5) + stat.LineOfBestFit.b 
+            deviation = predicted_CoMs[col_num] - CoMs[col_num]
+            
+            #flip the deviation if necessary
+            if stat.LineOfBestFit.a < 0: flip_track = True
+            if flip_track: deviation *= -1.
+            
+            if abs(deviation) < dev_max: #cut outliers
+                if col_num < max_distance: #discard if out of ROI
+                    deviations[col_num] += deviation    # sum
+                    point_counter[col_num] += 1         # increment number of points at this distance
+            
+            #TODO: need to:
+            #            a) weight by angle
+            #            b) flip for positive/negative slopes? - think about this
+
+
+        #end file loop
     
+    for i in range(max_distance):
+        gr_left.SetPoint(i, i + 0.5, deviations[i]/point_counter[i])
+
+    print point_counter
+    
+    gr_left.GetXaxis().SetTitle('Distance from sensor edge (pixels)')
+    gr_left.GetYaxis().SetTitle('Charge centroid distance from track (pixels)')
+    gr_left.SetMarkerStyle(2)
+    gr_left.SetMarkerSize(2)
+    
+    gr_left.GetXaxis().SetRangeUser(0.,max_distance)
+    gr_left.GetYaxis().SetRangeUser(-10.,10.)
+
+    gr_left.Draw('AP')
+    c1.SaveAs(OUTPUT_PATH + 'tracks/left/deviation.png')
     
     exit()
         
