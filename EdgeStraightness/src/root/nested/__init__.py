@@ -129,38 +129,42 @@ if __name__ == '__main__':
  
     c1 = TCanvas( 'canvas', 'canvas', 1600,800) #create canvas
     gr_left = TGraph() 
-    max_distance = 6
+    max_distance = 25
     dev_max = 10 #in pixels
         
     deviations = np.zeros(max_distance, dtype = 'f8')
     point_counter = np.zeros(max_distance, dtype = 'f8')
         
-    for i,stat in enumerate(right_tracks):
+    for i,stat in enumerate(bottom_tracks):
+#         if i != 2: continue
         legend_text = []
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
         legend_text.append(TrackFitting.GetEdgeType(stat))
+
         
         edge_type = GetEdgeType(stat)
-        if edge_type == 'right':
-            #flipud
-            data = np.flipud(stat.data)
-#             fit_line = ???
-        elif edge_type == 'top':
-#             data = ???
-#             fit_line = ???
-        elif edge_type == 'bottom':
-#             data = ???
-#             fit_line = ???
-        elif edge_type == 'left':
+        if edge_type == 'left':
             data = stat.data
             fit_line = stat.LineOfBestFit
+        elif edge_type == 'right':
+            #flip up-down - because of numpy's axis weirdness
+            data = np.flipud(stat.data)
+            fit_line = TrackFitting.FitStraightLine(data)
+        elif edge_type == 'top':
+            #rotate 90 degrees counter clockwise
+            data = np.rot90(stat.data,1)
+            fit_line = TrackFitting.FitStraightLine(data)
+        elif edge_type == 'bottom':
+            #rotate 90 degrees counter clockwise 3 times
+            data = np.rot90(stat.data,3) #[1:,]
+            fit_line = TrackFitting.FitStraightLine(data)
         else:
             print "This should never happen"
             exit()
         
-        
+#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/left/raw' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
 #         TV.TrackToFile_ROOT_2D_3D(data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=fit_line )
         
         cols, rows = data.shape
@@ -182,7 +186,7 @@ if __name__ == '__main__':
             
             #flip the deviation if necessary
             if fit_line.a < 0: flip_track = True
-            if flip_track: deviation *= -1.
+            if not flip_track: deviation *= -1.
             
             if abs(deviation) < dev_max: #cut outliers
                 if col_num < max_distance: #discard if out of ROI
@@ -220,7 +224,13 @@ if __name__ == '__main__':
     gr_left.GetXaxis().SetRangeUser(0.,max_distance)
     gr_left.GetYaxis().SetRangeUser(-4,4)
 
+    zero_line = TF1("line","0", 0,max_distance)
+    zero_line.SetLineStyle(7)
+    zero_line.SetLineWidth(1)
+
     gr_left.Draw('AP')
+    zero_line.Draw("same")
+    
     c1.SaveAs(OUTPUT_PATH + 'tracks/left/deviation.png')
     
 
