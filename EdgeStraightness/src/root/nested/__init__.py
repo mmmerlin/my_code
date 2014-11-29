@@ -26,8 +26,15 @@ from copy import copy
 
 
 ##########################################################################################
-# things that won't really change
 OUTPUT_PATH = "/mnt/hgfs/VMShared/output/edge_straightness/"
+
+cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/1_right_track'
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
+
+
 FILE_TYPE = ".pdf"
 N_AMPS = 16
 
@@ -55,57 +62,11 @@ GLOBAL_OUT = []
 
 
 
-def Cut_Length(stat, cut):
-    if stat.length_true_um >= cut:
-        return True
-    else:
-        return False
-def Cut_Ellipticity(stat, cut):
-    if stat.ellipse_b == 0:
-        return False
-    
-    ratio = stat.ellipse_a / stat.ellipse_b
-    if ratio >= cut:
-        return True
-    else:
-        return False
-def Cut_Chisq(stat, cut):
-    if stat.LineOfBestFit.chisq_red == -1: return False
-    if stat.LineOfBestFit.chisq_red / stat.diagonal_length_pixels <= 0.001: return False
-    if stat.LineOfBestFit.chisq_red / stat.diagonal_length_pixels >= cut:
-        return False
-    else:
-        return True
-    
-
-def Cut_GetEdgeTracks(stat):
-    edge_sum = stat.bottom_track + stat.top_track + stat.left_track + stat.right_track
-    if edge_sum > 0:
-        return True
-    else:
-        return False
-    
-def Cut_GetMidlineTracks(stat):
-    if stat.midline_track == True:
-        return True
-    else:
-        return False
-    
-def Cut_R2(stat, cut):
-    if stat.LineOfBestFit.R2 <= cut:
-        return False
-    else:
-        return True
-
 if __name__ == '__main__':
     start_time = time.time()
     import cPickle as pickle
     print "Running PSF Calculator\n"
 
-    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
-#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
-#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
-    
     t0 = time.time()
     all_tracks = pickle.load(open(cosmic_pickle_file, 'rb'))
     dt = time.time() - t0
@@ -129,7 +90,7 @@ if __name__ == '__main__':
     n_post_cut = 0
     for stat in all_tracks:
         if stat.length_true_um < 200: continue
-        if stat.discriminator > 2000: continue
+        if stat.discriminator > 1500: continue
         
         n_post_cut += 1
         all_tracks_temp.append(stat)
@@ -168,21 +129,40 @@ if __name__ == '__main__':
  
     c1 = TCanvas( 'canvas', 'canvas', 1600,800) #create canvas
     gr_left = TGraph() 
-    max_distance = 50
-    dev_max = 5 #in pixels
+    max_distance = 6
+    dev_max = 10 #in pixels
         
     deviations = np.zeros(max_distance, dtype = 'f8')
     point_counter = np.zeros(max_distance, dtype = 'f8')
         
-    for i,stat in enumerate(left_tracks):
-#         legend_text = []
-#         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
-#         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-#         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-#         legend_text.append(TrackFitting.GetEdgeType(stat))
-#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-
-        data = stat.data
+    for i,stat in enumerate(right_tracks):
+        legend_text = []
+        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+        legend_text.append(TrackFitting.GetEdgeType(stat))
+        
+        edge_type = GetEdgeType(stat)
+        if edge_type == 'right':
+            #flipud
+            data = np.flipud(stat.data)
+#             fit_line = ???
+        elif edge_type == 'top':
+#             data = ???
+#             fit_line = ???
+        elif edge_type == 'bottom':
+#             data = ???
+#             fit_line = ???
+        elif edge_type == 'left':
+            data = stat.data
+            fit_line = stat.LineOfBestFit
+        else:
+            print "This should never happen"
+            exit()
+        
+        
+#         TV.TrackToFile_ROOT_2D_3D(data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=fit_line )
+        
         cols, rows = data.shape
         
         CoMs = np.zeros(cols, dtype = 'f8')
@@ -197,11 +177,11 @@ if __name__ == '__main__':
             CoMs[col_num] /= col.sum() # calc CoM
 
             #calc deviation as function of edge distance using track fit
-            predicted_CoMs[col_num] = stat.LineOfBestFit.a*(col_num + 0.5) + stat.LineOfBestFit.b 
+            predicted_CoMs[col_num] = fit_line.a*(col_num + 0.5) + fit_line.b 
             deviation = predicted_CoMs[col_num] - CoMs[col_num]
             
             #flip the deviation if necessary
-            if stat.LineOfBestFit.a < 0: flip_track = True
+            if fit_line.a < 0: flip_track = True
             if flip_track: deviation *= -1.
             
             if abs(deviation) < dev_max: #cut outliers
@@ -214,6 +194,17 @@ if __name__ == '__main__':
             #            b) flip for positive/negative slopes? - think about this
 
 
+
+
+
+
+
+
+
+
+
+
+
         #end file loop
     
     for i in range(max_distance):
@@ -224,126 +215,21 @@ if __name__ == '__main__':
     gr_left.GetXaxis().SetTitle('Distance from sensor edge (pixels)')
     gr_left.GetYaxis().SetTitle('Charge centroid distance from track (pixels)')
     gr_left.SetMarkerStyle(2)
-    gr_left.SetMarkerSize(2)
+    gr_left.SetMarkerSize(1)
     
     gr_left.GetXaxis().SetRangeUser(0.,max_distance)
-    gr_left.GetYaxis().SetRangeUser(-10.,10.)
+    gr_left.GetYaxis().SetRangeUser(-4,4)
 
     gr_left.Draw('AP')
     c1.SaveAs(OUTPUT_PATH + 'tracks/left/deviation.png')
     
-    exit()
-        
-        
-        
-        
-#         
-#         
-#         
-#     #get new coefficients as distance to line uses straight line of form ax + by + c = 0
-#     a = -1. * fitted_line.a
-#     b = 1
-#     c = -1. * fitted_line.b
-#     
-#     histmin = -1 * max(data.shape[0], data.shape[1])
-#     histmax = max(data.shape[0], data.shape[1])
-#     nbins = (histmax - histmin) * 2
-#     
-#     discriminator = 0
-#     for xcoord in range(data.shape[0]):
-#         for ycoord in range(data.shape[1]):
-#             x = xcoord + 0.5 #adjust for bin centers - NB This is important!
-#             y = ycoord + 0.5 #adjust for bin centers - NB This is important!
-#             value = float(data[xcoord,ycoord])
-#             distance = abs(a*x + b*y + c) / (a**2 + b**2)**0.5
-#             try:
-#                 discriminator += value * (math.e**(distance))
-#             except:
-#                 discriminator = 1e324
-#                 return discriminator
-#     discriminator /= ((data.shape[0])**2 + (data.shape[1])**2)**0.5        
-#     
-#         
-#         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    exit()
-    
-    
-
-
-
-
-
-    ######################################################
-    nsecs = 6 #3,5,9 
-    
-    xpoints, sigmas, sigma_errors = [], [], []
-    av_sigma = [0.] * nsecs
-    av_sigma_error = [0.] * nsecs
-    npts = 0
-    
-    savepath = '/home/mmmerlin/output/PSF/'
-    for i,stat in enumerate(post_cuts): 
-        xs,s,se = MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, nsecs, tgraph_filename=savepath + str(i) + '.png')
-        assert nsecs == len(xs) or len(xs) == 0
-        for j in range(len(xs)):
-            xpoints.append(xs[j])
-            sigmas.append(s[j])
-            sigma_errors.append(se[j])
-            av_sigma[j] += s[j]
-            av_sigma_error[j] += se[j]**2
-        npts += 1
-    
-    for j in range(nsecs): #make averages into averages
-        av_sigma[j] /= float(npts)
-        av_sigma_error[j] = (av_sigma_error[j]/float(npts))**0.5
-
-    
-    
-    for i,stat in enumerate(some_list):
-#        if i <> 3: continue
-        legend_text = []
-        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
-        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-    
-    
-    
-    
-    
-       
-#    ListVsList([stat.LineOfBestFit.R2 for stat in rawlist], [stat.LineOfBestFit.chisq_red for stat in rawlist],  '/home/mmmerlin/output/PSF/r2_vs_chisq.pdf', xmax = 1)
-        
-    exit()
-
-
-
 
 ############## END CODE ##############
     
     all_time = time.time() - start_time
     for line in GLOBAL_OUT:
         print line
-    print "All analysis done in %.2f seconds" %all_time 
+#     print "All analysis done in %.2f seconds" %all_time 
     exit()
     
 ############# DONE ################

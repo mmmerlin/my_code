@@ -26,16 +26,17 @@ import time
 #dt = time.time() - t0
 #print "Time was %.2f seconds" %dt 
 
-FILE_LIMIT = 99999
+FILE_LIMIT = 3
+SKIP_N_FILES = FILE_LIMIT -1
 
-DISPLAY_LEVEL = 0
+DISPLAY_LEVEL = 1
 SINGLE_FILE = False
 SINGLE_POINT = False
 SPECIFIC_FILE = None
 #SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
 
-# pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
-pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
+pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+# pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
 input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
 
@@ -84,6 +85,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     statslist = []
     
     for i,filename in enumerate(file_list):
+        if i < SKIP_N_FILES: continue
         if i >= FILE_LIMIT: continue
         print "Processing %s..." %filename
         
@@ -108,36 +110,55 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
         print "Found %s footprints"%len(footPrints)
     
+        footprint_skip = 1
+        count = 0
+    
         for footprint in footPrints:
             heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
             stat = GetTrackStats(heavy_footprint, image, filename, save_track_data = True)
 #             statslist.append(stat)
 #             DrawStat(stat)
             
-            if stat.left_track == True:
-#                 DrawStat(stat)
-                nleft += 1
+            if GetEdgeType(stat) == "right":
+                count += 1
+#                 if stat.length_true_um < 200: continue
+                if count < (footprint_skip + 1): continue
+                ds9.mtv(image)
+                print "Found " + GetEdgeType(stat)
+                DrawStat(stat)
+                
                 statslist.append(stat)
-                 
-            if stat.right_track == True:
-#                 DrawStat(stat)
-                nright += 1
-                statslist.append(stat)
-                 
-            if stat.top_track == True:
-#                 DrawStat(stat)
-                ntop += 1
-                statslist.append(stat)
-                 
-            if stat.bottom_track == True:
-#                 DrawStat(stat)
-                nbottom += 1
-                statslist.append(stat)
- 
-            if stat.midline_track == True:
-#                 DrawStat(stat)
-                nmidline += 1
-                statslist.append(stat)
+#                 exit()
+                break
+            
+            
+            
+            
+            
+#             if stat.left_track == True:
+# #                 DrawStat(stat)
+#                 nleft += 1
+#                 statslist.append(stat)
+#                  
+#             if stat.right_track == True:
+# #                 DrawStat(stat)
+#                 nright += 1
+#                 statslist.append(stat)
+#                  
+#             if stat.top_track == True:
+# #                 DrawStat(stat)
+#                 ntop += 1
+#                 statslist.append(stat)
+#                  
+#             if stat.bottom_track == True:
+# #                 DrawStat(stat)
+#                 nbottom += 1
+#                 statslist.append(stat)
+#  
+#             if stat.midline_track == True:
+# #                 DrawStat(stat)
+#                 nmidline += 1
+#                 statslist.append(stat)
                 
                 
             if SINGLE_POINT == True: break
@@ -173,7 +194,7 @@ def DrawStat(stat):
     ds9.dot(argstring,stat.centroid_x,stat.centroid_y) #ellipse around the centroid
     ds9.dot("x",stat.centroid_x,stat.centroid_y)# cross on the peak
     displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
-#    ds9.zoom(22, stat.centroid_x,stat.centroid_y, 0) # use to zoom to a single point
+    ds9.zoom(22, stat.centroid_x,stat.centroid_y, 0) # use to zoom to a single point
     print 'length (diag,px) = %s, length (3D,true,um) = %s, flux = %s, npix = %s, dedx = %s' %(stat.diagonal_length_pixels, stat.length_true_um, stat.flux, stat.npix, stat.de_dx)
 
 
