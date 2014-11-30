@@ -135,7 +135,9 @@ if __name__ == '__main__':
     deviations = np.zeros(max_distance, dtype = 'f8')
     point_counter = np.zeros(max_distance, dtype = 'f8')
         
-    for i,stat in enumerate(bottom_tracks):
+#     for i,stat in enumerate(left_tracks + right_tracks + top_tracks + bottom_tracks):
+    for i,stat in enumerate(left_tracks):
+
 #         if i != 2: continue
         legend_text = []
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
@@ -143,7 +145,6 @@ if __name__ == '__main__':
         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
         legend_text.append(TrackFitting.GetEdgeType(stat))
 
-        
         edge_type = GetEdgeType(stat)
         if edge_type == 'left':
             data = stat.data

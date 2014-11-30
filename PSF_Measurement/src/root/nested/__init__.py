@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
 
 #     cosmic_pickle_file = home_dir + '/output/datasets/temp'
-    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
+    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
 #     cosmic_pickle_file = home_dir + '/output/datasets/all_cosmics_with_data'
 
 #    input_path = home_dir + '/Desktop/VMShared/Data/small_dark_set/'
@@ -327,6 +327,7 @@ if __name__ == '__main__':
         gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
         
     fit_func = TF1("line","[1]*x + [0]", 0,100)
+#     fit_func = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
     fit_func.SetNpx(1000)
     gr2.Fit(fit_func, "MEQ", "")
     a = fit_func.GetParameter(1) 
@@ -381,11 +382,11 @@ if __name__ == '__main__':
     fit_func_2.SetParameter(1,2.0)
     fit_func_2.SetNpx(1000)
     gr3.Fit(fit_func_2, "ME0", "")
-    a = fit_func_2.GetParameter(1) 
-    a_error = fit_func_2.GetParError(1)
-    b = fit_func_2.GetParameter(0) 
-    b_error = fit_func_2.GetParError(0)
-    R2 = gr3.GetCorrelationFactor()**2
+#     a = fit_func_2.GetParameter(1) 
+#     a_error = fit_func_2.GetParError(1)
+#     b = fit_func_2.GetParameter(0) 
+#     b_error = fit_func_2.GetParError(0)
+#     R2 = gr3.GetCorrelationFactor()**2
              
     gr3.SetLineColor(4)
     gr3.SetMarkerColor(4)
@@ -396,20 +397,41 @@ if __name__ == '__main__':
     gr2.Draw("Psame")
     fit_func.Draw("same")
     fit_func_2.Draw("lsame")
+    
+
      
     legend_text = []
-    legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
-    legend_text.append('intercept = ' + str(round(b,2)) + ' #pm ' + str(round(b_error,2)))
-    legend_text.append('R^{2} = ' + str(round(R2,3)))
-    textbox = TPaveText(0.5,0.25,0.85,0.45,"NDC")
+    legend_text.append('Intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)) + ' #mum')
+#     legend_text.append('Slope = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
+#     legend_text.append('R^{2} = ' + str(round(R2,3)))
+    textbox = TPaveText(0.15,0.65,0.5,0.85,"NDC")
     for line in legend_text:
         print line
         textbox.AddText(line)
     textbox.SetFillColor(0)
+    textbox.SetTextColor(2)
     textbox.SetTextSize(1.4* textbox.GetTextSize())
     textbox.Draw("same")
     
-    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.png')
+    chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
+    
+    legend_text = []
+    legend_text.append('Sqrt dependence:')
+    legend_text.append('#chi^{2}_{Red} = ' + str(round(chisqred,3)))
+    textbox2 = TPaveText(0.5,0.2,0.85,0.40,"NDC")
+    for line in legend_text:
+        print line
+        textbox2.AddText(line)
+    textbox2.SetFillColor(0)
+    textbox2.SetTextColor(4)
+#     textbox2.SetTextSize(1.4* textbox2.GetTextSize())
+    textbox2.Draw("same")
+    
+    
+    gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
+    gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
+    
+    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.pdf')
    
     
     exit()

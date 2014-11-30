@@ -30,7 +30,7 @@ from TrackFitting import *
 ##########################################################################################
 ##########################################################################################
 # things that won't really change
-OUTPUT_PATH = "/home/mmmerlin/output/"
+OUTPUT_PATH = "/mnt/hgfs/VMShared/output/cosmic_gain/"
 FILE_TYPE = ".pdf"
 N_AMPS = 16
 
@@ -54,7 +54,7 @@ CHISQ_CUT        = 10
 R2_CUT           = 0.8
 
 # Post processing options
-MAKE_LANDAUS = False
+MAKE_LANDAUS = True
 MAKE_FE55_SPECTRA = True
 
 GLOBAL_OUT = []
@@ -96,7 +96,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
 
     dircontents = listdir(input_path)
-    file_list = []path
+    file_list = []
     for thisfile in dircontents:
         filename = input_path + thisfile
         if str(filename).find('coadded') != -1: continue # skip coadd file
@@ -442,42 +442,37 @@ if __name__ == '__main__':
     SPECIFIC_FILE = None
 
     home_dir = expanduser("~")
-#    iron_pickle_file = home_dir + '/output/datasets/temp'
-#    iron_pickle_file = home_dir + '/output/datasets/20_ampwise_fe55'
-#    iron_pickle_file = home_dir + '/output/datasets/10_ampwise_fe55_th25_gr1'
-#    iron_pickle_file = home_dir + '/output/datasets/10_ampwise_fe55_th25_gr2'
-#    iron_pickle_file = home_dir + '/output/datasets/single_fe55'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/20_ampwise_fe55'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr2'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/single_fe55'
 
-#    iron_pickle_file = home_dir + '/output/datasets/10_ampwise_fe55_th25_gr1'
-    iron_pickle_file = '/home/mmmerlin/dl/QE/pickles/fe55/'
+#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
+    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
 
 
-    cosmic_pickle_file = home_dir + '/output/datasets/temp'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr0'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr0_mega'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr1_iso_mega'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr2_iso_mega'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr1_not_iso_mega'
-#    cosmic_pickle_file = home_dir + '/output/datasets/cosmic_th50_px2_gr2_not_iso_mega'
+#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_ampwise_cosmics'
+#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr0_mega'
+#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr1_iso_mega'
+#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr2_iso_mega'
+#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr1_not_iso_mega'
+#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr2_not_iso_mega'
 
-#    input_path = home_dir + '/Desktop/VMShared/Data/small_fe55_set/'
-#    input_path = home_dir + '/Desktop/VMShared/Data/small_dark_set/'
-    input_path = '/home/mmmerlin/dl/QE/fe55/20140709-112014/'
-    
-#    input_path = home_dir + '/Desktop/VMShared/Data/all_darks/'
+#     input_path = '/mnt/hgfs/VMShared/data/fe55/20140709-112014/'
+#    input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
-#    SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/long_darks_20140708/113-03_dark_dark_999.00_035_20140709120811.fits'
-#    SPECIFIC_FILE = home_dir + '/Desktop/VMShared/Data/small_fe55_set/113-03_fe55_fe55_005.00_000_20140709222117.fits'
-#    SPECIFIC_FILE = home_dir + '/useful/112_03_fe55_fe55_006.fits'
-#    SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
+
+#    SPECIFIC_FILE = 'somefile'
 
 #===============================================================================
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
     
-    DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+#     DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
 #    DoAnalysis(input_path, iron_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-    exit()   
+#     exit()   
 
     #= Fe55 - Get Gains =========================================================================
     if MAKE_FE55_SPECTRA:
