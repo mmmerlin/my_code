@@ -39,7 +39,7 @@ N_AMPS = 16
 DISPLAY_LEVEL = 0
 QUIET = False
 #PROCESS_FILE_LIMIT = None
-PROCESS_FILE_LIMIT = 1
+PROCESS_FILE_LIMIT = 50
 
 # Track finding options
 THRESHOLD = 50
@@ -142,7 +142,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
             if not QUIET: print "Found %s footprints in amp %s of file %s"%(footPrints.size(), amp, filename)
             total_found += footPrints.size()
        
-            if footPrints.size() >= 5000: # files with bright defects cause all sorts of problems
+            if footPrints.size() >= 2000: # files with bright defects cause all sorts of problems
                 print "Bad file - skipping..."
                 continue
 
@@ -161,7 +161,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
                 heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
                 stat = GetTrackStats(heavy_footprint, image, False, track_number=pointnum)
                 amplist[amp].append(stat)
-                if pointnum == pointlist[-1]: exit()
+#                 if pointnum == pointlist[-1]: exit()
 #                    ds9.mtv(image)
 #                    DrawStat(stat, True)
 #                if SINGLE_POINT == True: exit()
@@ -302,13 +302,14 @@ def GetGains_Cosmics(amplist):
     return mpvs, mpvs_errors, chisqrs
 
 def GetGains_Fe55(amplist):
+    from root_functions import GetLeftRightBinsAtPercentOfMax
 
     histmin = 200
     histmax = 700
     nbins = 200
-    fitmin = 400
-    fitmax = 550
-    fit_threshold = 1000
+#     fitmin = 400
+#     fitmax = 550
+    fit_threshold = 0.1
     
     hist_array = []
 
@@ -336,7 +337,7 @@ def GetGains_Fe55(amplist):
         
         GLOBAL_OUT.append(str(amp) + '\t' + "%.2f"%(float(av_pixels)/float(ntracks)))
         
-#        fitmin, fitmax = GetFirstBinBelowX(hist, fit_threshold)
+        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist, fit_threshold)
         
         fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
         fitfunc.Draw("same")
@@ -388,7 +389,6 @@ def GetGains_Fe55(amplist):
     mastercanvas2.SaveAs(OUTPUT_PATH + "fe55_spectra_overlay_cumulative" + FILE_TYPE)
  
 
-
     return means, mean_errors, chisqrs
 
 def DrawStat(stat, zoom_to_point = False):
@@ -437,19 +437,22 @@ if __name__ == '__main__':
     start_time = time.time()
     import cPickle as pickle
     print "Running center cosmic finder\n"
-    SINGLE_FILE = True
+    SINGLE_FILE = False
     SINGLE_POINT = False
     SPECIFIC_FILE = None
 
     home_dir = expanduser("~")
 #    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/20_ampwise_fe55'
+#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/20_ampwise_fe55'
 #    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
 #    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr2'
 #    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/single_fe55'
 
 #    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
-    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
+#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
+    
+    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/113_03_ampwise_th50_gr1_50_files'
+#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_data_ampwise_fe55'
 
 
 #     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
@@ -460,7 +463,7 @@ if __name__ == '__main__':
 #    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr1_not_iso_mega'
 #    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr2_not_iso_mega'
 
-#     input_path = '/mnt/hgfs/VMShared/data/fe55/20140709-112014/'
+    input_path = '/mnt/hgfs/VMShared/data/fe55/20140709-112014/'
 #    input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
 
@@ -471,7 +474,7 @@ if __name__ == '__main__':
     if SPECIFIC_FILE != None: SINGLE_FILE = True
     
 #     DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-#    DoAnalysis(input_path, iron_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+    DoAnalysis(input_path, iron_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
 #     exit()   
 
     #= Fe55 - Get Gains =========================================================================
@@ -494,7 +497,7 @@ if __name__ == '__main__':
         avg_rel_error_percent_fe55 /= float(N_AMPS)
         print 'Avg rel error Fe55 %s' %avg_rel_error_percent_fe55
 
-#    exit()
+    exit()
     
     #= Cosmics - Get gains =========================================================================
     if MAKE_LANDAUS:
@@ -559,7 +562,7 @@ if __name__ == '__main__':
         print "Chisqr / NDF = " + str(chisq) + ' / ' + str(NDF) + ' = ' + str(chisqr_over_NDF) +'\n'
     
         R2 = gr.GetCorrelationFactor()**2
-        legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
+        legend = TPaveText(0.25,0.60,0.55,0.85,"NDC")
         legend.SetTextAlign(12) 
         legend.SetFillColor(0) 
         legend.SetTextSize(0.05) 
@@ -611,7 +614,7 @@ if __name__ == '__main__':
                 if Cut_Length(stat, TRACK_LENGTH_CUT):
 #                    if Cut_Ellipticity(stat, ELLIPTICITY_CUT):
 #                        if Cut_Chisq(stat, CHISQ_CUT):
-                            if Cut_R2(stat, R2_CUT):
+#                             if Cut_R2(stat, R2_CUT):
                                 landau_hist.Fill(stat.de_dx)
         landau_hist.Draw()
         landau_hist.GetXaxis().SetTitle('dE/dx (ADU/#mum)')
