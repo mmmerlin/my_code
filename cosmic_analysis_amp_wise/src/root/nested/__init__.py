@@ -43,9 +43,9 @@ PROCESS_FILE_LIMIT = 50
 
 # Track finding options
 THRESHOLD = 50
-N_PIX_MIN = 1
+N_PIX_MIN = 2
 GROW = 1
-ISOTROPIC = False
+ISOTROPIC = True
 
 # Cut options
 TRACK_LENGTH_CUT = 150

@@ -28,11 +28,9 @@ from copy import copy
 ##########################################################################################
 OUTPUT_PATH = "/mnt/hgfs/VMShared/output/edge_straightness/"
 
+
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
 cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
-# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
-# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/1_right_track'
-# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_cosmics_with_data'
-# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/clean_cosmics_L400_R095_D500'
 
 
 FILE_TYPE = ".pdf"
@@ -129,16 +127,16 @@ if __name__ == '__main__':
  
     c1 = TCanvas( 'canvas', 'canvas', 1600,800) #create canvas
     gr_left = TGraph() 
-    max_distance = 25
+    max_distance = 50
     dev_max = 10 #in pixels
         
     deviations = np.zeros(max_distance, dtype = 'f8')
     point_counter = np.zeros(max_distance, dtype = 'f8')
+    
+    first_col_flux_list = []
         
 #     for i,stat in enumerate(left_tracks + right_tracks + top_tracks + bottom_tracks):
     for i,stat in enumerate(left_tracks):
-
-#         if i != 2: continue
         legend_text = []
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
@@ -164,7 +162,7 @@ if __name__ == '__main__':
         else:
             print "This should never happen"
             exit()
-        
+
 #         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/left/raw' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
 #         TV.TrackToFile_ROOT_2D_3D(data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=fit_line )
         
@@ -173,6 +171,10 @@ if __name__ == '__main__':
         CoMs = np.zeros(cols, dtype = 'f8')
         predicted_CoMs = np.zeros(cols, dtype = 'f8')
         flip_track = False
+        
+        # skip tracks that have been grown out to the edge but don't really touch the edge
+        edge_row_flux = (data[0,:].sum(dtype = 'f8'))
+        if edge_row_flux < 100: continue # value of 100 was picked with historgramming, i.e. not an arbitrary cut
         
         for col_num in range(cols):
             #calculate Center of Mass of column
@@ -204,12 +206,6 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
         #end file loop
     
     for i in range(max_distance):
@@ -234,6 +230,10 @@ if __name__ == '__main__':
     
     c1.SaveAs(OUTPUT_PATH + 'tracks/left/deviation.png')
     
+    
+    
+    #     ListToHist(first_col_flux_list, OUTPUT_PATH + 'first_col.pdf', log_z, nbins, histmin, histmax)
+#     ListToHist(first_col_flux_list, OUTPUT_PATH + 'first_col.pdf', nbins = 20, histmin = -20, histmax = 1500)
 
 ############## END CODE ##############
     

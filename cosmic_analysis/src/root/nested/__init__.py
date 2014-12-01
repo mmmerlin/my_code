@@ -26,8 +26,8 @@ import time
 #dt = time.time() - t0
 #print "Time was %.2f seconds" %dt 
 
-FILE_LIMIT = 3
-SKIP_N_FILES = FILE_LIMIT -1
+FILE_LIMIT = 99999
+# SKIP_N_FILES = FILE_LIMIT -1
 
 DISPLAY_LEVEL = 1
 SINGLE_FILE = False
@@ -35,7 +35,7 @@ SINGLE_POINT = False
 SPECIFIC_FILE = None
 #SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
 
-pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
 # pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
 input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
@@ -50,9 +50,9 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     t0 = time.time()
     
     thresholdValue = 200
-    npixMin = 2
-    grow = 2
-    isotropic = False
+    npixMin = 10
+    grow = 6
+    isotropic = True
     
     if DISPLAY_LEVEL >= 1:
         try: # initialise DS9, deal with a bug in its launching
@@ -85,7 +85,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     statslist = []
     
     for i,filename in enumerate(file_list):
-        if i < SKIP_N_FILES: continue
+#         if i < SKIP_N_FILES: continue
         if i >= FILE_LIMIT: continue
         print "Processing %s..." %filename
         
@@ -110,7 +110,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
         print "Found %s footprints"%len(footPrints)
     
-        footprint_skip = 1
+        footprint_skip = 0
         count = 0
     
         for footprint in footPrints:
@@ -119,46 +119,46 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 #             statslist.append(stat)
 #             DrawStat(stat)
             
-            if GetEdgeType(stat) == "right":
-                count += 1
+#             if GetEdgeType(stat) == "left":
+#                 count += 1
 #                 if stat.length_true_um < 200: continue
-                if count < (footprint_skip + 1): continue
-                ds9.mtv(image)
-                print "Found " + GetEdgeType(stat)
-                DrawStat(stat)
-                
+#                 if count < (footprint_skip + 1): continue
+#                 ds9.mtv(image)
+#                 print "Found " + GetEdgeType(stat)
+#                 DrawStat(stat)
+#                 
+#                 statslist.append(stat)
+# #                 exit()
+#                 break
+            
+            
+            
+            
+            
+            if stat.left_track == True:
+#                 DrawStat(stat)
+                nleft += 1
                 statslist.append(stat)
-#                 exit()
-                break
-            
-            
-            
-            
-            
-#             if stat.left_track == True:
-# #                 DrawStat(stat)
-#                 nleft += 1
-#                 statslist.append(stat)
-#                  
-#             if stat.right_track == True:
-# #                 DrawStat(stat)
-#                 nright += 1
-#                 statslist.append(stat)
-#                  
-#             if stat.top_track == True:
-# #                 DrawStat(stat)
-#                 ntop += 1
-#                 statslist.append(stat)
-#                  
-#             if stat.bottom_track == True:
-# #                 DrawStat(stat)
-#                 nbottom += 1
-#                 statslist.append(stat)
-#  
-#             if stat.midline_track == True:
-# #                 DrawStat(stat)
-#                 nmidline += 1
-#                 statslist.append(stat)
+                  
+            if stat.right_track == True:
+#                 DrawStat(stat)
+                nright += 1
+                statslist.append(stat)
+                  
+            if stat.top_track == True:
+#                 DrawStat(stat)
+                ntop += 1
+                statslist.append(stat)
+                  
+            if stat.bottom_track == True:
+#                 DrawStat(stat)
+                nbottom += 1
+                statslist.append(stat)
+  
+            if stat.midline_track == True:
+#                 DrawStat(stat)
+                nmidline += 1
+                statslist.append(stat)
                 
                 
             if SINGLE_POINT == True: break
