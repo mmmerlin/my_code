@@ -1,14 +1,5 @@
 from __builtin__ import str, range, len # why does it put these in when that is unnecessary?!
-from os.path import expanduser, isfile
-from os import listdir
 import time
-from time import sleep
-
-import lsst.afw.detection     as afwDetect
-import lsst.afw.display.utils as displayUtils
-import lsst.meas.algorithms   as measAlg
-import lsst.afw.image         as afwImg
-import lsst.afw.display.ds9   as ds9
 
 
 from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
@@ -22,43 +13,17 @@ from TrackFitting import *
 from ImageStat import Stat
 import TrackViewer as TV
 import TrackFitting
-from copy import copy
 
 
 ##########################################################################################
 OUTPUT_PATH = "/mnt/hgfs/VMShared/output/edge_straightness/"
 
 
-# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
-cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
-
-
-FILE_TYPE = ".pdf"
-N_AMPS = 16
-
-############
-
-DISPLAY_LEVEL = 0
-QUIET = False
-PROCESS_FILE_LIMIT = None
-#PROCESS_FILE_LIMIT = 1
-
-# Track finding options
-THRESHOLD = 50
-N_PIX_MIN = 1
-GROW = 1
-ISOTROPIC = False
-
-# Cut options
-TRACK_LENGTH_CUT = 150
-ELLIPTICITY_CUT  = 3
-CHISQ_CUT        = 10
-R2_CUT           = 0.8
+cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
+# cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
 
 
 GLOBAL_OUT = []
-
-
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -128,7 +93,7 @@ if __name__ == '__main__':
     c1 = TCanvas( 'canvas', 'canvas', 1600,800) #create canvas
     gr_left = TGraph() 
     max_distance = 50
-    dev_max = 10 #in pixels
+    dev_max = 5 #in pixels
         
     deviations = np.zeros(max_distance, dtype = 'f8')
     point_counter = np.zeros(max_distance, dtype = 'f8')
@@ -136,7 +101,7 @@ if __name__ == '__main__':
     first_col_flux_list = []
         
 #     for i,stat in enumerate(left_tracks + right_tracks + top_tracks + bottom_tracks):
-    for i,stat in enumerate(left_tracks):
+    for i,stat in enumerate(right_tracks):
         legend_text = []
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
@@ -164,7 +129,7 @@ if __name__ == '__main__':
             exit()
 
 #         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + 'tracks/left/raw' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-#         TV.TrackToFile_ROOT_2D_3D(data, OUTPUT_PATH + 'tracks/left/' + str(i) + '.png', legend_text=legend_text, fitline=fit_line )
+#         TV.TrackToFile_ROOT_2D_3D(data, OUTPUT_PATH + 'tracks/' + str(i) + '.png', legend_text=legend_text, fitline=fit_line )
         
         cols, rows = data.shape
         
@@ -174,7 +139,17 @@ if __name__ == '__main__':
         
         # skip tracks that have been grown out to the edge but don't really touch the edge
         edge_row_flux = (data[0,:].sum(dtype = 'f8'))
+#         edge_row_flux = max(data[0,:])
+#         print edge_row_flux
+        first_col_flux_list.append(edge_row_flux)
         if edge_row_flux < 100: continue # value of 100 was picked with historgramming, i.e. not an arbitrary cut
+        
+        #flip the deviation if necessary
+        if fit_line.a < 0:
+            flip_track = 1.
+        else:
+            flip_track = -1.
+            
         
         for col_num in range(cols):
             #calculate Center of Mass of column
@@ -186,10 +161,7 @@ if __name__ == '__main__':
             #calc deviation as function of edge distance using track fit
             predicted_CoMs[col_num] = fit_line.a*(col_num + 0.5) + fit_line.b 
             deviation = predicted_CoMs[col_num] - CoMs[col_num]
-            
-            #flip the deviation if necessary
-            if fit_line.a < 0: flip_track = True
-            if not flip_track: deviation *= -1.
+            deviation *= flip_track
             
             if abs(deviation) < dev_max: #cut outliers
                 if col_num < max_distance: #discard if out of ROI
@@ -199,9 +171,6 @@ if __name__ == '__main__':
             #TODO: need to:
             #            a) weight by angle
             #            b) flip for positive/negative slopes? - think about this
-
-
-
 
 
 
@@ -232,8 +201,7 @@ if __name__ == '__main__':
     
     
     
-    #     ListToHist(first_col_flux_list, OUTPUT_PATH + 'first_col.pdf', log_z, nbins, histmin, histmax)
-#     ListToHist(first_col_flux_list, OUTPUT_PATH + 'first_col.pdf', nbins = 20, histmin = -20, histmax = 1500)
+    ListToHist(first_col_flux_list, OUTPUT_PATH + 'first_col.pdf', nbins = 20, histmin = -20, histmax = 1500)
 
 ############## END CODE ##############
     

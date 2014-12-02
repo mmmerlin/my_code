@@ -35,7 +35,8 @@ SINGLE_POINT = False
 SPECIFIC_FILE = None
 #SPECIFIC_FILE = '/home/mmmerlin/Desktop/VMShared/Data/all_darks/113-03_dark_dark_999.00_035_20140709120811.fits'
 
-pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
+pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
+# pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_large_grow'
 # pickle_file = '/mnt/hgfs/VMShared/output/datasets/edge_tracks_200thr_gr2_px2_gain_corrected'
 input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
 
@@ -51,7 +52,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
     thresholdValue = 200
     npixMin = 10
-    grow = 6
+    grow = 2
     isotropic = True
     
     if DISPLAY_LEVEL >= 1:
@@ -110,7 +111,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
         print "Found %s footprints"%len(footPrints)
     
-        footprint_skip = 0
+        footprint_skip = 3
         count = 0
     
         for footprint in footPrints:
@@ -132,34 +133,45 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 #                 break
             
             
-            
-            
-            
-            if stat.left_track == True:
-#                 DrawStat(stat)
+            if stat.left_track == True or stat.right_track == True:
+                if stat.length_x_um > 250: #and stat.length_y_um > stat.length_x_um:
+                    count += 1
+                    if count < footprint_skip: continue
+                    ds9.mtv(image)
+                    
+#                     DrawStat(stat)
+                    exit()
+                    
                 nleft += 1
                 statslist.append(stat)
-                  
-            if stat.right_track == True:
-#                 DrawStat(stat)
-                nright += 1
-                statslist.append(stat)
-                  
-            if stat.top_track == True:
-#                 DrawStat(stat)
-                ntop += 1
-                statslist.append(stat)
-                  
-            if stat.bottom_track == True:
-#                 DrawStat(stat)
-                nbottom += 1
-                statslist.append(stat)
-  
-            if stat.midline_track == True:
-#                 DrawStat(stat)
-                nmidline += 1
-                statslist.append(stat)
-                
+            
+             
+             
+#             if stat.left_track == True:
+# #                 DrawStat(stat)
+#                 nleft += 1
+#                 statslist.append(stat)
+#                     
+#             if stat.right_track == True:
+# #                 DrawStat(stat)
+#                 nright += 1
+#                 statslist.append(stat)
+#                     
+#             if stat.top_track == True:
+# #                 DrawStat(stat)
+#                 ntop += 1
+#                 statslist.append(stat)
+#                     
+#             if stat.bottom_track == True:
+# #                 DrawStat(stat)
+#                 nbottom += 1
+#                 statslist.append(stat)
+#     
+#             if stat.midline_track == True:
+# #                 DrawStat(stat)
+#                 nmidline += 1
+#                 statslist.append(stat)
+                 
                 
             if SINGLE_POINT == True: break
         
