@@ -239,7 +239,7 @@ if __name__ == '__main__':
     gr_right.Draw('Psame')
     legendLR.Draw("same")
     
-    c_lr.SaveAs(OUTPUT_PATH + 'tracks/left/left_right.png')
+    c_lr.SaveAs(OUTPUT_PATH + 'tracks/left/left_right.pdf')
     
     
     ##########################################
@@ -277,7 +277,7 @@ if __name__ == '__main__':
     gr_bottom.Draw('Psame')
     legendUD.Draw("same")
     
-    c_tb.SaveAs(OUTPUT_PATH + 'tracks/left/top_bottom.png')
+    c_tb.SaveAs(OUTPUT_PATH + 'tracks/left/top_bottom.pdf')
 
 
 
