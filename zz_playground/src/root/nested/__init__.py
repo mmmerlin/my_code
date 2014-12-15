@@ -159,11 +159,47 @@ def test_lego():
 
     pylab.show()
 if __name__ == '__main__':
+    import os
+    import numpy as np
+    
+    expids,durations = np.loadtxt('/mnt/hgfs/VMShared/temp/input.txt', delimiter = '\t', skiprows = 1, usecols = (0,1), unpack = True)
+    
+    for i in range(len(expids)):
+        print i, str(expids[i]), str(durations[i])
+    
+        
+    dl = []
+    files = os.listdir('/mnt/hgfs/VMShared/Data/des_darks/')
+    for filename in files:
+        dl.append(filename[8:14])
+    print "downloaded " + str(len(dl))
+
+    index = []
+#     for i in range(len(expids)):
+#         indx = expids.index(dl[i])
+#         if indx != -1: index.append(indx)
+
+
+#     index = np.where(str(dl)  str(expids))
+#     print index
+
+
+    locations = np.in1d(expids, dl)
+    index = np.where(locations == True)
+    
+    for value in expids[index]:
+        print str(int(value)) + '\t'
+        
+    
+    
+    inttime = durations[index].sum()
+    print inttime
+    exit()
+       
 
     print "running"
     from my_functions import Timepix_ToT_to_lego
     from time import sleep
-    import os
 
     filename = '/'
 #    path = '/home/mmmerlin/Desktop/VMShared/Data/QE/Disc method/627nm/ToT before/10us_5V/'

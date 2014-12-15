@@ -111,7 +111,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     
         print "Found %s footprints"%len(footPrints)
     
-        footprint_skip = 3
+        footprint_skip = 2
         count = 0
     
         for footprint in footPrints:
@@ -133,13 +133,17 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 #                 break
             
             
-            if stat.left_track == True or stat.right_track == True:
-                if stat.length_x_um > 250: #and stat.length_y_um > stat.length_x_um:
+#             if stat.left_track == True or stat.right_track == True:
+#             if stat.bottom_track == True or stat.top_track == True:
+            if True:
+#                 if stat.length_x_um > 250: #and stat.length_y_um > stat.length_x_um:
+#                 if stat.length_true_um > 4000:# and stat.length_y_um > 1000:
+                if stat.length_true_um > 1000 and stat.discriminator > 100000:# and stat.length_y_um > 1000:
                     count += 1
-                    if count < footprint_skip: continue
+                    if count <= footprint_skip: continue
                     ds9.mtv(image)
                     
-#                     DrawStat(stat)
+                    DrawStat(stat)
                     exit()
                     
                 nleft += 1
