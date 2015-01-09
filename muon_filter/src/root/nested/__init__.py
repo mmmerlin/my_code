@@ -8,7 +8,6 @@ from lsst.pex.config import Config, Field, ConfigField, makePolicy
 import lsst.pipe.base as pipeBase
 
 
-
 import  numpy as np
 import  pylab as pl
 from os.path import expanduser
