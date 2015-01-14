@@ -35,25 +35,30 @@ def Make3DScatter():
     
 def MakeToFSpectrum():
 #         for file in os.listdir(input_path):
-    timecodes = GetTimecodes_AllFilesInDir(input_path, xmin, xmax, ymin, ymax, -186.6)
-    print 'Total entries = %s' %len(timecodes)
-    
-    min = 0
-    max = 50    
-    bins = (max-min)*50 -1
-    
-    #make the histogram of the timecodes
-    fig2 = pl.figure()
-    pl.subplot(2,1,1)
-    
-    pl.hist(timecodes, bins = bins, range = [min,max])
-    pl.ylim([0,75])
-    pl.xlim([min,max])
-    pl.title('Timepix SPectrum')
+#     timecodes = GetTimecodes_AllFilesInDir(input_path, xmin, xmax, ymin, ymax, -151.1)
+#     print 'Total entries = %s' %len(timecodes)
+#     
+#     min = 0
+#     max = 40    
+#     bins = (max-min)*50 -1
+#     
+#     #make the histogram of the timecodes
+#     fig2 = pl.figure()
+#     pl.subplot(2,1,1)
+#     
+#     pl.hist(timecodes, bins = bins, range = [min,max])
+# #     pl.ylim([0,75])
+#     pl.xlim([min,max])
+#     pl.title('Timepix SPectrum')
  
  
     #plot PMT data
-    pmt_datafile = '/mnt/hgfs/VMShared/Data/oxford/PMTdata/005.txt'
+#     pmt_datafile = '/mnt/hgfs/VMShared/Data/oxford/PMTdata/005.txt'
+    pmt_datafile = '/mnt/hgfs/VMShared/Data/oxford/Day 3/PMT/temp.csv'
+    
+    ReadTektronixWaveform(pmt_datafile)
+    exit()
+    
     data = pl.loadtxt(pmt_datafile)
     pl.subplot(2,1,2)
     pl.plot(data[:,0]*1e6 -84.3, -1.*data[:,1])
@@ -64,7 +69,7 @@ def MakeToFSpectrum():
     
     pl.show()
 
-def ShowCompositeImage(path):
+def ShowCompositeImageMedipix(path):
     
     image = MakeCompositeImage_Medipix(path, xmin, xmax, ymin, ymax, maxfiles=99999)
     
@@ -81,13 +86,28 @@ if __name__ == '__main__':
 
 
 #     input_path = '/mnt/hgfs/VMShared/Data/oxford/Big run 1/'
-    input_path = '/mnt/hgfs/VMShared/Data/oxford/PMT Comp/'
+#     input_path = '/mnt/hgfs/VMShared/Data/oxford/PMT Comp/'
+#     input_path = '/mnt/hgfs/VMShared/Data/oxford/Day 2/Run 1/'
+    input_path = '/mnt/hgfs/VMShared/Data/oxford/Day 3/First ions/'
 
 #     Make3DScatter()
     
-#     MakeToFSpectrum()
-    
+    MakeToFSpectrum()
+    exit()
 #     TimepixDirToPImMMSDatafile('/mnt/hgfs/VMShared/Data/oxford/PMT comp/', '/mnt/hgfs/VMShared/Data/oxford/pimms.txt')
+
+    from TrackViewer import TrackToFile_ROOT_2D_3D
+    image = MakeCompositeImage_Timepix(input_path, maxfiles = 2000, t_min=20, t_max = 21)
+    
+    TrackToFile_ROOT_2D_3D(image.getArray(), '/mnt/hgfs/VMShared/temp/comp.png', log_z = False, force_aspect= True, fitline = None)
+
+    import lsst.afw.display.ds9 as ds9
+    try:
+        ds9.initDS9(False)
+    except ds9.Ds9Error:
+        print 'DS9 launch bug error thrown away (probably)'
+
+    ds9.mtv(image)
 
     print '\n***End code***'
 
