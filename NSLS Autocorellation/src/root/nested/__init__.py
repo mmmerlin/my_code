@@ -7,72 +7,116 @@ import string
 import time
 from __builtin__ import len
 
-from ROOT import TCanvas, TF1, TH1F
+from ROOT import TCanvas, TF1, TH1F, TGraph
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
 from my_functions import GetRawTimecodes_SingleFile
 import cPickle as pickle
 from root_functions import Browse
+import ROOT
+from numpy import ndarray
 
+        # bin < 0 = underflow
+        # bin 0 = underflow
+        
+        # bin 1 = timecode = 0
+        # bin timecodemax = timecodemax -1
+        # bin timecodemax +1 = timecodemax
+        
+        # bin timecodemax +2 = overflow
+        # bin timecodemax + >2 = overflow
 
-
-OUTPUT_PATH = '/mnt/hgfs/VMShared/NSLS_temp/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/output/NSLS/'
 FILE_TYPE = ".pdf"
+path = '/mnt/hgfs/VMShared/Data/NSLS/Pre-beamdump/Run_00_thr_325/'
+
+
 
 if __name__ == '__main__':
     print "Running Auto-correlation analysis\n "
     
-    NFILES = 1
-    
-    path = '/mnt/hgfs/VMShared/Data/NSLS/Pre-beamdump/Run_00_thr_325/'
+    NFILES = 100
 
       
     timecodemin = 0
     timecodemax = 11809
     nbins = timecodemax - timecodemin
     
-    correl_hist = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
-    binsize = correl_hist.GetBinLowEdge(3) - correl_hist.GetBinLowEdge(2)
-    assert binsize == 1
+    #TODO: reinstate this check
+#     correl_hist_file   = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
+#     correl_hist_master = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
+#     binsize = correl_hist_master.GetBinLowEdge(3) - correl_hist_master.GetBinLowEdge(2)
+#     assert binsize == 1
+    
+    correl_graph = TGraph(nbins)
     
     
     files = []
     for filename in os.listdir(path):
         files.append(path + filename)
 
-    
+    old_value = ROOT.Double()
+    dummy = ROOT.Double()
+
     for numfiles, filename in enumerate(files):
+        print "File #%s"%numfiles
         if numfiles >= NFILES: break
         
         c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
         filehist = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
         
+#         for i in range(2):
+#             for bin in range(nbins):
+#                 filehist.Fill(bin)
+#         filehist.Draw()  
+#         c1.SaveAs(OUTPUT_PATH + "filehist.png")
+#         exit()  
+        
         timecodes = GetRawTimecodes_SingleFile(filename,15,240,15,240)
         for code in timecodes:
             if code != 11810:
                 filehist.Fill(code)
+#         filehist.Draw()  
+#         c1.SaveAs(OUTPUT_PATH + "filehist.png")      
         
-        for i in range(11810):
+        contents = np.zeros([nbins], dtype = np.int32)
+        for i in range(nbins):
+            contents[i] = filehist.GetBinContent(i)
+        
+        denominator = 0.
+        for i in range(1, timecodemax + 2):
+            denominator += filehist.GetBinContent(i) ** 2
+        
+
+        for j in range(0,timecodemax + 2):
+        
+            numerator = 0.
+            for i in range(1, timecodemax + 2 - j): # from 1 to exclude underflow bin, up to end of histogram
+                numerator += filehist.GetBinContent(i) * filehist.GetBinContent(i+j)
+                
+#             print "Filling:" + str(j) + ',' + str(numerator/denominator)
             
+            correl_graph.GetPoint(j,dummy,old_value)
+            correl_graph.SetPoint(j,j, old_value + (numerator/denominator))
+            
+#             if j >500: break
         
         
-        filehist.Draw()
-        c1.SaveAs(OUTPUT_PATH + "temp.png")
-        print "loaded %s timecodes from file %s"%(len(timecodes),numfiles)
         
-        exit()
+    #normalise:
+    for i in range(nbins):
+        correl_graph.GetPoint(i,dummy,old_value)
+        correl_graph.SetPoint(i,i, old_value/float(NFILES))
+    
+    correl_graph.Draw('AP')
+    c1.SaveAs(OUTPUT_PATH + "corellation.pdf")
+#     exit()
             
             
-    
-    c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    
-    
-    correl_hist.Draw()
-    correl_hist.GetXaxis().SetTitle('#Delta t')
-    c1.SaveAs(OUTPUT_PATH + "correlation_histogram" + FILE_TYPE)
-    
-    
-    
-    
+    outfile = open(OUTPUT_PATH + 'corellation_data.txt', 'w')
+    for i in range(nbins):
+        correl_graph.GetPoint(i,dummy,old_value)
+        outfile.write(str(i) + '\t' + str(old_value) + '\n')
+    outfile.close()
     
 
 
