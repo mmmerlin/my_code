@@ -27,14 +27,16 @@ from numpy import ndarray
 
 OUTPUT_PATH = '/mnt/hgfs/VMShared/output/NSLS/'
 FILE_TYPE = ".pdf"
-path = '/mnt/hgfs/VMShared/Data/NSLS/Pre-beamdump/Run_00_thr_325/'
+# path = '/mnt/hgfs/VMShared/Data/NSLS/Pre-beamdump/Run_00_thr_325/'
+path = '/mnt/hgfs/VMShared/Data/NSLS/post-all/'
+# path = '/mnt/hgfs/VMShared/Data/NSLS/Pre-beamdump/Run_00_thr_325/'
 
 
 
 if __name__ == '__main__':
     print "Running Auto-correlation analysis\n "
     
-    NFILES = 100
+    NFILES = 999999
 
       
     timecodemin = 0
@@ -57,6 +59,10 @@ if __name__ == '__main__':
     old_value = ROOT.Double()
     dummy = ROOT.Double()
 
+    normalisation = 0.
+    autocorrellation = np.zeros([timecodemax])
+    autocorrellation_sum = np.zeros([timecodemax])
+
     for numfiles, filename in enumerate(files):
         print "File #%s"%numfiles
         if numfiles >= NFILES: break
@@ -70,7 +76,7 @@ if __name__ == '__main__':
 #         filehist.Draw()  
 #         c1.SaveAs(OUTPUT_PATH + "filehist.png")
 #         exit()  
-        
+
         timecodes = GetRawTimecodes_SingleFile(filename,15,240,15,240)
         for code in timecodes:
             if code != 11810:
@@ -86,18 +92,64 @@ if __name__ == '__main__':
         for i in range(1, timecodemax + 2):
             denominator += filehist.GetBinContent(i) ** 2
         
-
-        for j in range(0,timecodemax + 2):
+        result = np.correlate(contents, contents, mode = 'full')
+        autocorrellation = result[result.size/2:]
         
-            numerator = 0.
-            for i in range(1, timecodemax + 2 - j): # from 1 to exclude underflow bin, up to end of histogram
-                numerator += filehist.GetBinContent(i) * filehist.GetBinContent(i+j)
-                
+        autocorrellation_sum += autocorrellation
+        normalisation += denominator
+        
+#         autocorrellation /= denominator
+#         print autocorrellation
+#         exit()
+        
+    for pointnum, value in enumerate(autocorrellation_sum):
+        correl_graph.SetPoint(pointnum,pointnum, value/ normalisation)
+    
+    correl_graph.Draw('AP')
+    c1.SaveAs(OUTPUT_PATH + "post_all.png")
+    
+    
+    outfile = open(OUTPUT_PATH + 'post_all.txt', 'w')
+    for i in range(nbins):
+        correl_graph.GetPoint(i,dummy,old_value)
+        outfile.write(str(i) + '\t' + str(old_value) + '\n')
+    outfile.close()
+    
+    exit()
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        ######################
+        
+    denominator = 0.
+    for i in range(1, timecodemax + 2):
+        denominator += filehist.GetBinContent(i) ** 2
+    
+
+    for j in range(0,timecodemax + 2):
+    
+        numerator = 0.
+        for i in range(1, timecodemax + 2 - j): # from 1 to exclude underflow bin, up to end of histogram
+            numerator += filehist.GetBinContent(i) * filehist.GetBinContent(i+j)
+            
 #             print "Filling:" + str(j) + ',' + str(numerator/denominator)
-            
-            correl_graph.GetPoint(j,dummy,old_value)
-            correl_graph.SetPoint(j,j, old_value + (numerator/denominator))
-            
+        
+        correl_graph.GetPoint(j,dummy,old_value)
+        correl_graph.SetPoint(j,j, old_value + (numerator/denominator))
+        
 #             if j >500: break
         
         
