@@ -22,6 +22,34 @@ thresholds = [0,5,50,100,160,215,225,235,245,255,265,275,285,295,305,315,325]
 if __name__ == '__main__':
     print "Making plots for Andrei..."
 
+#     in_file = open('/mnt/hgfs/VMShared/output/NSLS/post-all.txt','r')
+
+    data = np.loadtxt('/mnt/hgfs/VMShared/output/NSLS/post_all.txt')
+    print data[0]
+
+    ts = data[:,0]
+    ys = data[:,1]
+    
+    t = []
+    y= []
+    for i in range(len(ts)):
+        t.append(ts[i] * 0.02 )
+        y.append(ys[i])
+
+
+    from root_functions import ListVsList
+    c1 = TCanvas( 'canvas2', 'canvas2', 500, 200, 700, 500 ) #create canvas
+    
+    graph = ListVsList(t , y, '', xmin = 0, ymin =0.0, ymax = 0.35, marker_color = 1, xtitle = '#Deltat (#mus)', ytitle = 'g_{2}', xmax = 250*0.02) # xmax = 250*0.02
+    graph.Draw('AL')
+    c1.SetLogx()
+    c1.SaveAs('/mnt/hgfs/VMShared/output/NSLS/6.pdf')
+    exit()
+
+
+
+
+
     av_codes_list = []
     
     hists = []

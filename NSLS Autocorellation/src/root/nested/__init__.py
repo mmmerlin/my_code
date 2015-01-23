@@ -36,19 +36,23 @@ path = '/mnt/hgfs/VMShared/Data/NSLS/post-all/'
 if __name__ == '__main__':
     print "Running Auto-correlation analysis\n "
     
-    NFILES = 999999
-
+    NFILES = 100
+    
       
     timecodemin = 0
-    timecodemax = 11809
-    nbins = timecodemax - timecodemin
+    timecodemax = 11809#11809
+    rebin_factor = 10
+    nbins = ((timecodemax - timecodemin))/ rebin_factor +1
+    print nbins
     
     #TODO: reinstate this check
-#     correl_hist_file   = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
-#     correl_hist_master = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
+#     correl_hist_file   = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax+1)
+#     correl_hist_master = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax+1)
 #     binsize = correl_hist_master.GetBinLowEdge(3) - correl_hist_master.GetBinLowEdge(2)
-#     assert binsize == 1
+#     print binsize
+#     assert binsize == rebin_factor
     
+#     exit()
     correl_graph = TGraph(nbins)
     
     
@@ -60,16 +64,18 @@ if __name__ == '__main__':
     dummy = ROOT.Double()
 
     normalisation = 0.
-    autocorrellation = np.zeros([timecodemax])
-    autocorrellation_sum = np.zeros([timecodemax])
+    autocorrellation = np.zeros([nbins])
+    autocorrellation_sum = np.zeros([nbins])
 
     for numfiles, filename in enumerate(files):
         print "File #%s"%numfiles
         if numfiles >= NFILES: break
         
         c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        filehist = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax)
-        
+        filehist = TH1F('', 'Timecodes',nbins,timecodemin,timecodemax+1)
+        binsize = filehist.GetBinLowEdge(3) - filehist.GetBinLowEdge(2)
+        print binsize
+        assert binsize == rebin_factor
 #         for i in range(2):
 #             for bin in range(nbins):
 #                 filehist.Fill(bin)
@@ -83,6 +89,7 @@ if __name__ == '__main__':
                 filehist.Fill(code)
 #         filehist.Draw()  
 #         c1.SaveAs(OUTPUT_PATH + "filehist.png")      
+#         exit()
         
         contents = np.zeros([nbins], dtype = np.int32)
         for i in range(nbins):
@@ -106,10 +113,10 @@ if __name__ == '__main__':
         correl_graph.SetPoint(pointnum,pointnum, value/ normalisation)
     
     correl_graph.Draw('AP')
-    c1.SaveAs(OUTPUT_PATH + "post_all.png")
+    c1.SaveAs(OUTPUT_PATH + "post_all_rebin_4.png")
     
     
-    outfile = open(OUTPUT_PATH + 'post_all.txt', 'w')
+    outfile = open(OUTPUT_PATH + 'post_all_rebin_4.txt', 'w')
     for i in range(nbins):
         correl_graph.GetPoint(i,dummy,old_value)
         outfile.write(str(i) + '\t' + str(old_value) + '\n')
