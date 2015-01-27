@@ -1,4 +1,3 @@
-from __builtin__ import str, range, len # why does it put these in when that is unnecessary?!
 from os.path import expanduser, isfile
 from os import listdir
 import time
@@ -89,7 +88,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     for filename in dircontents:
         if str(input_path + filename).find('coadded') != -1: continue # skip coadd file
         if str(input_path + filename).find('.DS') != -1: continue
-        if str(input_path + filename).find('N10') == -1: continue
+#         if str(input_path + filename).find('N10') == -1: continue
         if isfile(input_path + filename): file_list.append(filename) # skip bias dir
     
     if SPECIFIC_FILE != None:
@@ -278,22 +277,22 @@ if __name__ == '__main__':
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
     
-#     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
     print 'Finished analysis'
     exit()   
     
-    from os.path import isfile
-
+    
+    rawlist = []
     filter = 'N10'
     file_list = []
-    dir_contents = listdir(pickle_stem)
-    for filename in 
-        if isfile(pickle_stem + filename)
-    
-    t0 = time.time()
-    rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
-    dt = time.time() - t0
-    print "Data unpickled in %.2f seconds" %dt 
+    for filename in listdir(pickle_stem):
+        if str.find(str(pickle_stem + filename),filter) != -1:
+            print "Loading %s"%(pickle_stem + filename)
+            for item in pickle.load(open(pickle_stem + filename, 'rb')):
+                rawlist.append(item)
+            
+    print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter)
+    exit()
     
     post_cuts = []
     nstats = 0
