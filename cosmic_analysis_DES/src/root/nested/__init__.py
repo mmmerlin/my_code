@@ -20,10 +20,11 @@ from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
 from array import array
 import numpy as np
 from numpy.core.defchararray import zfill
+from root_functions import ListToHist
 
 # my stuff
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
-from TrackFitting import *
+from TrackFitting_DES import *
 
 
 ##########################################################################################
@@ -38,7 +39,7 @@ N_AMPS = 1
 DISPLAY_LEVEL = 0
 QUIET = False
 #PROCESS_FILE_LIMIT = None
-PROCESS_FILE_LIMIT = 50
+PROCESS_FILE_LIMIT = 999999
 
 # Track finding options
 THRESHOLD = 50
@@ -50,7 +51,7 @@ ISOTROPIC = True
 XSIZE = 2160
 YSIZE = 4146
 
-b_trim = 0
+b_trim = 20
 t_trim = 16
 l_trim = 80
 r_trim = 80
@@ -63,8 +64,7 @@ R2_CUT           = 0.8
 
 # Post processing options
 MAKE_LANDAUS = True
-
-
+GLOBAL_OUT = []
 
 #===============================================================================
 def DEBUG(image, footprintset):
@@ -89,11 +89,13 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     for filename in dircontents:
         if str(input_path + filename).find('coadded') != -1: continue # skip coadd file
         if str(input_path + filename).find('.DS') != -1: continue
+        if str(input_path + filename).find('N10') == -1: continue
         if isfile(input_path + filename): file_list.append(filename) # skip bias dir
     
     if SPECIFIC_FILE != None:
         file_list = []
         file_list.append(SPECIFIC_FILE)
+        SINGLE_FILE = True
     
     print "Processing %s files using settings:" %min(len(file_list), PROCESS_FILE_LIMIT)
     print "THRESHOLD = %s" %THRESHOLD
@@ -105,7 +107,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     print "L_trim: %s"%l_trim
     print "R_trim: %s"%r_trim
     print "T_trim: %s"%t_trim
-    print "B_trim: %s"%b_trim
+    print "B_trim: %s\n"%b_trim
 
     
     for i, filename in enumerate(file_list):
@@ -118,6 +120,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         temp_image = afwImg.ImageF(input_path + filename)
         image = makeImageFromArray(temp_image.getArray()[b_trim:YSIZE-t_trim,l_trim:XSIZE - r_trim])
         del temp_image
+#         ds9.mtv(image)
         
         maskedImg = afwImg.MaskedImageF(image)
         exposure = afwImg.ExposureF(maskedImg)
@@ -128,29 +131,26 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         footPrintSet = afwDetect.FootprintSet(footPrintSet, GROW, ISOTROPIC)
     
         footPrints = footPrintSet.getFootprints()
-        if not QUIET: print "Found %s footprints in amp %s of file %s"%(footPrints.size(), amp, filename)
+        if not QUIET: print "Found %s footprints in file %s"%(footPrints.size(), filename)
    
+        tracklist = []
         if footPrints.size() >= 2000: # files with bright defects cause all sorts of problems
             print "Bad file - skipping..."
             continue
-
+        else:
 #            pointlist = [1,7,11,12,13,14,23]
-#             pointlist = np.arange(20)
-
-            tracklist = []
+#            pointlist = np.arange(20)
             for pointnum, footprint in enumerate(footPrints):
-                print pointnum
 #                if pointnum in pointlist:
                 heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
-                stat = GetTrackStats(heavy_footprint, image, False, track_number=pointnum)
+                stat = GetTrackStats(heavy_footprint, image, filename, save_track_data = True)
+#                 if stat.xsize - (XSIZE - l_trim - r_trim) == 0: continue #skip bad rows (also tracks which traverse whole sensor)
+#                 if stat.ysize - (YSIZE - t_trim - b_trim) == 0: continue #skip bad columns (also tracks which traverse whole sensor)
                 tracklist.append(stat)
-#                 if pointnum == pointlist[-1]: exit()
-#                 ds9.mtv(image)
 #                 DrawStat(stat, True)
 #                if SINGLE_POINT == True: exit()
-        
+
         pickle.dump(tracklist, open(pickle_filname, 'wb'))
-        
         if SINGLE_FILE == True: exit()
     
 
@@ -221,6 +221,7 @@ def DrawStat(stat, zoom_to_point = False):
     displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
     if zoom_to_point: ds9.zoom(22, stat.centroid_x,stat.centroid_y, 0) # use to zoom to a single point
     print 'length (diag,px) = %s, length (3D,true,um) = %s, flux = %s, npix = %s, dedx = %s' %(stat.diagonal_length_pixels, stat.length_true_um, stat.flux, stat.npix, stat.de_dx)
+    print 'length x = %s, length_y = %s ' %(stat.xsize, stat.ysize)
 
 
 #===============================================================================
@@ -262,248 +263,296 @@ if __name__ == '__main__':
     SINGLE_POINT = False
 #     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134299.fits.fz_ext_S18.fits'
 #     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_N24.fits'
-    SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_S14.fits'
+#     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_S14.fits'
+    SPECIFIC_FILE = None
+
+#     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_test/pickles/'
+#     input_path = '/mnt/hgfs/VMShared/Data/DES_test/'
 
 
-    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_test/pickles/'
-    input_path = '/mnt/hgfs/VMShared/Data/DES_test/'
+    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_darks/split/pickles/'
+    input_path  = '/mnt/hgfs/VMShared/Data/DES_darks/split/'
 
-
-#    SPECIFIC_FILE = 'somefile'
 
 #===============================================================================
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
     
-#     DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+#     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
     print 'Finished analysis'
     exit()   
+    
+    from os.path import isfile
 
-    import my_image_tools
-    import my_functions
-##
-    #= Cosmics - Get gains =========================================================================
-    if MAKE_LANDAUS:
-        rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
-        amplist = []
-        for i in range(N_AMPS):
-            amplist.append([])
-        nstats = 0
-        rawstats = 0
-        for amp in range(N_AMPS):
-            for stat in rawlist[amp]:
-                rawstats +=1
-                if Cut_Length(stat, TRACK_LENGTH_CUT):
-                    if Cut_Ellipticity(stat, ELLIPTICITY_CUT):
-                        amplist[amp].append(stat)
-                        nstats += 1
-        print "%s cosmic stats loaded" %rawstats
-        print "%s after cuts" %nstats
-        mpvs, mpvs_errors, chisqrs = GetGains_Cosmics(amplist)
-    #    mpvs, mpvs_errors, chisqrs = GetGains_Cosmics_using_pixels(amplist)
-        
-        avg_rel_error_percent_cosmics = 0
-        for i in range(N_AMPS):
-            avg_rel_error_percent_cosmics += 100 * (mpvs_errors[i]/mpvs[i])
-        avg_rel_error_percent_cosmics /= float(N_AMPS)
-        print 'Avg rel error cosmics %s' %avg_rel_error_percent_cosmics
+    filter = 'N10'
+    file_list = []
+    dir_contents = listdir(pickle_stem)
+    for filename in 
+        if isfile(pickle_stem + filename)
     
+    t0 = time.time()
+    rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
+    dt = time.time() - t0
+    print "Data unpickled in %.2f seconds" %dt 
     
-    #= Correlation plot ==========================================================================
-    if MAKE_LANDAUS and MAKE_FE55_SPECTRA:
-        xlist, ylist, xerrlist, yerrlist = array('d'), array('d'), array('d'), array('d')
-        for i in range(N_AMPS):
-            xlist.append(1600/means[i])
-            xerrlist.append((mean_errors[i]/means[i]) * xlist[i])
-            ylist.append(70/mpvs[i])
-            yerrlist.append((mpvs_errors[i]/mpvs[i]) * ylist[i])
+    post_cuts = []
+    nstats = 0
+    rawstats = 0
     
-        c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        gr = TGraphErrors(len(xlist), xlist, ylist, xerrlist, yerrlist) #populate graph with data points
+    TRACK_LENGTH_CUT = 1000
+    aspect_limit = 1
+    aspect_rejected = 0
+
+    ###################################################
+####     Applying cuts, optionally re-saving dataset
+    for stat in rawlist:
+        rawstats +=1
+        if stat.length_true_um >= TRACK_LENGTH_CUT:
+            if stat.LineOfBestFit.R2 > 0.95:
+                if stat.discriminator < 500:
+                    if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
+#                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
+#                    if aspect_ratio > aspect_limit or aspect_ratio < (1/aspect_limit):
+#                        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/aspect' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
+#                        aspect_rejected += 1
+#                    else:
+                    post_cuts.append(stat); nstats += 1
     
-        gr.SetTitle("")
-        gr.GetXaxis().SetTitle( "^{55}Fe Gain (e^{-}/ADU)" )
-        gr.GetYaxis().SetTitle( "Cosmic Gain (e^{-}/ADU)" )
-        gr.GetYaxis().SetTitleOffset(1.1)
-        gr.GetXaxis().SetTitleOffset(1.2)
-        
-    #    fitfunc = TF1("line","[0]*x", 0,5) #straight line THROUGH ORIGIN!
-        fitfunc = TF1("line","[0]*x + [1]", 0,5) # straight line
-        fitfunc.SetNpx(1000)
-        fitfunc.SetParameter(0,1) # grad
-        fitfunc.SetParameter(1,3) # y-intercept
+    ###################################################
+    # Produce indivual track profiles
+    if True:
+        for stat in rawlist:
+            rawstats +=1
+            if stat.length_true_um >= 800:
+                if stat.discriminator > 2000:
+                        aspect_ratio = (stat.length_x_um / stat.length_y_um)
+                        if aspect_ratio < 0.05:
+#                             if aspect_rejected == 13:
+                
+                            TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/delta' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
+    #                TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
+    #                TrackFitting.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, 6, OUTPUT_PATH + '/aspect13Tgraph' + '.png')
+                
+                
+#                     aspect_rejected += 1
+                        
+                        
+                        
+#            else:
+#                post_cuts.append(stat); nstats += 1
+#     exit()    
     
-        gr.Fit(fitfunc,"ME")
-        gr.Draw("AP")
-        
-        chisq = fitfunc.GetChisquare()
-        NDF = fitfunc.GetNDF()
-        try:
-            chisqr_over_NDF = chisq/NDF
-        except:
-            chisqr_over_NDF = -1
-        print "Chisqr / NDF = " + str(chisq) + ' / ' + str(NDF) + ' = ' + str(chisqr_over_NDF) +'\n'
-    
-        R2 = gr.GetCorrelationFactor()**2
-        legend = TPaveText(0.25,0.60,0.55,0.85,"NDC")
-        legend.SetTextAlign(12) 
-        legend.SetFillColor(0) 
-        legend.SetTextSize(0.05) 
-        legend.AddText("R^{2} = " + str(round(R2,3)))
-        legend.AddText("#chi^{2}_{red} = " + str(round(chisqr_over_NDF,1)))
-        legend.Draw("same")
-        
-        c1.SaveAs(OUTPUT_PATH + "cosmic_landau_correlation" + FILE_TYPE)
-    
-    
-    #===========================================================================
-    #===========================================================================
+    print "%s stats loaded" %len(rawlist)
+    print "%s after cuts" %nstats
+
+#    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
+#    pickle.dump(post_cuts, open(cosmic_pickle_file, 'wb'), pickle.HIGHEST_PROTOCOL)
+#    exit()
 
 
+    ############################################
+    # Generating some plots
+    make_n_plots = 0
+    savepath = '/home/mmmerlin/output/PSF/'
+    for i,stat in enumerate(post_cuts):
+        if i >= make_n_plots: break
+        legend_text = []
+#        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+#        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+#        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + 'both.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+        TV.TrackToFile_ROOT_2D(stat.data, savepath + 'colz_' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit, plot_opt = 'colz' )
+        TV.TrackToFile_ROOT(stat.data, savepath + 'lego20_' + str(i) + '.png', legend_text=legend_text, plot_opt = 'lego2 0' )
 
-        
-    #= Master Landaus =======================================================
+
+
+    ######################################################
+    #do analysis, deal with averaging and compiling return values
+    nsecs = 6 #3,5,9 
     
-    if MAKE_LANDAUS:
-        histmin = 0
-        histmax = 100
-        nbins = 50
-        fitmin = 12
-        fitmax = 60
+    xpoints, sigmas, sigma_errors = [], [], []
+    av_sigma = [0.] * nsecs
+    av_sigma_error = [0.] * nsecs
+    npts = 0
     
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        landau_hist = TH1F('Track Length', 'Track Length',nbins,histmin,histmax)
-        for amp in range(N_AMPS):
-            for stat in rawlist[amp]:
-                landau_hist.Fill(stat.de_dx)
-        landau_hist.Draw()
-        landau_hist.GetXaxis().SetTitle('dE/dx (ADU/#mum)')
-        landau_hist.GetYaxis().SetTitle('Frequency')
-        langaus_func, rawchisqr = LanGausFit(landau_hist, fitmin,fitmax)
-        langaus_func.SetNpx(1000)
-        langaus_func.Draw("same")
-        print "raw master landau chisq_red = %.3f"%(rawchisqr)
+    savepath = '/home/mmmerlin/output/PSF/'
+    for i,stat in enumerate(post_cuts): 
+        xs,s,se = MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, nsecs, tgraph_filename=savepath + str(i) + '.png')
+        assert nsecs == len(xs) or len(xs) == 0
+        for j in range(len(xs)):
+            xpoints.append(xs[j])
+            sigmas.append(s[j])
+            sigma_errors.append(se[j])
+            av_sigma[j] += s[j]
+            av_sigma_error[j] += se[j]**2
+        npts += 1
+    
+    for j in range(nsecs): #make averages into averages
+        av_sigma[j] /= float(npts)
+        av_sigma_error[j] = (av_sigma_error[j]/float(npts))**0.5
+
+    
+    
+    ######################################################
+    # All points on top of each other graph
+#     c2 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) 
+#     assert len(xpoints) == len(sigmas) == len(sigma_errors)
+#     gr = TGraphErrors()
+#     for i in range(len(xpoints)):
+#         gr.SetPoint(int(i), float(xpoints[i]), float(sigmas[i]))
+#         gr.SetPointError(i, float(0), float(sigma_errors[i]))
+#     print "Added %s points to PSF Graph"%len(xpoints)
+#     gr.SetLineColor(2)
+#     gr.SetMarkerColor(2)
+#     gr.Draw("AP")
+#     gr.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+#     gr.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+#     c2.SaveAs(OUTPUT_PATH + '/psf_graph' + '.png')
+
+
+
+    ######################################################
+    # Averaged points
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+    gr2 = TGraphErrors()
+    for i in range(nsecs):
+        gr2.SetPoint(int(i), float(xpoints[i]), av_sigma[i])   
+        gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
         
-        c3.SaveAs(OUTPUT_PATH + "Master_landau_raw" + FILE_TYPE)
-        del c3
-        del landau_hist
-        
-        
+    fit_func = TF1("line","[1]*x + [0]", 0,100)
+#     fit_func = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
+    fit_func.SetNpx(1000)
+    gr2.Fit(fit_func, "MEQ", "")
+    a = fit_func.GetParameter(1) 
+    a_error = fit_func.GetParError(1)
+    y_int = fit_func.GetParameter(0) 
+    y_int_error = fit_func.GetParError(0)
+    R2 = gr2.GetCorrelationFactor()**2
             
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        landau_hist = TH1F('Track Length', 'Track Length',nbins,histmin,histmax)
-        for amp in range(N_AMPS):
-            for stat in amplist[amp]:
-                if Cut_Length(stat, TRACK_LENGTH_CUT):
-#                    if Cut_Ellipticity(stat, ELLIPTICITY_CUT):
-#                        if Cut_Chisq(stat, CHISQ_CUT):
-#                             if Cut_R2(stat, R2_CUT):
-                                landau_hist.Fill(stat.de_dx)
-        landau_hist.Draw()
-        landau_hist.GetXaxis().SetTitle('dE/dx (ADU/#mum)')
-        landau_hist.GetYaxis().SetTitle('Frequency')
-        langaus_func, cutchisq = LanGausFit(landau_hist, fitmin,fitmax)
-        langaus_func.SetNpx(1000)
-        langaus_func.Draw("same")
+    gr2.SetLineColor(2)
+    gr2.SetMarkerColor(2)
+    gr2.Draw("AP")
+    fit_func.Draw("same")
+    gr2.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+    gr2.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+    
+    legend_text = []
+    legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
+    legend_text.append('intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)))
+    legend_text.append('R^{2} = ' + str(round(R2,3)))
+    textbox = TPaveText(0.5,0.25,0.85,0.5,"NDC")
+    for line in legend_text: textbox.AddText(line)
+    textbox.SetFillColor(0)
+    textbox.SetTextSize(1.4* textbox.GetTextSize())
+    textbox.Draw("same")
+    
+    c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_' + str(nsecs) + '.png')
+ 
+    ######################################################
+    # y-intercept removed in quadrature
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+    gr3 = TGraphErrors()
+    for i in range(nsecs):
+        gr3.SetPoint(int(i), float(xpoints[i]), (av_sigma[i]**2 - y_int**2)**0.5 )  
+        gr3.SetPointError(int(i), float(0), (av_sigma_error[i]**2 + y_int_error**2)**0.5)    
+#        gr3.SetPointError(int(i), float(0), abs(av_sigma_error[i]**2 - y_int_error**2)**0.5)    
+      
+    xmin = 0.
+    xmax = 100.
+    ymin = 0.
+    ymax = float(6.)
+    gr_scale_dummy = TGraph()
+    gr_scale_dummy.SetPoint(0,xmin,ymin)
+    gr_scale_dummy.SetPoint(1,xmax,ymax)
+    gr_scale_dummy.SetMarkerColor(0)
+    gr_scale_dummy.SetMarkerSize(0)
+    gr_scale_dummy.Draw("AP") 
+        
+#     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
+    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
+#     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
+    fit_func_2.SetParameter(0,0.1)
+    fit_func_2.SetParameter(1,2.0)
+    fit_func_2.SetNpx(1000)
+    gr3.Fit(fit_func_2, "ME0", "")
+#     a = fit_func_2.GetParameter(1) 
+#     a_error = fit_func_2.GetParError(1)
+#     b = fit_func_2.GetParameter(0) 
+#     b_error = fit_func_2.GetParError(0)
+#     R2 = gr3.GetCorrelationFactor()**2
+             
+    gr3.SetLineColor(4)
+    gr3.SetMarkerColor(4)
+    fit_func_2.SetLineColor(4)
+    gr3.Draw("Psame")
+    gr3.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+    gr3.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+    gr2.Draw("Psame")
+    fit_func.Draw("same")
+    fit_func_2.Draw("lsame")
+    
 
-        print "cut master landau chisq_red = %.3f"%(cutchisq)
-        GLOBAL_OUT.append('cut master landau chisq_red = %.3f"%(cutchisq)')
-
-        # 1.548 with 150,3 and 28,598 entries
-        # 6.926 with just r2 cut at 0.8, 20,891 entries
-        # 23.353 with just chisq cut at 20,277
-        # 6.926 with length at 150 and r2 at 0.8
-  
-  
-        c3.SaveAs(OUTPUT_PATH + "Master_landau_cut" + FILE_TYPE)
-        del c3
-        del landau_hist
-        
-        
-        
-        
-    #= R2 distribution =======================================================
-    if MAKE_LANDAUS:
-        histmin = 0
-        histmax = 1
-        nbins = 100
+     
+    legend_text = []
+    legend_text.append('Intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)) + ' #mum')
+#     legend_text.append('Slope = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
+#     legend_text.append('R^{2} = ' + str(round(R2,3)))
+    textbox = TPaveText(0.15,0.65,0.5,0.85,"NDC")
+    for line in legend_text:
+        print line
+        textbox.AddText(line)
+    textbox.SetFillColor(0)
+    textbox.SetTextColor(2)
+    textbox.SetTextSize(1.4* textbox.GetTextSize())
+    textbox.Draw("same")
     
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        r2_hist_cut = TH1F('R2', 'R2',nbins,histmin,histmax)
-        for amp in range(N_AMPS):
-            for stat in amplist[amp]:
-                r2_hist_cut.Fill(stat.LineOfBestFit.R2)
-        r2_hist_cut.Draw()
-        r2_hist_cut.GetXaxis().SetTitle('R^{2}')
-        c3.SetLogy()
-        c3.SaveAs(OUTPUT_PATH + "r2_cut" + FILE_TYPE)
-        del c3
-        del r2_hist_cut
-        
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        r2_hist_raw= TH1F('R2', 'R2',nbins,histmin,histmax)
-        for amp in range(N_AMPS):
-            for stat in rawlist[amp]:
-                r2_hist_raw.Fill(stat.LineOfBestFit.R2)
-#                r2_hist_raw.Fill(stat.LineOfBestFit.chisq_red / stat.diagonal_length_pixels)
-        r2_hist_raw.Draw()
-        r2_hist_raw.GetXaxis().SetTitle('R^{2}')
-#        c3.SetLogy()
-        c3.SaveAs(OUTPUT_PATH + "r2_raw" + FILE_TYPE)
-        del c3
-        del r2_hist_raw
+    chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
     
-
-    #===========================================================================
-    if MAKE_LANDAUS:
-        try:
-            dummy = amplist[0][0].pixel_list_all_in_footprint
-            list_is_heavy = True
-        except:
-            list_is_heavy = False
-            print "List is not heavy, skipping requested section..." 
-        
-        if list_is_heavy:    
-            histmin = THRESHOLD
-            histmax = 10000
-            nbins = 1000
-        
-            c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-            pixel_hist = TH1F('Pixel values within footprint', 'Pixel values within footprint',nbins,histmin,histmax)
-            i = 0
-            for amp in range(N_AMPS):
-                for stat in amplist[amp]:
-                    for value in stat.pixel_list_all_in_footprint:
-                        pixel_hist.Fill(value)
-            pixel_hist.GetXaxis().SetTitle('Pixel value (ADU)')
-            pixel_hist.GetYaxis().SetTitle('Frequency')
-            pixel_hist.Draw()
-        #    c1.SetLogx()
-            c1.SetLogy()
-            c1.SaveAs(cosmic_pickle_file +"_pixel_value_footprint" + FILE_TYPE)
-            del c1
-            del pixel_hist
-        
+    legend_text = []
+    legend_text.append('Sqrt dependence:')
+    legend_text.append('#chi^{2}_{Red} = ' + str(round(chisqred,3)))
+    textbox2 = TPaveText(0.5,0.2,0.85,0.40,"NDC")
+    for line in legend_text:
+        print line
+        textbox2.AddText(line)
+    textbox2.SetFillColor(0)
+    textbox2.SetTextColor(4)
+#     textbox2.SetTextSize(1.4* textbox2.GetTextSize())
+    textbox2.Draw("same")
     
-    #= Track length histo=======================================================
     
-    if MAKE_LANDAUS:
-        histmin = 0
-        histmax = 800
-        nbins = 50
+    gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
+    gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
     
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        landau_hist = TH1F('Track Length', 'Track Length',nbins,histmin,histmax)
-        for amp in range(N_AMPS):
-            for stat in amplist[amp]:
-                landau_hist.Fill(stat.length_true_um)
-        landau_hist.Draw()
-        landau_hist.GetXaxis().SetTitle('Track Length (#mum)')
-        landau_hist.GetYaxis().SetTitle('Frequency')
-        c3.SaveAs(OUTPUT_PATH + "track_length_distribution" + FILE_TYPE)
-        del c3
-        del landau_hist
+    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.pdf')
+   
+    
+    exit()
+    
+    
+#    savepath = '/home/mmmerlin/output/PSF/'
+#    i = 0
+#    for stat in rawlist:
+#        if stat.npix <= 50:
+#            i += 1
+#            legend_text = []
+#            legend_text.append('npix = ' + str(stat.npix))
+#            TV.TrackToFile_ROOT_2D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+#            if i >25: break
+#            
+    
+    for i,stat in enumerate(post_cuts):
+#        if i <> 3: continue
+        legend_text = []
+        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+#        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+#        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+    
+    
+    ListToHist([stat.discriminator for stat in rawlist], '/home/mmmerlin/output/PSF/raw_disc.pdf', histmax = 5000)
+    ListToHist([stat.discriminator for stat in post_cuts], '/home/mmmerlin/output/PSF/post_cut_disc.pdf', histmin = 0, histmax = 500, nbins = 50)
+    ListToHist([stat.npix for stat in rawlist], '/home/mmmerlin/output/PSF/npx_hist.pdf', histmin = 0, histmax = 100, nbins = 100)
         
 
 
@@ -517,233 +566,6 @@ if __name__ == '__main__':
     exit()
     
 ############# DONE ################
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
-    
-    #===========================================================================
-    c4 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    
-    from array import array
-    xpoints, ypoints = array('d'), array('d')
-    
-    for stat in statslist:
-        if stat.ellipse_b <> 0:
-            xpoints.append(float(stat.ellipse_a))
-            ypoints.append(float(stat.ellipse_b))
-
-    ab_graph = TGraph(len(xpoints), xpoints, ypoints)
-    
-    ab_graph.GetXaxis().SetTitle('a')
-    ab_graph.GetYaxis().SetTitle('b')
-    ab_graph.GetXaxis().SetRangeUser(0,100)
-    ab_graph.GetYaxis().SetRangeUser(0,10)
-    
-    ab_graph.Draw("AP")
-    c4.SaveAs(OUTPUT_PATH + "ab_graph" + FILE_TYPE)
-    del c4
-    del ab_graph
-    
-    #===========================================================================
-    # NB This uses the raw (pre-cut) dataset!
-    histmin = 0
-    histmax = 50
-    nbins = 50
-
-    c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    landau_hist = TH1F('a/b ratio', 'a/b ratio',nbins,histmin,histmax)
-    for stat in rawlist:
-        if stat.ellipse_b <> 0:
-            landau_hist.Fill(stat.ellipse_a/stat.ellipse_b)
-    landau_hist.Draw()
-    c3.SaveAs(OUTPUT_PATH + "ratio" + FILE_TYPE)
-    del c3
-    del landau_hist
+  
 
 
-
-    #===========================================================================
-    histmin = 0
-    histmax = 500
-    nbins = 100
-
-    c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    pixel_hist = TH1F('Pixel values within BBox', 'Pixel values within BBox',nbins,histmin,histmax)
-    for stat in statslist:
-        for value in stat.pixel_list_all_in_bbox:
-            if value >= 15:
-                pixel_hist.Fill(value)
-    pixel_hist.GetXaxis().SetTitle('Pixel value (ADU)')
-    pixel_hist.GetYaxis().SetTitle('Frequency')
-    pixel_hist.Draw()
-    c1.SaveAs(OUTPUT_PATH + "pixel_value_hist_bbox" + FILE_TYPE)
-    del c1
-    del pixel_hist
-    
-    
-    #===========================================================================
-    histmin = 0
-    histmax = 500
-    nbins = 50
-
-    c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    pixel_hist = TH1F('Pixel values within footprint', 'Pixel values within footprint',nbins,histmin,histmax)
-    i = 0
-    for stat in statslist:
-        for value in stat.pixel_list_all_in_footprint:
-            pixel_hist.Fill(value)
-    pixel_hist.GetXaxis().SetTitle('Pixel value (ADU)')
-    pixel_hist.GetYaxis().SetTitle('Frequency')
-    pixel_hist.Draw()
-    c1.SaveAs(OUTPUT_PATH + "pixel_value_hist_footprint" + FILE_TYPE)
-    del c1
-    del pixel_hist
-    
-    
-    
-    #===========================================================================
-    histmin = 0
-    histmax = 250
-    nbins = 50
-
-    c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    pixel_hist = TH1F('Pixels per footprint', 'Pixels per footprint',nbins,histmin,histmax)
-    i = 0
-    for stat in statslist:
-        pixel_hist.Fill(len(stat.pixel_list_all_in_footprint))
-    pixel_hist.GetXaxis().SetTitle('Footprint Area (pixels)')
-    pixel_hist.GetYaxis().SetTitle('Frequency')
-    pixel_hist.Draw()
-    c1.SaveAs(OUTPUT_PATH + "pixels_per_footprint" + FILE_TYPE)
-    del c1
-    del pixel_hist
-    
-    
-    
-    #===========================================================================
-
-
-    print '\n*** End code ***'
-    exit()
-    
-    
-    
-#======================================================================================================================================================
-#======================================================================================================================================================
-#======================================================================================================================================================
-#======================================================================================================================================================
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    #
-#    for rowdata in imdata[:]:
-#        for pixeldata in rowdata:
-##            print pixeldata
-#            imagehist.Fill(pixeldata)
-
-
-
-
-
-
-
-#    filename = '/home/mmmerlin/useful/herring_bone.fits'
-
-    
-    ## Paul's way
-#    filename = input_path + input_file
-#    bigimage = AssembleImage(filename)
-#    if DISPLAY_LEVEL >= 1: ds9.mtv(bigimage)
-    
-    
-    ## My bad way
-#    image = AssembleImage_bad_way(filename)
-#    if DISPLAY_LEVEL >= 1: ds9.mtv(image)
-    
-    
-    ##Mosaic way
-#    mosaicmaker = BuildMosaic(input_path + input_file)
-#    mosaic = mosaicmaker.makeMosaic()
-#    if DISPLAY_LEVEL >= 1: ds9.mtv(mosaic)
-## Note - to use this you then need to write a function to convert 
-## the mosaic into an image for processing as mosaics do not function like images
-
-
-    ## Single image way
-#    exposure = afwImg.ExposureF(input_path + input_file)
-
-
-
-
-#def GetNumpyArrayFromFootprint(footprint, parent_image):
-#    out = np.zeros(footprint.getArea(), dtype=parent_image.getArray().dtype)
-#    array = afwDetect.flattenArray(footprint, parent_image.getArray(), out, parent_image.getXY0())
-#    return array
-
-
-#class MuonConfig(Config):
-#    # TODO: strip this down to remove bloat
-#    
-#    detection = ConfigField(dtype=SourceDetectionTask.ConfigClass, doc="Detection config")
-#    background = ConfigField(dtype=BackgroundConfig, doc="Background subtraction config")
-#    cosmicray = ConfigField(dtype=measAlg.FindCosmicRaysConfig, doc="Cosmic-ray config")
-#    psfSigma = Field(dtype=float, default=2.0, doc="PSF Gaussian sigma")
-#    psfSize = Field(dtype=int, default=21, doc="PSF size (pixels)")
-#
-#    def setDefaults(self):
-#        super(MuonConfig, self).setDefaults()
-#        self.cosmicray.keepCRs = True # We like CRs!
-#        self.cosmicray.nCrPixelMax = 1000000
-#        self.cosmicray.minSigma = 5.0
-#        self.cosmicray.min_DN = 1.0
-#        self.cosmicray.cond3_fac2 = 0.4
