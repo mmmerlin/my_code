@@ -13,6 +13,8 @@ import lsst.afw.display.utils as displayUtils
 import lsst.meas.algorithms   as measAlg
 import lsst.afw.image         as afwImg
 import lsst.afw.display.ds9   as ds9
+from lsst.afw.image import makeImageFromArray
+
 
 from ROOT import TCanvas, TF1, TH1F, TGraph, TLegend, TGraphErrors, TPaveText
 from array import array
@@ -24,15 +26,12 @@ from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauF
 from TrackFitting import *
 
 
-#import matplotlib.pyplot as plt
-#from mpl_toolkits.mplot3d import axes3d
-
 ##########################################################################################
 ##########################################################################################
 # things that won't really change
-OUTPUT_PATH = "/mnt/hgfs/VMShared/output/cosmic_gain/"
+OUTPUT_PATH = "/mnt/hgfs/VMShared/Data/DES_test/"
 FILE_TYPE = ".pdf"
-N_AMPS = 16
+N_AMPS = 1
 
 ############
 
@@ -47,6 +46,15 @@ N_PIX_MIN = 2
 GROW = 1
 ISOTROPIC = True
 
+
+XSIZE = 2160
+YSIZE = 4146
+
+b_trim = 0
+t_trim = 16
+l_trim = 80
+r_trim = 80
+
 # Cut options
 TRACK_LENGTH_CUT = 150
 ELLIPTICITY_CUT  = 3
@@ -55,9 +63,7 @@ R2_CUT           = 0.8
 
 # Post processing options
 MAKE_LANDAUS = True
-MAKE_FE55_SPECTRA = True
 
-GLOBAL_OUT = []
 
 
 #===============================================================================
@@ -75,170 +81,81 @@ def DEBUG(image, footprintset):
         ds9.dot("x",stat.centroid_x,stat.centroid_y)# cross on the peak
         displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
         
-#        print "flux = " + str(stat.flux)
 
 
 def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None, SINGLE_POINT = False):
-    t0 = time.time()
-    total_found = 0
-    
-    from image_assembly import AssembleImage, MakeBiasImage, GetImage_SingleAmp
-    
-    if DISPLAY_LEVEL >= 1:
-        try: # initialise DS9, deal with a bug in its launching
-            ds9.initDS9(False)
-        except ds9.Ds9Error:
-            print 'DS9 launch bug error thrown away (probably)'
-        print 'called ds9 to display' 
-        
-#= Open image, assemble, background subtract ===============================================================
-    
-    metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
-
     dircontents = listdir(input_path)
     file_list = []
-    for thisfile in dircontents:
-        filename = input_path + thisfile
-        if str(filename).find('coadded') != -1: continue # skip coadd file
-        if str(filename).find('.DS') != -1: continue # skip coadd file
-        if isfile(filename): file_list.append(filename) # skip bias dir
+    for filename in dircontents:
+        if str(input_path + filename).find('coadded') != -1: continue # skip coadd file
+        if str(input_path + filename).find('.DS') != -1: continue
+        if isfile(input_path + filename): file_list.append(filename) # skip bias dir
     
     if SPECIFIC_FILE != None:
         file_list = []
         file_list.append(SPECIFIC_FILE)
-        SINGLE_FILE = True
     
-    if not SINGLE_FILE: print "Processing %s files using settings:" %len(file_list)
+    print "Processing %s files using settings:" %min(len(file_list), PROCESS_FILE_LIMIT)
     print "THRESHOLD = %s" %THRESHOLD
     print "N_PIX_MIN = %s" %N_PIX_MIN
     print "GROW = %s" %GROW
     print "ISOTROPIC = %s" %ISOTROPIC
+    print
+    print "Image Trimming:"
+    print "L_trim: %s"%l_trim
+    print "R_trim: %s"%r_trim
+    print "T_trim: %s"%t_trim
+    print "B_trim: %s"%b_trim
 
-    amplist = []
-    for i in range(N_AMPS):
-        amplist.append([])
-    
     
     for i, filename in enumerate(file_list):
         if PROCESS_FILE_LIMIT != None:
             if i >= PROCESS_FILE_LIMIT: break
         print "Processing %s of %s files (%.2f %% done)" %(i, len(file_list), 100 * float(i) / float(len(file_list)))
         if not QUIET: print "Current file = %s..." %filename
-        
-        for amp in range(N_AMPS):
-            image = GetImage_SingleAmp(filename, True, amp)
-            maskedImg = afwImg.MaskedImageF(image)
-            exposure = afwImg.ExposureF(maskedImg)
-            
-            if DISPLAY_LEVEL >= 1 and SINGLE_FILE == True: ds9.mtv(image)
-#            exit()    
-        
-        # = Do finding ====================================================================
-            threshold = afwDetect.Threshold(THRESHOLD, afwDetect.Threshold.VALUE)
-            footPrintSet = afwDetect.FootprintSet(exposure.getMaskedImage(), threshold, "DETECTED", N_PIX_MIN)
-            footPrintSet = afwDetect.FootprintSet(footPrintSet, GROW, ISOTROPIC)
-        
-            footPrints = footPrintSet.getFootprints()
-            if not QUIET: print "Found %s footprints in amp %s of file %s"%(footPrints.size(), amp, filename)
-            total_found += footPrints.size()
-       
-            if footPrints.size() >= 2000: # files with bright defects cause all sorts of problems
-                print "Bad file - skipping..."
-                continue
 
-#            for pointnum, footprint in enumerate(footPrints):
-#                heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
-#                stat = GetTrackStats(heavy_footprint, image, False, track_number=pointnum)
-#                amplist[amp].append(stat)
-#                if SINGLE_POINT == True: exit()
+        pickle_filname = pickle_stem + filename + '.pickle'
+        temp_image = afwImg.ImageF(input_path + filename)
+        image = makeImageFromArray(temp_image.getArray()[b_trim:YSIZE-t_trim,l_trim:XSIZE - r_trim])
+        del temp_image
+        
+        maskedImg = afwImg.MaskedImageF(image)
+        exposure = afwImg.ExposureF(maskedImg)
+         
+    # = Do finding ====================================================================
+        threshold = afwDetect.Threshold(THRESHOLD, afwDetect.Threshold.VALUE)
+        footPrintSet = afwDetect.FootprintSet(exposure.getMaskedImage(), threshold, "DETECTED", N_PIX_MIN)
+        footPrintSet = afwDetect.FootprintSet(footPrintSet, GROW, ISOTROPIC)
+    
+        footPrints = footPrintSet.getFootprints()
+        if not QUIET: print "Found %s footprints in amp %s of file %s"%(footPrints.size(), amp, filename)
+   
+        if footPrints.size() >= 2000: # files with bright defects cause all sorts of problems
+            print "Bad file - skipping..."
+            continue
 
 #            pointlist = [1,7,11,12,13,14,23]
-#            pointlist = [11]
-            pointlist = np.arange(20)
+#             pointlist = np.arange(20)
 
+            tracklist = []
             for pointnum, footprint in enumerate(footPrints):
+                print pointnum
 #                if pointnum in pointlist:
                 heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
                 stat = GetTrackStats(heavy_footprint, image, False, track_number=pointnum)
-                amplist[amp].append(stat)
+                tracklist.append(stat)
 #                 if pointnum == pointlist[-1]: exit()
-#                    ds9.mtv(image)
-#                    DrawStat(stat, True)
+#                 ds9.mtv(image)
+#                 DrawStat(stat, True)
 #                if SINGLE_POINT == True: exit()
-            
+        
+        pickle.dump(tracklist, open(pickle_filname, 'wb'))
+        
         if SINGLE_FILE == True: exit()
     
 
-    dt = time.time() - t0
-    print "Data analysed in %.2f seconds, %s total footprints found" %(dt,total_found) 
-    
-    t0 = time.time()
-    pickle.dump(amplist, open(pickle_file, 'wb'))
-    dt = time.time() - t0
-    print "Data pickled in %.2f seconds" %dt 
 #===============================================================================
 
-#
-#def GetGains_Cosmics_using_pixels(amplist):
-#    
-#    histmin = 0
-#    histmax = 100
-#    nbins = 50
-#    fitmin = 12
-#    fitmax = 60
-#
-#    mpvs, mpvs_errors, chisqrs  = [], [], []
-#    for amp in range(N_AMPS):
-#        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-#        landau_hist = TH1F('dE/dx', 'Muon pixel energy spectrum - Amp ' + str(amp),nbins,histmin,histmax)
-#        
-#        stat = TrackStats()
-#        for i, stat in enumerate(amplist[amp]):
-#            for value in stat.pixel_list_all_in_footprint:
-#                length_thru_pixel = 10
-#
-#                if length_thru_pixel > 100.5 or length_thru_pixel < 10: print "Error in length through pixel!"                
-#                pix_dedx = value / length_thru_pixel
-##               if i % 4 == 0: landau_hist.Fill(pix_dedx)
-#                landau_hist.Fill(pix_dedx)
-#            landau_hist.Draw()
-#            landau_hist.GetXaxis().SetTitle('dE/dx per pixel (ADU/#mum)')
-#            landau_hist.GetYaxis().SetTitle('Frequency')
-#            
-#            langaus_func, chisqr = LanGausFit(landau_hist, fitmin,fitmax)
-#            langaus_func.SetNpx(1000)
-#            langaus_func.Draw("same")
-#         
-#            mpvs.append(langaus_func.GetParameter(1))
-#            mpvs_errors.append(langaus_func.GetParError(1))
-#            chisqrs.append(chisqr)
-#            
-#            
-#            legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
-#            legend.SetTextAlign(12) 
-#            legend.SetFillColor(0) 
-#            legend.AddText("MPV = " + str(round(mpvs[amp],2)) + " #pm " + str(round(mpvs_errors[amp],2)) + " ADU")
-#            legend.AddText("Entries = " + str(landau_hist.GetEntries()))
-#            legend.AddText("#chi^{2}_{red} = " + str(round(chisqr,2)))
-#            legend.Draw("same")
-#            
-#            c3.SaveAs(OUTPUT_PATH + "amp" + str(zfill(str(amp),2)) +"dedx_hist" + FILE_TYPE)
-#            del c3
-#            del landau_hist
-#
-#    tot_chi_sq = 0
-#    for i in range(N_AMPS):
-#        print "Amp " + str(i) + " ChiSq = \t" + str(chisqrs[i])
-#        tot_chi_sq += chisqrs[i]
-#    print "Avg ChiSq = " + str(tot_chi_sq/len(chisqrs)) + "\n"
-#
-#    for i in range(N_AMPS):
-#        print "Amp " + str(i) + " MPV = \t" + str(mpvs[i])
-#
-#
-#    return mpvs, mpvs_errors, chisqrs
-
-#===============================================================================
 
 def GetGains_Cosmics(amplist):
     histmin = 0
@@ -263,15 +180,9 @@ def GetGains_Cosmics(amplist):
         langaus_func.SetNpx(1000)
         langaus_func.Draw("same")
      
-#        langaus_func = LandauFit(landau_hist, fitmin,fitmax)
-#        langaus_func.SetNpx(1000)
-#        langaus_func.Draw("same")
-#        chisqr = 0
-        
         mpvs.append(langaus_func.GetParameter(1))
         mpvs_errors.append(langaus_func.GetParError(1))
         chisqrs.append(chisqr)
-        
         
         legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
         legend.SetTextAlign(12) 
@@ -291,7 +202,6 @@ def GetGains_Cosmics(amplist):
         tot_chi_sq += chisqrs[i]
     avg_chi_sq = tot_chi_sq/len(chisqrs)
     print "Avg ChiSq = " + str(avg_chi_sq) + "\n"
-    GLOBAL_OUT.append("Avg ChiSq = " + str(avg_chi_sq))
 
     for i in range(N_AMPS):
         print "Amp " + str(i) + " MPV = \t" + str(mpvs[i])
@@ -301,95 +211,6 @@ def GetGains_Cosmics(amplist):
 
     return mpvs, mpvs_errors, chisqrs
 
-def GetGains_Fe55(amplist):
-    from root_functions import GetLeftRightBinsAtPercentOfMax
-
-    histmin = 200
-    histmax = 700
-    nbins = 200
-#     fitmin = 400
-#     fitmax = 550
-    fit_threshold = 0.1
-    
-    hist_array = []
-
-    K_Alphas = []
-    K_Alphas_widths = []
-    K_Betas = []
-    K_Betas_widths = []
-    
-    means, mean_errors, chisqrs = [], [], []
-    for amp in range(N_AMPS):
-
-        stat = TrackStats()
-        av_pixels = 0
-        ntracks = 0
-
-        c3 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        hist = TH1F('hist', '^{55}Fe Spectrum - Amp ' + str(amp),nbins,histmin,histmax)
-        for stat in amplist[amp]:
-            hist.Fill(stat.flux)
-            av_pixels += stat.npix
-            ntracks += 1
-        hist.Draw()
-        hist.GetXaxis().SetTitle('Charge (ADU)')
-        hist.GetYaxis().SetTitle('Frequency')
-        
-        GLOBAL_OUT.append(str(amp) + '\t' + "%.2f"%(float(av_pixels)/float(ntracks)))
-        
-        fitmin, fitmax = GetLeftRightBinsAtPercentOfMax(hist, fit_threshold)
-        
-        fitfunc, chisqr = DoubleGausFit(hist, fitmin, fitmax)
-        fitfunc.Draw("same")
-        
-        K_Alphas.append(fitfunc.GetParameter(0))
-        K_Alphas_widths.append(fitfunc.GetParameter(1))
-        K_Betas.append(fitfunc.GetParameter(3))
-        K_Betas_widths.append(fitfunc.GetParameter(4))
-        
-        mean = fitfunc.GetParameter(0)
-        mean_error = fitfunc.GetParError(0)
-        means.append(mean)
-        mean_errors.append(mean_error)
-        chisqrs.append(chisqr)
-        
-        legend = TPaveText(0.65,0.68,0.99,0.93,"NDC")
-        legend.SetTextAlign(12) 
-        legend.SetFillColor(0) 
-        legend.AddText("K_{#alpha} peak = " + str(round(mean,2)) + " #pm " + str(round(mean_error,2)) + " ADU")
-        legend.AddText("Entries = " + str(len(amplist[amp])))
-        legend.AddText("#chi^{2}_{red} = " + str(round(chisqr,2)))
-        legend.Draw("same")
-#        c3.SetLogy()
-        c3.SaveAs(OUTPUT_PATH + "fe55_amp_" + str(zfill(str(amp),2)) +"sprectrum" + FILE_TYPE)
-        hist_array.append(hist)
-        del c3
-        del hist
-
-    print "amp \t K_a \t K_a_width \t K_b \t K_b_width"
-    for amp in range(N_AMPS):
-        print "%s\t%.3f\t%.3f\t%.3f\t%.3f\t" %(amp,K_Alphas[amp], K_Alphas_widths[amp], K_Betas[amp], K_Betas_widths[amp])
-
-    mastercanvas = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    hist_array[amp].SetLineColor(1)
-    hist_array[amp].Draw()
-    for amp in range(N_AMPS -1):
-        hist_array[amp].SetLineColor(amp+1)
-        hist_array[amp].Draw("same")
-    mastercanvas.SetLogy()
-    mastercanvas.SaveAs(OUTPUT_PATH + "fe55_spectra_overlay" + FILE_TYPE)
-
-    mastercanvas2 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-    masterhist = TH1F('hist', '^{55}Fe Spectrum - Amp ' + str(amp),nbins,histmin,histmax)
-    for amp in range(N_AMPS):
-        masterhist.Add(hist_array[amp])
-        masterhist.SetLineColor(amp+1)
-        masterhist.Draw("")
-    mastercanvas2.SetLogy()
-    mastercanvas2.SaveAs(OUTPUT_PATH + "fe55_spectra_overlay_cumulative" + FILE_TYPE)
- 
-
-    return means, mean_errors, chisqrs
 
 def DrawStat(stat, zoom_to_point = False):
 #    if stat.ellipse_b == 0:
@@ -436,35 +257,16 @@ def Cut_R2(stat, cut):
 if __name__ == '__main__':
     start_time = time.time()
     import cPickle as pickle
-    print "Running center cosmic finder\n"
+    print "Running DES Analysis\n"
     SINGLE_FILE = False
     SINGLE_POINT = False
-    SPECIFIC_FILE = None
-
-    home_dir = expanduser("~")
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
-#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/20_ampwise_fe55'
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr2'
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/single_fe55'
-
-#    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
-#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/10_ampwise_fe55_th25_gr1'
-    
-    iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/113_03_ampwise_th50_gr1_50_files'
-#     iron_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_data_ampwise_fe55'
+#     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134299.fits.fz_ext_S18.fits'
+#     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_N24.fits'
+    SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_S14.fits'
 
 
-#     cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/temp'
-    cosmic_pickle_file = '/mnt/hgfs/VMShared/output/datasets/all_ampwise_cosmics'
-#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr0_mega'
-#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr1_iso_mega'
-#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr2_iso_mega'
-#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr1_not_iso_mega'
-#    cosmic_pickle_file = '/hgfs/VMShared/output/datasets/cosmic_th50_px2_gr2_not_iso_mega'
-
-    input_path = '/mnt/hgfs/VMShared/data/fe55/20140709-112014/'
-#    input_path = '/mnt/hgfs/VMShared/Data/all_darks/'
+    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_test/pickles/'
+    input_path = '/mnt/hgfs/VMShared/Data/DES_test/'
 
 
 #    SPECIFIC_FILE = 'somefile'
@@ -474,31 +276,13 @@ if __name__ == '__main__':
     if SPECIFIC_FILE != None: SINGLE_FILE = True
     
 #     DoAnalysis(input_path, cosmic_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-    DoAnalysis(input_path, iron_pickle_file, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-#     exit()   
+    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+    print 'Finished analysis'
+    exit()   
 
-    #= Fe55 - Get Gains =========================================================================
-    if MAKE_FE55_SPECTRA:
-        t0 = time.time()
-        rawlist = pickle.load(open(iron_pickle_file, 'rb'))
-        dt = time.time() - t0
-        print "Data unpickled in %.2f seconds" %dt 
-        
-        amplist = []
-        for i in range(16):
-            amplist.append([])
-    
-        amplist = rawlist # <-- no cuts for Fe55
-        means, mean_errors, chisqrs = GetGains_Fe55(amplist)
-    
-        avg_rel_error_percent_fe55 = 0
-        for i in range(N_AMPS):
-            avg_rel_error_percent_fe55 += 100 * (mean_errors[i]/means[i])
-        avg_rel_error_percent_fe55 /= float(N_AMPS)
-        print 'Avg rel error Fe55 %s' %avg_rel_error_percent_fe55
-
-    exit()
-    
+    import my_image_tools
+    import my_functions
+##
     #= Cosmics - Get gains =========================================================================
     if MAKE_LANDAUS:
         rawlist = pickle.load(open(cosmic_pickle_file, 'rb'))
