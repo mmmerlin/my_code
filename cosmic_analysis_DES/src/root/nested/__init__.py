@@ -20,6 +20,7 @@ from array import array
 import numpy as np
 from numpy.core.defchararray import zfill
 from root_functions import ListToHist
+import gc
 
 # my stuff
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
@@ -99,7 +100,6 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
     print "T_trim: %s"%t_trim
     print "B_trim: %s\n"%b_trim
 
-    
     for i, filename in enumerate(file_list):
         if PROCESS_FILE_LIMIT != None:
             if i >= PROCESS_FILE_LIMIT: break
@@ -134,15 +134,17 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 #                if pointnum in pointlist:
                 heavy_footprint = afwDetect.HeavyFootprintF(footprint, maskedImg)
                 stat = GetTrackStats(heavy_footprint, image, filename, save_track_data = True)
-#                 if stat.xsize - (XSIZE - l_trim - r_trim) == 0: continue #skip bad rows (also tracks which traverse whole sensor)
-#                 if stat.ysize - (YSIZE - t_trim - b_trim) == 0: continue #skip bad columns (also tracks which traverse whole sensor)
                 tracklist.append(stat)
+                del stat, heavy_footprint
 #                 DrawStat(stat, True)
 #                if SINGLE_POINT == True: exit()
 
         pickle.dump(tracklist, open(pickle_filname, 'wb'), pickle.HIGHEST_PROTOCOL)
+        del maskedImg, exposure, threshold, footPrintSet, footPrints, tracklist
+        gc.collect()
         if SINGLE_FILE == True: exit()
-    
+            
+            
 
 #===============================================================================
 
@@ -245,8 +247,8 @@ if __name__ == '__main__':
 #     input_path = '/mnt/hgfs/VMShared/Data/DES_test/'
 
 
-    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_N10_only/'
-#     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2/'
+#     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_N10_only/'
+    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2/'
     input_path  = '/mnt/hgfs/VMShared/Data/DES_darks/split/'
 
 
@@ -254,12 +256,16 @@ if __name__ == '__main__':
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
      
-#     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-#     print 'Finished analysis'
-#     exit()   
+    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+    for line in GLOBAL_OUT: print line
+    print 'Finished analysis'
+    exit()   
     
     
     OUTPUT_PATH = "/mnt/hgfs/VMShared/output/DES_analysis/N10/"
+    
+    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+    
     
     rawlist = []
     filter = 'N10'
@@ -287,7 +293,7 @@ if __name__ == '__main__':
     TRACK_LENGTH_CUT = 50
     DISCRIMINATOR_CUT = 600
     R2_CUT = 0.95
-    N_SECS_PSF = 7
+    N_SECS_PSF = 6
     
     ###################################################
 ####     Applying cuts
