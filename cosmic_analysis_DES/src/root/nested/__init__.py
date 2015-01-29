@@ -24,13 +24,14 @@ from root_functions import ListToHist
 # my stuff
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
 from TrackFitting_DES import *
+import TrackViewer as TV
+import TrackFitting_DES
 
 
 ##########################################################################################
 ##########################################################################################
 # things that won't really change
-OUTPUT_PATH = "/mnt/hgfs/VMShared/Data/DES_test/"
-FILE_TYPE = ".pdf"
+FILE_TYPE = ".png"
 N_AMPS = 1
 
 ############
@@ -51,7 +52,7 @@ XSIZE = 2160
 YSIZE = 4146
 
 b_trim = 20
-t_trim = 16
+t_trim = 20
 l_trim = 80
 r_trim = 80
 
@@ -66,20 +67,6 @@ MAKE_LANDAUS = True
 GLOBAL_OUT = []
 
 #===============================================================================
-def DEBUG(image, footprintset):
-    ds9.mtv(image)
-    
-    for footprint in footprintset:
-        from lsst.afw.image.imageLib import MaskedImageF
-        masked_imaged = MaskedImageF(image)
-        heavy_footprint = afwDetect.HeavyFootprintF(footprint, masked_imaged)
-        stat = GetTrackStats(heavy_footprint, image, False)
-    
-        argstring = "@:"+str(4*stat.ellipse_Ixx)+','+str(4*stat.ellipse_Ixy)+','+str(4*stat.ellipse_Iyy) #multiply by four just to make it more exaggerated otherwise they all look like cirlces
-        ds9.dot(argstring,stat.centroid_x,stat.centroid_y) #ellipse around the centroid
-        ds9.dot("x",stat.centroid_x,stat.centroid_y)# cross on the peak
-        displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
-        
 
 
 def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None, SINGLE_POINT = False):
@@ -89,7 +76,11 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         if str(input_path + filename).find('coadded') != -1: continue # skip coadd file
         if str(input_path + filename).find('.DS') != -1: continue
 #         if str(input_path + filename).find('N10') == -1: continue
-        if isfile(input_path + filename): file_list.append(filename) # skip bias dir
+#         if filename != 'DECam_00134929.fits.fz_ext_N15.fits': continue
+#         if filename != 'DECam_00134299.fits.fz_ext_N01.fits': continue
+        if isfile(pickle_stem + filename + '.pickle'): continue # skip finished files
+        if isfile(input_path + filename): file_list.append(filename) # skip directories
+    
     
     if SPECIFIC_FILE != None:
         file_list = []
@@ -123,7 +114,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         
         maskedImg = afwImg.MaskedImageF(image)
         exposure = afwImg.ExposureF(maskedImg)
-         
+        
     # = Do finding ====================================================================
         threshold = afwDetect.Threshold(THRESHOLD, afwDetect.Threshold.VALUE)
         footPrintSet = afwDetect.FootprintSet(exposure.getMaskedImage(), threshold, "DETECTED", N_PIX_MIN)
@@ -133,7 +124,7 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         if not QUIET: print "Found %s footprints in file %s"%(footPrints.size(), filename)
    
         tracklist = []
-        if footPrints.size() >= 2000: # files with bright defects cause all sorts of problems
+        if footPrints.size() >= 5000: # files with bright defects cause all sorts of problems
             print "Bad file - skipping..."
             continue
         else:
@@ -149,12 +140,27 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
 #                 DrawStat(stat, True)
 #                if SINGLE_POINT == True: exit()
 
-        pickle.dump(tracklist, open(pickle_filname, 'wb'))
+        pickle.dump(tracklist, open(pickle_filname, 'wb'), pickle.HIGHEST_PROTOCOL)
         if SINGLE_FILE == True: exit()
     
 
 #===============================================================================
 
+def DEBUG(image, footprintset):
+    ds9.mtv(image)
+    
+    for footprint in footprintset:
+        from lsst.afw.image.imageLib import MaskedImageF
+        masked_imaged = MaskedImageF(image)
+        heavy_footprint = afwDetect.HeavyFootprintF(footprint, masked_imaged)
+        stat = GetTrackStats(heavy_footprint, image, False)
+    
+        argstring = "@:"+str(4*stat.ellipse_Ixx)+','+str(4*stat.ellipse_Ixy)+','+str(4*stat.ellipse_Iyy) #multiply by four just to make it more exaggerated otherwise they all look like cirlces
+        ds9.dot(argstring,stat.centroid_x,stat.centroid_y) #ellipse around the centroid
+        ds9.dot("x",stat.centroid_x,stat.centroid_y)# cross on the peak
+        displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
+
+#===============================================================================
 
 def GetGains_Cosmics(amplist):
     histmin = 0
@@ -222,37 +228,9 @@ def DrawStat(stat, zoom_to_point = False):
     print 'length (diag,px) = %s, length (3D,true,um) = %s, flux = %s, npix = %s, dedx = %s' %(stat.diagonal_length_pixels, stat.length_true_um, stat.flux, stat.npix, stat.de_dx)
     print 'length x = %s, length_y = %s ' %(stat.xsize, stat.ysize)
 
+#===============================================================================
 
-#===============================================================================
-#===============================================================================
-#===============================================================================
-def Cut_Length(stat, cut):
-    if stat.length_true_um >= cut:
-        return True
-    else:
-        return False
-def Cut_Ellipticity(stat, cut):
-    if stat.ellipse_b == 0:
-        return False
-    
-    ratio = stat.ellipse_a / stat.ellipse_b
-    if ratio >= cut:
-        return True
-    else:
-        return False
-def Cut_Chisq(stat, cut):
-    if stat.LineOfBestFit.chisq_red == -1: return False
-    if stat.LineOfBestFit.chisq_red / stat.diagonal_length_pixels <= 0.001: return False
-    if stat.LineOfBestFit.chisq_red / stat.diagonal_length_pixels >= cut:
-        return False
-    else:
-        return True
-    
-def Cut_R2(stat, cut):
-    if stat.LineOfBestFit.R2 <= cut:
-        return False
-    else:
-        return True
+
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -260,8 +238,6 @@ if __name__ == '__main__':
     print "Running DES Analysis\n"
     SINGLE_FILE = False
     SINGLE_POINT = False
-#     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134299.fits.fz_ext_S18.fits'
-#     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_N24.fits'
 #     SPECIFIC_FILE = '/mnt/hgfs/VMShared/Data/DES_test/DECam_00134300.fits.fz_ext_S14.fits'
     SPECIFIC_FILE = None
 
@@ -269,115 +245,107 @@ if __name__ == '__main__':
 #     input_path = '/mnt/hgfs/VMShared/Data/DES_test/'
 
 
-    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_darks/split/pickles/'
+    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_N10_only/'
+#     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2/'
     input_path  = '/mnt/hgfs/VMShared/Data/DES_darks/split/'
 
 
 #===============================================================================
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
+     
+#     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+#     print 'Finished analysis'
+#     exit()   
     
-    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-    print 'Finished analysis'
-    exit()   
     
+    OUTPUT_PATH = "/mnt/hgfs/VMShared/output/DES_analysis/N10/"
     
     rawlist = []
     filter = 'N10'
-    file_list = []
-    for filename in listdir(pickle_stem):
-        if str.find(str(pickle_stem + filename),filter) != -1:
-            print "Loading %s"%(pickle_stem + filename)
-            for item in pickle.load(open(pickle_stem + filename, 'rb')):
-                rawlist.append(item)
-            
-    print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter)
-    exit()
+#     file_list = []
+#     for filename in listdir(pickle_stem):
+#         if str.find(str(pickle_stem + filename),filter) != -1:
+#             print "Loading %s"%(pickle_stem + filename)
+#             for item in pickle.load(open(pickle_stem + filename, 'rb')):
+#                 rawlist.append(item)
+#     print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter)
+# 
+#     pickle.dump(rawlist, open(pickle_stem + 'all_tracks.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+    
+    
+    for item in pickle.load(open(pickle_stem + 'all_tracks.pickle', 'rb')):
+        rawlist.append(item)
+    print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter) 
+
+#     exit()
     
     post_cuts = []
     nstats = 0
     rawstats = 0
     
-    TRACK_LENGTH_CUT = 1000
-    aspect_limit = 1
-    aspect_rejected = 0
-
+    TRACK_LENGTH_CUT = 50
+    DISCRIMINATOR_CUT = 600
+    R2_CUT = 0.95
+    N_SECS_PSF = 7
+    
     ###################################################
-####     Applying cuts, optionally re-saving dataset
+####     Applying cuts
+    dummy = TrackStats()
+    dummy.diagonal_length_pixels
+    
     for stat in rawlist:
         rawstats +=1
-        if stat.length_true_um >= TRACK_LENGTH_CUT:
-            if stat.LineOfBestFit.R2 > 0.95:
-                if stat.discriminator < 500:
-                    if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
-#                    aspect_ratio = (stat.length_x_um / stat.length_y_um)
-#                    if aspect_ratio > aspect_limit or aspect_ratio < (1/aspect_limit):
-#                        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/aspect' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-#                        aspect_rejected += 1
-#                    else:
+        if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
+        
+        if stat.diagonal_length_pixels >= TRACK_LENGTH_CUT:
+            if stat.LineOfBestFit.R2 >= R2_CUT:
+                if stat.discriminator < DISCRIMINATOR_CUT:
                     post_cuts.append(stat); nstats += 1
+    
+    print "%s stats loaded" %len(rawlist)
+    print "%s after cuts" %len(post_cuts) 
     
     ###################################################
     # Produce indivual track profiles
-    if True:
-        for stat in rawlist:
-            rawstats +=1
-            if stat.length_true_um >= 800:
-                if stat.discriminator > 2000:
-                        aspect_ratio = (stat.length_x_um / stat.length_y_um)
-                        if aspect_ratio < 0.05:
-#                             if aspect_rejected == 13:
-                
-                            TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + '/delta' + str(aspect_rejected) + '.png', fitline=stat.LineOfBestFit )
-    #                TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
-    #                TrackFitting.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, 6, OUTPUT_PATH + '/aspect13Tgraph' + '.png')
-                
-                
-#                     aspect_rejected += 1
-                        
-                        
-                        
-#            else:
-#                post_cuts.append(stat); nstats += 1
-#     exit()    
-    
-    print "%s stats loaded" %len(rawlist)
-    print "%s after cuts" %nstats
-
-#    cosmic_pickle_file = home_dir + '/output/datasets/clean_cosmics_L400_R095_D500'
-#    pickle.dump(post_cuts, open(cosmic_pickle_file, 'wb'), pickle.HIGHEST_PROTOCOL)
-#    exit()
+#     for i in range(1,2):
+#         stat = post_cuts[i]
+#         legend_text = []
+#         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+#         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+#         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + str(i) + FILE_TYPE, fitline=stat.LineOfBestFit, legend_text=legend_text )
+# #                     TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
+#         TrackFitting_DES.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, N_SECS_PSF, OUTPUT_PATH + str(i) + 'psf_vs_depth'  + '.png')
+#     
+#     exit()
 
 
     ############################################
-    # Generating some plots
-    make_n_plots = 0
-    savepath = '/home/mmmerlin/output/PSF/'
-    for i,stat in enumerate(post_cuts):
-        if i >= make_n_plots: break
-        legend_text = []
+##### Generating some plots
+#     make_n_plots = 0
+#     for i,stat in enumerate(post_cuts):
+#         if i >= make_n_plots: break
+#         legend_text = []
 #        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
 #        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
 #        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + 'both.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
-        TV.TrackToFile_ROOT_2D(stat.data, savepath + 'colz_' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit, plot_opt = 'colz' )
-        TV.TrackToFile_ROOT(stat.data, savepath + 'lego20_' + str(i) + '.png', legend_text=legend_text, plot_opt = 'lego2 0' )
+#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + str(i) + 'both.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+#         TV.TrackToFile_ROOT_2D(stat.data, OUTPUT_PATH + 'colz_' + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit, plot_opt = 'colz' )
+#         TV.TrackToFile_ROOT(stat.data, OUTPUT_PATH + 'lego20_' + str(i) + '.png', legend_text=legend_text, plot_opt = 'lego2 0' )
 
 
 
     ######################################################
     #do analysis, deal with averaging and compiling return values
-    nsecs = 6 #3,5,9 
-    
     xpoints, sigmas, sigma_errors = [], [], []
-    av_sigma = [0.] * nsecs
-    av_sigma_error = [0.] * nsecs
+    av_sigma = [0.] * N_SECS_PSF
+    av_sigma_error = [0.] * N_SECS_PSF
     npts = 0
     
-    savepath = '/home/mmmerlin/output/PSF/'
     for i,stat in enumerate(post_cuts): 
-        xs,s,se = MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, nsecs, tgraph_filename=savepath + str(i) + '.png')
-        assert nsecs == len(xs) or len(xs) == 0
+        xs,s,se = MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, N_SECS_PSF, tgraph_filename=OUTPUT_PATH + str(i) + FILE_TYPE)
+        assert N_SECS_PSF == len(xs) or len(xs) == 0
         for j in range(len(xs)):
             xpoints.append(xs[j])
             sigmas.append(s[j])
@@ -386,14 +354,14 @@ if __name__ == '__main__':
             av_sigma_error[j] += se[j]**2
         npts += 1
     
-    for j in range(nsecs): #make averages into averages
+    for j in range(N_SECS_PSF): #make averages into averages
         av_sigma[j] /= float(npts)
         av_sigma_error[j] = (av_sigma_error[j]/float(npts))**0.5
 
     
     
     ######################################################
-    # All points on top of each other graph
+##### All points on top of each other graph
 #     c2 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT) 
 #     assert len(xpoints) == len(sigmas) == len(sigma_errors)
 #     gr = TGraphErrors()
@@ -414,7 +382,7 @@ if __name__ == '__main__':
     # Averaged points
     c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     gr2 = TGraphErrors()
-    for i in range(nsecs):
+    for i in range(N_SECS_PSF):
         gr2.SetPoint(int(i), float(xpoints[i]), av_sigma[i])   
         gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
         
@@ -435,6 +403,8 @@ if __name__ == '__main__':
     gr2.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
     gr2.GetXaxis().SetTitle('Av. Si Depth (#mum)')
     
+    gr2.GetYaxis().SetRangeUser(0,10)
+    
     legend_text = []
     legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
     legend_text.append('intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)))
@@ -445,21 +415,21 @@ if __name__ == '__main__':
     textbox.SetTextSize(1.4* textbox.GetTextSize())
     textbox.Draw("same")
     
-    c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_' + str(nsecs) + '.png')
+    c3.SaveAs(OUTPUT_PATH + '/psf_graph_averaged_' + str(N_SECS_PSF) + FILE_TYPE)
  
     ######################################################
     # y-intercept removed in quadrature
     c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     gr3 = TGraphErrors()
-    for i in range(nsecs):
+    for i in range(N_SECS_PSF):
         gr3.SetPoint(int(i), float(xpoints[i]), (av_sigma[i]**2 - y_int**2)**0.5 )  
         gr3.SetPointError(int(i), float(0), (av_sigma_error[i]**2 + y_int_error**2)**0.5)    
 #        gr3.SetPointError(int(i), float(0), abs(av_sigma_error[i]**2 - y_int_error**2)**0.5)    
       
     xmin = 0.
-    xmax = 100.
+    xmax = 250.
     ymin = 0.
-    ymax = float(6.)
+    ymax = float(10.)
     gr_scale_dummy = TGraph()
     gr_scale_dummy.SetPoint(0,xmin,ymin)
     gr_scale_dummy.SetPoint(1,xmax,ymax)
@@ -468,7 +438,7 @@ if __name__ == '__main__':
     gr_scale_dummy.Draw("AP") 
         
 #     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
-    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
+    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", xmin, xmax)
 #     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
     fit_func_2.SetParameter(0,0.1)
     fit_func_2.SetParameter(1,2.0)
@@ -503,7 +473,7 @@ if __name__ == '__main__':
     textbox.SetFillColor(0)
     textbox.SetTextColor(2)
     textbox.SetTextSize(1.4* textbox.GetTextSize())
-    textbox.Draw("same")
+#     textbox.Draw("same")
     
     chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
     
@@ -523,20 +493,20 @@ if __name__ == '__main__':
     gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
     gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
     
-    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(nsecs) + '.pdf')
+    c3.SaveAs(OUTPUT_PATH + 'psf_graph_averaged_quad_subtracted' + str(N_SECS_PSF) + FILE_TYPE)
    
-    
+    print "Finished"
     exit()
     
     
-#    savepath = '/home/mmmerlin/output/PSF/'
+#    OUTPUT_PATH = '/home/mmmerlin/output/PSF/'
 #    i = 0
 #    for stat in rawlist:
 #        if stat.npix <= 50:
 #            i += 1
 #            legend_text = []
 #            legend_text.append('npix = ' + str(stat.npix))
-#            TV.TrackToFile_ROOT_2D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+#            TV.TrackToFile_ROOT_2D(stat.data, OUTPUT_PATH + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
 #            if i >25: break
 #            
     
@@ -546,7 +516,7 @@ if __name__ == '__main__':
         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
 #        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-#        TV.TrackToFile_ROOT_2D_3D(stat.data, savepath + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
+#        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + str(i) + '.png', legend_text=legend_text, fitline=stat.LineOfBestFit )
     
     
     ListToHist([stat.discriminator for stat in rawlist], '/home/mmmerlin/output/PSF/raw_disc.pdf', histmax = 5000)
