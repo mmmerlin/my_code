@@ -234,7 +234,7 @@ def DrawStat(stat, zoom_to_point = False):
 
 def CollatePickles():
 #     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
-    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13']
+    filter_list = ['N03','N04','N05','N08','N12']
     in_path = "/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2/"
     out_path = "/mnt/hgfs/VMShared/Data/DES_analysis/collated/"
 
@@ -479,10 +479,14 @@ if __name__ == '__main__':
     OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/Sensorwise_analysis/'
     
 #     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
-    filter_list = ['N01']
+    filter_list = ['N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
     for filter in filter_list:
-        DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/collated/' + filter + '.pickle', filter)
+        try:
+            DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/collated/' + filter + '.pickle', filter)
+        except:
+            GLOBAL_OUT.append('Failed %s'%filter)
     
+    for line in GLOBAL_OUT: print line
     print "Finished all"
     exit()
     
