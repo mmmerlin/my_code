@@ -232,6 +232,217 @@ def DrawStat(stat, zoom_to_point = False):
 
 #===============================================================================
 
+def CollatePickles():
+#     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13']
+    in_path = "/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2/"
+    out_path = "/mnt/hgfs/VMShared/Data/DES_analysis/collated/"
+
+    dirlist = listdir(in_path)
+
+    for filter in filter_list:
+        nfiles = 0
+        datalist = []
+        for filename in dirlist:
+            if str.find(str(in_path + filename),filter) != -1:
+                print "Loading %s"%(in_path + filename)
+                nfiles += 1 
+                for item in pickle.load(open(in_path + filename, 'rb')):
+                    datalist.append(item)
+        
+        print "Unpickled %s tracks for sensor %s"%(len(datalist),filter)
+        pickle.dump(datalist, open(out_path + filter + '.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+        print "Finished collating %s"%filter
+        message = '%s files for sensor %s containing %s tracks'%(nfiles, filter, len(datalist))
+        print message
+        GLOBAL_OUT.append(message)
+        del datalist
+        
+    for line in GLOBAL_OUT: print line
+    print "Finished."
+
+
+def DoPSF_Analysis(collated_pickle, sensor_name):
+    from os import sys
+    stdout = sys.stdout
+    
+    sys.stdout = open(OUTPUT_PATH + sensor_name + '.txt','w')
+    rawlist = []
+    for item in pickle.load(open(collated_pickle, 'rb')):
+        rawlist.append(item)
+    print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter) 
+
+    post_cuts = []
+    nstats = 0
+    rawstats = 0
+    
+    TRACK_LENGTH_CUT = 50
+    DISCRIMINATOR_CUT = 600
+    R2_CUT = 0.95
+    N_SECS_PSF = 7
+    
+    ###################################################
+####     Applying cuts
+    
+    for stat in rawlist:
+        if GetEdgeType(stat) != "none" and GetEdgeType(stat) != "midline": continue
+        
+        if stat.diagonal_length_pixels >= TRACK_LENGTH_CUT:
+            if stat.LineOfBestFit.R2 >= R2_CUT:
+                if stat.discriminator < DISCRIMINATOR_CUT:
+                    post_cuts.append(stat); nstats += 1
+    
+    print "%s stats loaded" %len(rawlist)
+    print "%s after cuts" %len(post_cuts) 
+    
+
+    ######################################################
+    #do analysis, deal with averaging and compiling return values
+    xpoints, sigmas, sigma_errors = [], [], []
+    av_sigma = [0.] * N_SECS_PSF
+    av_sigma_error = [0.] * N_SECS_PSF
+    npts = 0
+    
+    for i,stat in enumerate(post_cuts): 
+        xs,s,se = MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, N_SECS_PSF, tgraph_filename=OUTPUT_PATH + str(i) + FILE_TYPE)
+        assert N_SECS_PSF == len(xs) or len(xs) == 0
+        for j in range(len(xs)):
+            xpoints.append(xs[j])
+            sigmas.append(s[j])
+            sigma_errors.append(se[j])
+            av_sigma[j] += s[j]
+            av_sigma_error[j] += se[j]**2
+        npts += 1
+    
+    for j in range(N_SECS_PSF): #make averages into averages
+        av_sigma[j] /= float(npts)
+        av_sigma_error[j] = (av_sigma_error[j]/float(npts))**0.5
+
+
+    ######################################################
+    # Averaged points
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+    gr2 = TGraphErrors()
+    for i in range(N_SECS_PSF):
+        gr2.SetPoint(int(i), float(xpoints[i]), av_sigma[i])   
+        gr2.SetPointError(int(i), float(0), av_sigma_error[i])   
+        
+    fit_func = TF1("line","[1]*x + [0]", 0,100)
+#     fit_func = TF1("line","TMath::Sqrt([1]*x) + [0]", 0, 100)
+    fit_func.SetNpx(1000)
+    gr2.Fit(fit_func, "MEQ", "")
+    a = fit_func.GetParameter(1) 
+    a_error = fit_func.GetParError(1)
+    y_int = fit_func.GetParameter(0) 
+    y_int_error = fit_func.GetParError(0)
+    R2 = gr2.GetCorrelationFactor()**2
+            
+    gr2.SetLineColor(2)
+    gr2.SetMarkerColor(2)
+    gr2.Draw("AP")
+    fit_func.Draw("same")
+    gr2.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+    gr2.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+    
+    gr2.GetYaxis().SetRangeUser(0,10)
+    gr2.GetXaxis().SetRangeUser(0,250)
+    
+    legend_text = []
+    legend_text.append('grad = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
+    legend_text.append('intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)) + ' #mum')
+    legend_text.append('R^{2} = ' + str(round(R2,3)))
+    textbox = TPaveText(0.5,0.25,0.85,0.5,"NDC")
+    for line in legend_text: textbox.AddText(line)
+    textbox.SetFillColor(0)
+    textbox.SetTextSize(1.4* textbox.GetTextSize())
+    textbox.Draw("same")
+    
+    c3.SaveAs(OUTPUT_PATH + sensor_name + '_' + str(N_SECS_PSF) + '_sections.png')
+    c3.SaveAs(OUTPUT_PATH + sensor_name + '_' + str(N_SECS_PSF) + '_sections.pdf')
+ 
+    ######################################################
+    # y-intercept removed in quadrature
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+    gr3 = TGraphErrors()
+    for i in range(N_SECS_PSF):
+        gr3.SetPoint(int(i), float(xpoints[i]), (av_sigma[i]**2 - y_int**2)**0.5 )  
+        gr3.SetPointError(int(i), float(0), (av_sigma_error[i]**2 + y_int_error**2)**0.5)    
+#        gr3.SetPointError(int(i), float(0), abs(av_sigma_error[i]**2 - y_int_error**2)**0.5)    
+      
+    xmin = 0.
+    xmax = 250.
+    ymin = 0.
+    ymax = float(10.)
+    gr_scale_dummy = TGraph()
+    gr_scale_dummy.SetPoint(0,xmin,ymin)
+    gr_scale_dummy.SetPoint(1,xmax,ymax)
+    gr_scale_dummy.SetMarkerColor(0)
+    gr_scale_dummy.SetMarkerSize(0)
+    gr_scale_dummy.Draw("AP") 
+        
+#     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
+    fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", xmin, xmax)
+#     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
+    fit_func_2.SetParameter(0,0.1)
+    fit_func_2.SetParameter(1,2.0)
+    fit_func_2.SetNpx(1000)
+    gr3.Fit(fit_func_2, "ME0", "")
+#     a = fit_func_2.GetParameter(1) 
+#     a_error = fit_func_2.GetParError(1)
+#     b = fit_func_2.GetParameter(0) 
+#     b_error = fit_func_2.GetParError(0)
+#     R2 = gr3.GetCorrelationFactor()**2
+             
+    gr3.SetLineColor(4)
+    gr3.SetMarkerColor(4)
+    fit_func_2.SetLineColor(4)
+    gr3.Draw("Psame")
+    gr3.GetYaxis().SetTitle('Diffusion #sigma (#mum)')
+    gr3.GetXaxis().SetTitle('Av. Si Depth (#mum)')
+    gr2.Draw("Psame")
+    fit_func.Draw("same")
+    fit_func_2.Draw("lsame")
+    
+
+     
+    legend_text = []
+    legend_text.append('Intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)) + ' #mum')
+#     legend_text.append('Slope = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
+#     legend_text.append('R^{2} = ' + str(round(R2,3)))
+    textbox = TPaveText(0.15,0.65,0.5,0.85,"NDC")
+    for line in legend_text:
+        print line
+        textbox.AddText(line)
+    textbox.SetFillColor(0)
+    textbox.SetTextColor(2)
+    textbox.SetTextSize(1.4* textbox.GetTextSize())
+#     textbox.Draw("same")
+    
+    chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
+    
+    legend_text = []
+    legend_text.append('Sqrt dependence:')
+    legend_text.append('#chi^{2}_{Red} = ' + str(round(chisqred,3)))
+    textbox2 = TPaveText(0.5,0.2,0.85,0.40,"NDC")
+    for line in legend_text:
+        print line
+        textbox2.AddText(line)
+    textbox2.SetFillColor(0)
+    textbox2.SetTextColor(4)
+#     textbox2.SetTextSize(1.4* textbox2.GetTextSize())
+    textbox2.Draw("same")
+    
+    gr_scale_dummy.GetXaxis().SetRangeUser(0,250)
+    
+    gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
+    gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
+    
+    c3.SaveAs(OUTPUT_PATH + sensor_name + '_quad_subtracted_' + str(N_SECS_PSF) + '_sections.png')
+    c3.SaveAs(OUTPUT_PATH + sensor_name + '_quad_subtracted_' + str(N_SECS_PSF) + '_sections.pdf')
+   
+    print "Finished %s"%sensor_name
+    sys.stdout = stdout
+
 
 
 if __name__ == '__main__':
@@ -256,15 +467,24 @@ if __name__ == '__main__':
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
      
-    DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
-    for line in GLOBAL_OUT: print line
-    print 'Finished analysis'
-    exit()   
+#     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
+#     for line in GLOBAL_OUT: print line
+#     print 'Finished analysis'
+#     exit()   
+    
+#     CollatePickles()
+#     exit()
     
     
-    OUTPUT_PATH = "/mnt/hgfs/VMShared/output/DES_analysis/N10/"
+    OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/Sensorwise_analysis/'
     
-    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+#     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+    filter_list = ['N01']
+    for filter in filter_list:
+        DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/collated/' + filter + '.pickle', filter)
+    
+    print "Finished all"
+    exit()
     
     
     rawlist = []
