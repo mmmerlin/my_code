@@ -460,7 +460,7 @@ def DoPSF_Analysis(collated_pickle, sensor_name, ROOT_Filename):
     print "Finished %s"%sensor_name
 #     sys.stdout = stdout
 
-def ReDrawAllGraphsInROOTFILE(filename):
+def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
     rootfile = TFile.Open(filename, "READ")
     c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     
@@ -501,41 +501,24 @@ def ReDrawAllGraphsInROOTFILE(filename):
             print "Skipped %s"%filter
         
     for i, graph in enumerate(graphlist):
-#         print i
-#         print repr(graph)
         graph.SetLineColor(4)
         graph.SetMarkerColor(4)
         graph.Draw("Psame")
     
-    
-     
-#     legend_text = []
-#     legend_text.append('Intercept = ' + str(round(y_int,2)) + ' #pm ' + str(round(y_int_error,2)) + ' #mum')
-# #     legend_text.append('Slope = ' + str(round(a,4)) + ' #pm ' + str(round(a_error,4)))
-# #     legend_text.append('R^{2} = ' + str(round(R2,3)))
-#     textbox = TPaveText(0.15,0.65,0.5,0.85,"NDC")
-#     for line in legend_text:
-#         print line
-#         textbox.AddText(line)
-#     textbox.SetFillColor(0)
-#     textbox.SetTextColor(2)
-#     textbox.SetTextSize(1.4* textbox.GetTextSize())
-# #     textbox.Draw("same")
-    
-#     chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
-    
-#     legend_text = []
-#     legend_text.append('Sqrt dependence:')
-#     legend_text.append('#chi^{2}_{Red} = ' + str(round(chisqred,3)))
-#     textbox2 = TPaveText(0.5,0.2,0.85,0.40,"NDC")
-#     for line in legend_text:
-#         print line
-#         textbox2.AddText(line)
-#     textbox2.SetFillColor(0)
-#     textbox2.SetTextColor(4)
-# #     textbox2.SetTextSize(1.4* textbox2.GetTextSize())
-#     textbox2.Draw("same")
-    
+    if rootfilename_for_comparison is not None:
+        altgraphlist = []
+        for i, filter in enumerate(filter_list):
+            temp = rootfile.Get(filter)
+            if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
+                altgraphlist.append(temp)
+            else:
+                print "Skipped %s from alt-set"%filter
+        
+        for i, graph in enumerate(altgraphlist):
+            fitfunc = graph.GetFunction('line')
+            yint = fitfunc.GetParameter('p0')
+        
+        
     
     gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
     gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
@@ -563,19 +546,23 @@ if __name__ == '__main__':
 
 
 #     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_N10_only/'
-    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_new_data/'
+#     pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_new_data/'
+    pickle_stem = '/mnt/hgfs/VMShared/Data/DES_analysis/newset_collated/'
     input_path  = '/mnt/hgfs/VMShared/Data/des_new_darks/split/'
-    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
-#     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
+
 
 #===============================================================================
 
     if SPECIFIC_FILE != None: SINGLE_FILE = True
      
+     
+     
 #     DoAnalysis(input_path, pickle_stem, SINGLE_FILE, SPECIFIC_FILE=SPECIFIC_FILE, SINGLE_POINT=SINGLE_POINT)
 #     for line in GLOBAL_OUT: print line
 #     print 'Finished analysis'
 #     exit()   
+    
+    
     
 #     CollatePickles()
 #     exit()
@@ -583,41 +570,31 @@ if __name__ == '__main__':
     
     OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/temp/'
     
-    
-    
-#     ReDrawAllGraphsInROOTFILE(rootfilename)
-#     print "Finished combining graphs"
-#     exit()
-    
-    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
-#     filter_list = ['N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
-#     filter_list = ['S24','S25','S26','S27','S28','S29','S30','S31']
-#     filter_list = ['N02']
-    for filter in filter_list:
-        try:
-            DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/newset_collated/' + filter + '.pickle', filter, rootfilename)
-        except:
-            GLOBAL_OUT.append('Failed %s'%filter)
-        
-    for line in GLOBAL_OUT: print line
-    print "Finished all"
+#     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
+    rootfilename_for_comparison = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
+    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
+    ReDrawAllGraphsInROOTFILE(rootfilename, rootfilename_for_comparison)
+    print "Finished combining graphs"
     exit()
+ 
+    
+#     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+#     for filter in filter_list:
+#         try:
+#             DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/newset_collated/' + filter + '.pickle', filter, rootfilename)
+#         except:
+#             GLOBAL_OUT.append('Failed %s'%filter)
+#         
+#     for line in GLOBAL_OUT: print line
+#     print "Finished all"
+#     exit()
     
     
     rawlist = []
-    filter = 'N10'
-#     file_list = []
-#     for filename in listdir(pickle_stem):
-#         if str.find(str(pickle_stem + filename),filter) != -1:
-#             print "Loading %s"%(pickle_stem + filename)
-#             for item in pickle.load(open(pickle_stem + filename, 'rb')):
-#                 rawlist.append(item)
-#     print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter)
-# 
-#     pickle.dump(rawlist, open(pickle_stem + 'all_tracks.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
-    
-    
-    for item in pickle.load(open(pickle_stem + 'all_tracks.pickle', 'rb')):
+    pickle_filename = 'N30.pickle'
+#     pickle_filename = 'all_tracks.pickle'
+#     for item in pickle.load(open(pickle_stem + 'all_tracks.pickle', 'rb')):
+    for item in pickle.load(open(pickle_stem + pickle_filename, 'rb')):
         rawlist.append(item)
     print "Unpickled %s tracks for sensor %s"%(len(rawlist),filter) 
 
@@ -627,10 +604,11 @@ if __name__ == '__main__':
     nstats = 0
     rawstats = 0
     
+    
     TRACK_LENGTH_CUT = 50
     DISCRIMINATOR_CUT = 600
     R2_CUT = 0.95
-    N_SECS_PSF = 6
+    N_SECS_PSF = 7
     
     ###################################################
 ####     Applying cuts
@@ -650,18 +628,18 @@ if __name__ == '__main__':
     print "%s after cuts" %len(post_cuts) 
     
     ###################################################
-    # Produce indivual track profiles
-#     for i in range(1,2):
-#         stat = post_cuts[i]
-#         legend_text = []
-#         legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
-#         legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
-#         legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
-#         TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + str(i) + FILE_TYPE, fitline=stat.LineOfBestFit, legend_text=legend_text )
-# #                     TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
-#         TrackFitting_DES.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, N_SECS_PSF, OUTPUT_PATH + str(i) + 'psf_vs_depth'  + '.png')
-#     
-#     exit()
+#### Produce indivual track profiles
+    for i in range(19,21):
+        stat = post_cuts[i]
+        legend_text = []
+        legend_text.append('R^{2} = ' + str(round(stat.LineOfBestFit.R2,5)))
+        legend_text.append('Disc = ' + str(round(stat.discriminator,0)))
+        legend_text.append('Chisq = ' + str(stat.LineOfBestFit.chisq_red))
+        TV.TrackToFile_ROOT_2D_3D(stat.data, OUTPUT_PATH + str(i) + FILE_TYPE, fitline=stat.LineOfBestFit, legend_text=legend_text )
+#                     TrackFitting.MeasurePSF_Whole_track(stat.data, stat.LineOfBestFit)
+        TrackFitting_DES.MeasurePSF_in_Sections(stat.data, stat.LineOfBestFit, N_SECS_PSF, OUTPUT_PATH + str(i) + 'psf_vs_depth'  + '.png', DEBUG = True, DEBUG_Filenum = i)
+     
+    exit()
 
 
     ############################################
