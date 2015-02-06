@@ -462,6 +462,7 @@ def DoPSF_Analysis(collated_pickle, sensor_name, ROOT_Filename):
 
 def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
     rootfile = TFile.Open(filename, "READ")
+    if rootfilename_for_comparison is not None: altrootfile = TFile.Open(rootfilename_for_comparison, "READ")
     c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     
     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
@@ -479,45 +480,37 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
     gr_scale_dummy.SetMarkerSize(0)
     gr_scale_dummy.Draw("AP") 
         
-# #     fit_func_2 = TF1("line","[1]*x + [0]", 0, 100)
-#     fit_func_2 = TF1("line","TMath::Sqrt([1]*x) + [0]", xmin, xmax)
-# #     fit_func_2 = TF1("line","TMath::Sqrt([1]*x)", 0, 100)
-#     fit_func_2.SetParameter(0,0.1)
-#     fit_func_2.SetParameter(1,2.0)
-#     fit_func_2.SetNpx(1000)
-#     gr3.Fit(fit_func_2, "ME0", "")
 
-    
-
-#     fit_func_2.SetLineColor(4)
-#     fit_func.Draw("same")
-#     fit_func_2.Draw("lsame")
-    
     for i, filter in enumerate(filter_list):
         temp = rootfile.Get(filter)
         if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
             graphlist.append(temp)
         else:
             print "Skipped %s"%filter
-        
+    
+    
     for i, graph in enumerate(graphlist):
         graph.SetLineColor(4)
         graph.SetMarkerColor(4)
         graph.Draw("Psame")
     
+    
     if rootfilename_for_comparison is not None:
-        altgraphlist = []
-        for i, filter in enumerate(filter_list):
-            temp = rootfile.Get(filter)
+        alt_y_ints = {}
+        alt_grads = {}
+        altgraphlist = {}
+        for filter in filter_list:
+            temp = altrootfile.Get(filter)
             if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
-                altgraphlist.append(temp)
+                altgraphlist[filter] = temp
+                fitfunc = temp.GetFunction('line')
+                yint = fitfunc.GetParameter('p0')
+                grad = fitfunc.GetParameter('p1')
+                alt_y_ints[filter] = yint  
+                alt_grads[filter] = grad  
             else:
                 print "Skipped %s from alt-set"%filter
-        
-        for i, graph in enumerate(altgraphlist):
-            fitfunc = graph.GetFunction('line')
-            yint = fitfunc.GetParameter('p0')
-        
+            
         
     
     gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
@@ -527,10 +520,67 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
     c3.SaveAs(OUTPUT_PATH + 'all_plots_together' + '.pdf')
    
     
+    if rootfilename_for_comparison is not None:
+        y_ints_errors = {}
+        y_ints = {}
+        grads_errors = {}
+        grads = {}
+        graphlist = {}
+        for filter in filter_list:
+            temp = rootfile.Get(filter)
+            if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
+                graphlist[filter] = temp
+                fitfunc = temp.GetFunction('line')
+                yint = fitfunc.GetParameter('p0')
+                yint_error = fitfunc.GetParError(fitfunc.GetParNumber('p0'))
+                grad = fitfunc.GetParameter('p1')
+                grad_error = fitfunc.GetParError(fitfunc.GetParNumber('p1'))
+                y_ints[filter] = yint  
+                grads[filter] = grad 
+                y_ints_errors[filter] = yint_error  
+                grads_errors[filter] = grad_error  
+            else:
+                print "Skipped %s from alt-set"%filter
     
-    
-    
+        c4 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+        yint_graph = TGraphErrors()
+        pointnum = 0
+        for filtername in filter_list:
+            if y_ints.has_key(filtername) and alt_y_ints.has_key(filtername):
+                x = y_ints.get(filtername)
+                y = alt_y_ints.get(filtername)
+                yint_graph.SetPoint(pointnum, x, y)
+#                 x_error = y_ints_errors.get(filtername)
+#                 y_error = alt_y_ints_errors.get(filtername)
+#                 yint_graph.SetPointError(pointnum, x_error, y_error)
+                pointnum += 1
+        
+#         yint_graph.Fit('pol1')
+        yint_graph.Fit('pol1', '','',3.5, 4.75)
+        
+        yint_graph.SetMarkerSize(2)
+        yint_graph.SetMarkerStyle(2)
+        yint_graph.Draw("APsame")
+        yint_graph.GetXaxis().SetRangeUser(3.5,4.75)
+        yint_graph.GetYaxis().SetRangeUser(3.5,4.75)
+        c4.SaveAs(OUTPUT_PATH + 'dataset_corellation_yints' + '.png')
 
+        grad_graph = TGraphErrors()
+        pointnum = 0
+        for filtername in filter_list:
+            if grads.has_key(filtername) and alt_grads.has_key(filtername):
+                x = grads.get(filtername)
+                y = alt_grads.get(filtername)
+                grad_graph.SetPoint(pointnum, x, y)
+                pointnum += 1
+                
+        grad_graph.Fit('pol1','','', 0.018, 1)
+                
+        grad_graph.SetMarkerSize(2)
+        grad_graph.SetMarkerStyle(2)
+        grad_graph.Draw("AP")
+        c4.SaveAs(OUTPUT_PATH + 'dataset_corellation_grads' + '.png')
+        
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -570,12 +620,13 @@ if __name__ == '__main__':
     
     OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/temp/'
     
+# #     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
+#     rootfilename_for_comparison = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
 #     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
-    rootfilename_for_comparison = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
-    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
-    ReDrawAllGraphsInROOTFILE(rootfilename, rootfilename_for_comparison)
-    print "Finished combining graphs"
-    exit()
+# #     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
+#     ReDrawAllGraphsInROOTFILE(rootfilename, rootfilename_for_comparison)
+#     print "Finished combining graphs"
+#     exit()
  
     
 #     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
