@@ -466,6 +466,8 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
     c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
     
     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+    boule_1 = ['S28','S23','S22','S01','N06','N01','N28','N27','N30','N24']
+    
     graphlist = []
     
     xmin = 0.
@@ -485,7 +487,7 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
             graphlist.append(temp)
         else:
-            print "Skipped %s from mainset"%filter
+            print "Skipped %s from set1"%filter
     
     for i, graph in enumerate(graphlist):
         graph.SetLineColor(4)
@@ -545,7 +547,7 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
 #                 GLOBAL_OUT.append(filter + '\t' + str(yint) + '\t' + str(yint_error) + '\t' + str(grad) + '\t' + str(grad_error))
             else:
                 rootdata[filter] = False
-                print "Skipped %s from mainset"%filter
+                print "Skipped %s from set1"%filter
     
         c4 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
         yint_graph = TGraphErrors()
@@ -578,7 +580,7 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         yint_graph.SetMarkerSize(2)
         yint_graph.SetMarkerStyle(2)
         yint_graph.Draw("APsame")
-        y_equals_x.Draw('same')
+#         y_equals_x.Draw('same')
 #         yint_graph.GetXaxis().SetRangeUser(3.5,4.75)
 #         yint_graph.GetYaxis().SetRangeUser(3.5,4.75)
         y_int_chisq = yint_graph.GetFunction('pol1').GetChisquare() / yint_graph.GetFunction('pol1').GetNDF()
@@ -590,7 +592,7 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         grad_graph.SetMarkerSize(2)
         grad_graph.SetMarkerStyle(2)
         grad_graph.Draw("AP")
-        y_equals_x.Draw('same')
+#         y_equals_x.Draw('same')
         grad_chisq = grad_graph.GetFunction('pol1').GetChisquare() / grad_graph.GetFunction('pol1').GetNDF()
         print 'grad Chi Sq = %s'%grad_chisq
         c4.SaveAs(OUTPUT_PATH + 'dataset_corellation_grads' + '.png')
