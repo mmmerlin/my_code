@@ -597,8 +597,8 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         yint_graph.SetMarkerStyle(2)
         yint_graph.Draw("APsame")
 #         y_equals_x.Draw('same')
-#         yint_graph.GetXaxis().SetRangeUser(3.5,4.75)
-#         yint_graph.GetYaxis().SetRangeUser(3.5,4.75)
+        yint_graph.GetXaxis().SetRangeUser(3.7,4.6)
+        yint_graph.GetYaxis().SetRangeUser(3.7,4.6)
         y_int_chisq = yint_graph.GetFunction('pol1').GetChisquare() / yint_graph.GetFunction('pol1').GetNDF()
         print 'y_int Chi Sq = %s'%y_int_chisq
         c4.SaveAs(OUTPUT_PATH + 'dataset_corellation_yints' + '.png')
@@ -608,6 +608,8 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         grad_graph.SetMarkerSize(2)
         grad_graph.SetMarkerStyle(2)
         grad_graph.Draw("AP")
+        grad_graph.GetXaxis().SetRangeUser(0.018,0.026)
+        grad_graph.GetYaxis().SetRangeUser(0.018,0.026)
 #         y_equals_x.Draw('same')
         grad_chisq = grad_graph.GetFunction('pol1').GetChisquare() / grad_graph.GetFunction('pol1').GetNDF()
         print 'grad Chi Sq = %s'%grad_chisq

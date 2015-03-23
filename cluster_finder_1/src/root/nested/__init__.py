@@ -22,7 +22,18 @@ import lsst.afw.geom.ellipses as Ellipses
 #from lsst.afw.geom.geomLib import Point2D
 #from lsst.afw.detection.detectionLib import Footprint
 #from lsst.afw.geom.ellipses.ellipsesLib import BaseCore
+import lsst.afw.display.utils as displayUtils
 
+def DrawStat(stat):
+    if stat.ellipse_b == 0:
+        ds9.zoom(22, stat.centroid_x,stat.centroid_y, 0) # use to zoom to a single point
+        
+    argstring = "@:"+str(4*stat.ellipse_Ixx)+','+str(4*stat.ellipse_Ixy)+','+str(4*stat.ellipse_Iyy) #multiply by four just to make it more exaggerated otherwise they all look like cirlces
+    ds9.dot(argstring,stat.centroid_x,stat.centroid_y) #ellipse around the centroid
+    ds9.dot("x",stat.centroid_x,stat.centroid_y)# cross on the peak
+    displayUtils.drawBBox(stat.BBox, borderWidth=0.5) # border to fully encompass the bbox and no more
+    ds9.zoom(22, stat.centroid_x,stat.centroid_y, 0) # use to zoom to a single point
+    print 'length (diag,px) = %s, length (3D,true,um) = %s, flux = %s, npix = %s, dedx = %s' %(stat.diagonal_length_pixels, stat.length_true_um, stat.flux, stat.npix, stat.de_dx)
 
 
 if __name__ == '__main__':
@@ -37,10 +48,14 @@ if __name__ == '__main__':
 #    input_file = '20_9_100_rings_420big.fits' # big tree ring data
 #    input_file = '8_9_100_rings_420.fits' #small tree ring data
 #    input_file = 'ben/ellipse2.fits.gz' # just an ellipse from Ben
-    input_file = "darks/from ccdtest.e2v.CCD250.112-04.dark.20140419-190507/000-00_dark_dark_500.00_001_20140420034133.fits"
+#     input_file = "darks/from ccdtest.e2v.CCD250.112-04.dark.20140419-190507/000-00_dark_dark_500.00_001_20140420034133.fits"
+
+    input_file = "/mnt/hgfs/VMShared/Data/Andrei_fe55_set1/113-03_fe55_fe55_015.00_005_20140709224636.fits"
 
 
-    exposure = afwImg.ExposureF(input_path + input_file)
+    exposure = afwImg.ExposureF(input_file)
+
+#     exposure = afwImg.ExposureF(input_path + input_file)
     maskedImage = exposure.getMaskedImage()
 
 
@@ -79,12 +94,11 @@ if __name__ == '__main__':
 
 
 
-
     # let's find some clusters!
     # set up some finding parameters
-    thresholdValue = mean
-    npixMin = 5
-    grow = 1
+    thresholdValue = mean +30
+    npixMin = 2
+    grow = 2
     isotropic = False
 
     # do the finding
@@ -134,8 +148,8 @@ if __name__ == '__main__':
 #        centroid_y = footprint.getCentroid()[1]
         xcoords.append(centroid_x)
         ycoords.append(centroid_y)
-        ds9.dot("x",centroid_x,centroid_y)# cross on the peak
-    
+#         ds9.dot("x",centroid_x,centroid_y)# cross on the peak
+        displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
     
         Ixx = quadshape.getIxx()
         Iyy = quadshape.getIyy()
@@ -152,7 +166,7 @@ if __name__ == '__main__':
 
 #    ds9.zoom(5, footPrints[0].getPeaks()[0].getFx(), footPrints[0].getPeaks()[0].getFy())
 #    ds9.zoom(4, 2050, 2060)
-    ds9.zoom(6, 2000, 2035)
+#     ds9.zoom(6, 2000, 2035)
 
 
 #
