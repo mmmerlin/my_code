@@ -43,13 +43,13 @@ def MakeToFSpectrum():
     timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -155.1) #OCS
     print 'Total entries = %s' %len(timecodes)
      
-#     tmin = -10
-#     tmax = 100
-#     bins = ((tmax-tmin) -1) *50
+    tmin = 70
+    tmax = 160
+    bins = ((tmax-tmin) -1) *50
      
-    tmin = 6950
-    tmax = 7200
-    bins = (tmax-tmin) +1 
+#     tmin = 0
+#     tmax = 4200
+#     bins = (tmax-tmin) +1 
      
     #make the histogram of the timecodes
     fig2 = pl.figure()
@@ -107,15 +107,15 @@ if __name__ == '__main__':
     from root_functions import *
     from TrackViewer import TrackToFile_ROOT_2D_3D
 
-    in_stem = '/mnt/hgfs/VMShared/Data/oxford/'
-    path = 'Day 4/Run 20/'
+    in_stem = '/mnt/hgfs/VMShared/Data/oxford_march_2015/E404_50nm_425/'
+    path = 'Voltage_scan/1000/'
 #     path = 'Day 2/Run 11/'
-    out_stem = '/mnt/hgfs/VMShared/output/oxford/'
+    out_stem = '/mnt/hgfs/VMShared/output/oxford_march_2015/'
     
     from os import mkdir
 #     mkdir(out_stem + path)
-    Make3DScatter()
-    exit()
+#     Make3DScatter()
+#     exit()
 #     TimepixDirToPImMMSDatafile('/mnt/hgfs/VMShared/Data/oxford/PMT comp/', '/mnt/hgfs/VMShared/Data/oxford/pimms.txt')
     
 #     MakeToFSpectrum()
@@ -123,14 +123,16 @@ if __name__ == '__main__':
 #     exit()
     
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=6960, t_max = 6980)
-#     TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + path + 'temp.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None)
+    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3200, t_max = 3500)
+    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + 'temp.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 8)
 #     import lsst.afw.display.ds9 as ds9
 #     try:
 #         ds9.initDS9(False)
 #     except ds9.Ds9Error:
 #         print 'DS9 launch bug error thrown away (probably)'
-#   
+   
 #     ds9.mtv(image)
+    exit()
 
     
     slicelist = []

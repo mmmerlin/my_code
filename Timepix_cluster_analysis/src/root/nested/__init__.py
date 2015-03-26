@@ -49,7 +49,7 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, include_index):
 #     out_image[include_index] = my_image[include_index]
 #     my_image = my_image[include_index]
     
-    return my_image
+    return my_image[include_index]
 
 
 
@@ -70,9 +70,9 @@ FILE_TYPE = ".png"
 
 if __name__ == '__main__':
     print "Running QE analysis\n "
-#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/old_sensor/'
+    path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/old_sensor/'
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-4(120nm)400thr/'
-    path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-2(200nm)/'
+#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-2(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-6(50nm)/'
     
     
@@ -145,8 +145,8 @@ if __name__ == '__main__':
             cluster_sizes.append(npix)
 #         exit()
         
-#     ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 9, histmin = 1, histmax = 10)
-    ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 8, histmin = 2, histmax = 10)
+    ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 9, histmin = 1, histmax = 10)
+#     ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 8, histmin = 2, histmax = 10)
     
     
     
