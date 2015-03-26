@@ -43,17 +43,17 @@ def MakeToFSpectrum():
     timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -155.1) #OCS
     print 'Total entries = %s' %len(timecodes)
      
-    tmin = 70
-    tmax = 160
-    bins = ((tmax-tmin) -1) *50
+#     tmin = 70
+#     tmax = 160
+#     bins = ((tmax-tmin) -1) *50
      
-#     tmin = 0
-#     tmax = 4200
-#     bins = (tmax-tmin) +1 
+    tmin = 0
+    tmax = 4200
+    bins = (tmax-tmin) +1 
      
     #make the histogram of the timecodes
     fig2 = pl.figure()
-    pl.subplot(2,1,1)
+#     pl.subplot(2,1,1)
      
     pl.hist(timecodes, bins = bins, range = [tmin,tmax])
 #     pl.ylim([0,2000])
@@ -78,8 +78,8 @@ def MakeToFSpectrum():
 #     pl.xlim([tmin,tmax])
 #     pl.title('PMT Spectrum')
 #     
-#     fig2.savefig(out_stem + path + 'Full_ToF.png')
-# #     pl.xlim([7100,7170])
+    fig2.savefig(out_stem + 'voltage/Full_ToF.png')
+#     pl.xlim([7100,7170])
 #     fig2.savefig(out_stem + path + 'ToF_ROI.png')
 # #     pl.xlim([6900,7170])
 #     fig2.savefig(out_stem + path + 'ToF_ROI_More.png')
@@ -118,13 +118,13 @@ if __name__ == '__main__':
 #     exit()
 #     TimepixDirToPImMMSDatafile('/mnt/hgfs/VMShared/Data/oxford/PMT comp/', '/mnt/hgfs/VMShared/Data/oxford/pimms.txt')
     
-#     MakeToFSpectrum()
-#     print "Finished ToF Spectrum"
+    MakeToFSpectrum()
+    print "Finished ToF Spectrum"
 #     exit()
     
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=6960, t_max = 6980)
-    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3200, t_max = 3500)
-    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + 'temp.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 8)
+    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3363, t_max = 3400)
+    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + '/voltage/3300-3500-1000.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 9)
 #     import lsst.afw.display.ds9 as ds9
 #     try:
 #         ds9.initDS9(False)
