@@ -30,7 +30,8 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, include_index):
         t = data[2]
         
         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
-            my_array[y,x] = 1
+            if include_index[y][x] == 0:
+                my_array[y,x] = 1
       
         my_image = makeImageFromArray(my_array)
     
@@ -41,7 +42,8 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, include_index):
     
         for pointnum in range(len(x)):
             if x[pointnum] >= xmin and x[pointnum] <= xmax and y[pointnum] >= ymin and y[pointnum] <= ymax:
-                my_array[y[pointnum],x[pointnum]] = 1
+                if include_index[y][x] == 0:
+                    my_array[y[pointnum],x[pointnum]] = 1
             
         my_image = makeImageFromArray(my_array)
     
@@ -91,7 +93,6 @@ if __name__ == '__main__':
     n_pix_hits = 0
     nfiles = 0.
     
-    templist = []
     for filename in os.listdir(path):
         xs, ys, ts = GetXYTarray_SingleFile(path + filename, xmin, xmax, ymin, ymax)
         assert len(xs) == len(ys) == len(ts)
@@ -99,23 +100,24 @@ if __name__ == '__main__':
         n_goodframes += 1
         nfiles += 1
         n_pix_hits += len(ts)
-        
+         
     pixels_per_frame = float(n_pix_hits) / float(n_goodframes)
-    
-    
-    intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
-    
-    print 'nfiles = %s'%nfiles
      
+     
+    intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+     
+    print 'nfiles = %s'%nfiles
+      
     for thr_range in range(1,1001):
         badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
         index = np.where(intensity_array <= badpixel_threshold)
         intensity_sum = intensity_array[index].sum(dtype = np.float64)
         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-    
-    
+     
+     
     index = np.where(intensity_array <= 0.03*(nfiles))
-    
+
+
 
     if DISPLAY:
         try:
@@ -131,10 +133,11 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     
-    for filename in os.listdir(path):
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, index)
-        
-        if DISPLAY: ds9.mtv(image)
+    display_num = 5
+    for filenum, filename in enumerate(os.listdir(path)):
+        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, include_index=index)
+
+        if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
         threshold = afwDetect.Threshold(thresholdValue)
         footPrintSet = afwDetect.FootprintSet(image, threshold, npixMin)
@@ -142,16 +145,16 @@ if __name__ == '__main__':
         footPrints = footPrintSet.getFootprints()
 
         for footprint in footPrints:
-            if DISPLAY: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
+            if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
 #         print cluster_sizes
-        exit()
+        if filenum == display_num: exit()
     
     
     histmax = 25
 #     filename = '7153-6(300nm)_Run1'
-    filename = 'Old_sensor_2_run_3'
+    filename = 'test'
     ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-20.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
     ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-20.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
