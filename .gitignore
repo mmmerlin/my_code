@@ -6,5 +6,3 @@
 .deps
 *.so
 .sconsign.dblite
-*.project
-*.pydevproject

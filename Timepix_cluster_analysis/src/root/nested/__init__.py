@@ -49,12 +49,12 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, include_index):
 #     out_image[include_index] = my_image[include_index]
 #     my_image = my_image[include_index]
     
-    return my_image[include_index]
+    return my_image#[include_index]
 
 
 
 
-DISPLAY = False
+DISPLAY = True
 
 glitch_threshold = 5000
 
@@ -66,15 +66,22 @@ ymax = 254
 
 
 OUTPUT_PATH = '/mnt/hgfs/VMShared/output/chem_new_sensors_first_light/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/'
+
 FILE_TYPE = ".png"
 
 if __name__ == '__main__':
-    print "Running QE analysis\n "
-    path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/old_sensor/'
+#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/old_sensor/'
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-4(120nm)400thr/'
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-2(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-6(50nm)/'
-    
+
+#     path     = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_senors/7343-6(50nm_bad_bonds)/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_1/'
+    path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_2/Run3/'
+#     path = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
+
     
     #########################
     c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
@@ -94,25 +101,22 @@ if __name__ == '__main__':
         n_pix_hits += len(ts)
         
     pixels_per_frame = float(n_pix_hits) / float(n_goodframes)
-    print "av. pixels per frame = %.2f"%pixels_per_frame
     
     
     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
-     
+    
     print 'nfiles = %s'%nfiles
      
-#     for thr_range in range(1,1001):
-#         badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
-#         index = np.where(intensity_array <= badpixel_threshold)
-#         intensity_sum = intensity_array[index].sum(dtype = np.float64)
-#         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
+    for thr_range in range(1,1001):
+        badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
+        index = np.where(intensity_array <= badpixel_threshold)
+        intensity_sum = intensity_array[index].sum(dtype = np.float64)
+        print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
     
     
     index = np.where(intensity_array <= 0.03*(nfiles))
     
-    
 
-    
     if DISPLAY:
         try:
             ds9.initDS9(False)
@@ -137,17 +141,19 @@ if __name__ == '__main__':
         footPrintSet = afwDetect.FootprintSet(footPrintSet, grow, isotropic)
         footPrints = footPrintSet.getFootprints()
 
-        
-
         for footprint in footPrints:
             if DISPLAY: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
-#         exit()
-        
-    ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 9, histmin = 1, histmax = 10)
-#     ListToHist(cluster_sizes, OUTPUT_PATH + 'test.png', log_z = False, nbins = 8, histmin = 2, histmax = 10)
+#         print cluster_sizes
+        exit()
     
+    
+    histmax = 25
+#     filename = '7153-6(300nm)_Run1'
+    filename = 'Old_sensor_2_run_3'
+    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-20.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-20.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
     
     
