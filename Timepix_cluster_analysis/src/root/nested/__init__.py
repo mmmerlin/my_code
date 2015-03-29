@@ -15,9 +15,8 @@ from root_functions import ListToHist
 from lsst.afw.image import makeImageFromArray
 
 
-def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=1):
-#     from lsst.afw.image import makeImageFromArray
-
+def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.ones((1), dtype = np.float64)):
+    from lsst.afw.image import makeImageFromArray
     data = np.loadtxt(filename)
 
     my_array = np.zeros((256,256), dtype = np.int32)
@@ -29,25 +28,22 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=1):
         x = data[0] 
         y = data[1] 
         t = data[2]
-        
         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
             my_array[y,x] = 1
-      
-        my_image = makeImageFromArray(my_array*mask_pixels)
+        my_image = makeImageFromArray(my_array*mask_pixels.transpose())
     
     else:   
         x = data[:, 0] 
         y = data[:, 1] 
         t = data[:, 2]
-    
         for pointnum in range(len(x)):
             if x[pointnum] >= xmin and x[pointnum] <= xmax and y[pointnum] >= ymin and y[pointnum] <= ymax:
                 my_array[y[pointnum],x[pointnum]] = 1
         
-        my_image = makeImageFromArray(my_array*mask_pixels)
-    
-
+        my_image = makeImageFromArray(my_array*mask_pixels.transpose())
     return my_image
+
+
 
 def MakeMaskArray(mask_list):
     mask_array = np.ones((256,256), dtype = np.int32)
@@ -63,6 +59,7 @@ def MaskBadPixels(data_array, mask_list):
     mask_array = MakeMaskArray(mask_list)
     data_array *= mask_array
     
+    
 def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
     intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
     nfiles = len(os.listdir(path))
@@ -71,7 +68,7 @@ def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
     return mask_pixels
     
 
-DISPLAY = True
+DISPLAY = False
 
 glitch_threshold = 5000
 
@@ -94,12 +91,12 @@ if __name__ == '__main__':
 #     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-6(50nm)/'
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_senors/7343-6(50nm_bad_bonds)/'
+    path     = '/mnt/hgfs/VMShared/Data/new_senors/7343-6(50nm_bad_bonds)/Run1/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_1/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_2/Run3/'
 #     path = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
 
-    path     = '/mnt/hgfs/VMShared/Data/temp/temp/'
+#     path     = '/mnt/hgfs/VMShared/Data/temp/temp/'
 
     
     #########################
@@ -133,8 +130,10 @@ if __name__ == '__main__':
 #     print intensity_array[187][19]
      
          
-    pixel_mask = MakeMaskArray(GeneratePixelMaskListFromFileset(path, 0.04))
-         
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.04)    
+    print 'masking %s pixels'%len(mask_list[0])
+    pixel_mask = MakeMaskArray(mask_list)
+    
 #     MaskBadPixels(intensity_array, pixel_mask)
 #     temp = makeImageFromArray(intensity_array)
 #     ds9.mtv(temp)
@@ -173,8 +172,8 @@ if __name__ == '__main__':
     
     display_num = 10
     for filenum, filename in enumerate(os.listdir(path)):
-        print filenum
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=0)
+#         print filenum
+        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
@@ -191,11 +190,10 @@ if __name__ == '__main__':
         if filenum == display_num: exit()
     
     
-    histmax = 25
-#     filename = '7153-6(300nm)_Run1'
-    filename = 'test'
-    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-20.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
-    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-20.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
+    histmax = 10
+    filename = '7343-6(50nm_bad_bonds)_run1'
+    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
     
     
