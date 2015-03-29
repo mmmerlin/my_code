@@ -68,7 +68,7 @@ def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
     return mask_pixels
     
 
-DISPLAY = False
+DISPLAY = True
 
 glitch_threshold = 5000
 
@@ -130,9 +130,7 @@ if __name__ == '__main__':
 #     print intensity_array[187][19]
      
          
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.04)    
-    print 'masking %s pixels'%len(mask_list[0])
-    pixel_mask = MakeMaskArray(mask_list)
+
     
 #     MaskBadPixels(intensity_array, pixel_mask)
 #     temp = makeImageFromArray(intensity_array)
@@ -141,26 +139,26 @@ if __name__ == '__main__':
     
     
     
-      
+#     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+#     nfiles = len(os.listdir(path))
+#       
 #     for thr_range in range(1,1001):
 #         badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
 #         index = np.where(intensity_array <= badpixel_threshold)
 #         intensity_sum = intensity_array[index].sum(dtype = np.float64)
-# #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-#      
-#     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
+#         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
+#       
+# #     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
 #     print 'done'
 #     exit()
-# #     index = np.where(intensity_array <= 0.03*(nfiles))
-#     index = np.where(intensity_array <= 0.03*(nfiles))
 
 
 
-    if DISPLAY:
-        try:
-            ds9.initDS9(False)
-        except ds9.Ds9Error:
-            print 'DS9 launch bug error thrown away (probably)'
+
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.017)    
+    print 'masking %s pixels'%len(mask_list[0])
+    pixel_mask = MakeMaskArray(mask_list)
+
 
     
     thresholdValue = 1
@@ -170,10 +168,11 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     
-    display_num = 10
+    display_num = 11
     for filenum, filename in enumerate(os.listdir(path)):
-#         print filenum
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
+        print filenum
+#         image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
+        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
@@ -186,7 +185,6 @@ if __name__ == '__main__':
             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
-#         print cluster_sizes
         if filenum == display_num: exit()
     
     
