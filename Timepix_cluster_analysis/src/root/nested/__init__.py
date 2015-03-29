@@ -15,7 +15,7 @@ from root_functions import ListToHist
 from lsst.afw.image import makeImageFromArray
 
 
-def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels):
+def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=1):
 #     from lsst.afw.image import makeImageFromArray
 
     data = np.loadtxt(filename)
@@ -31,11 +31,9 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels):
         t = data[2]
         
         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
-#             if include_index[y][x] == 0:
-        
             my_array[y,x] = 1
       
-        my_image = makeImageFromArray(my_array)
+        my_image = makeImageFromArray(my_array*mask_pixels)
     
     else:   
         x = data[:, 0] 
@@ -44,16 +42,12 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels):
     
         for pointnum in range(len(x)):
             if x[pointnum] >= xmin and x[pointnum] <= xmax and y[pointnum] >= ymin and y[pointnum] <= ymax:
-#                 if include_index[y][x] == 0:
                 my_array[y[pointnum],x[pointnum]] = 1
-            
-        my_image = makeImageFromArray(my_array)
+        
+        my_image = makeImageFromArray(my_array*mask_pixels)
     
-#     out_image = np.zeros((256,256), dtype = np.int32)
-#     out_image[include_index] = my_image[include_index]
-#     my_image = my_image[include_index]
-    
-    return my_image#[include_index]
+
+    return my_image
 
 def MakeMaskArray(mask_list):
     mask_array = np.ones((256,256), dtype = np.int32)
@@ -62,9 +56,20 @@ def MakeMaskArray(mask_list):
         y = mask_list[0][i]
         x = mask_list[1][i]
         mask_array[y][x] = 0
-    
     return mask_array
 
+
+def MaskBadPixels(data_array, mask_list):
+    mask_array = MakeMaskArray(mask_list)
+    data_array *= mask_array
+    
+def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
+    intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+    nfiles = len(os.listdir(path))
+    mask_pixels = np.where(intensity_array >= noise_threshold*(nfiles))
+
+    return mask_pixels
+    
 
 DISPLAY = True
 
@@ -116,37 +121,39 @@ if __name__ == '__main__':
 #     pixels_per_frame = float(n_pix_hits) / float(n_goodframes)
      
      
-    intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
-    nfiles = len(os.listdir(path))
-#     intensity_array /= float(nfiles)
-    mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
-    print mask_pixels
-    for element in mask_pixels:
-        print element
-        
-    print mask_pixels
-    print intensity_array[187][19]
-    
-    mask = MakeMaskArray(mask_pixels)
-    intensity_array *= mask
-    
-    ds9.mtv(makeImageFromArray(intensity_array))
-    exit()
+#     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+#     nfiles = len(os.listdir(path))
+# #     intensity_array /= float(nfiles)
+#     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
+#     print mask_pixels
+#     for element in mask_pixels:
+#         print element
+#          
+#     print mask_pixels
+#     print intensity_array[187][19]
+     
+         
+    pixel_mask = MakeMaskArray(GeneratePixelMaskListFromFileset(path, 0.04))
+         
+#     MaskBadPixels(intensity_array, pixel_mask)
+#     temp = makeImageFromArray(intensity_array)
+#     ds9.mtv(temp)
+#     exit()
     
     
     
       
-    for thr_range in range(1,1001):
-        badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
-        index = np.where(intensity_array <= badpixel_threshold)
-        intensity_sum = intensity_array[index].sum(dtype = np.float64)
-#         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-     
-    mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
-    print 'done'
-    exit()
+#     for thr_range in range(1,1001):
+#         badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
+#         index = np.where(intensity_array <= badpixel_threshold)
+#         intensity_sum = intensity_array[index].sum(dtype = np.float64)
+# #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
+#      
+#     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
+#     print 'done'
+#     exit()
+# #     index = np.where(intensity_array <= 0.03*(nfiles))
 #     index = np.where(intensity_array <= 0.03*(nfiles))
-    index = np.where(intensity_array <= 0.03*(nfiles))
 
 
 
@@ -164,10 +171,11 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     
-    display_num = 5
+    display_num = 10
     for filenum, filename in enumerate(os.listdir(path)):
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=mask_pixels)
-
+        print filenum
+        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=0)
+        
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
         threshold = afwDetect.Threshold(thresholdValue)
