@@ -6,8 +6,7 @@ import string
                
 from ROOT import TCanvas, TF1, TH1F, TGraph
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
-from my_functions import GetXYTarray_SingleFile, MakeCompositeImage_Timepix,\
-    TimepixToExposure
+from my_functions import GetXYTarray_SingleFile, MakeCompositeImage_Timepix, TimepixToExposure
 from math import floor
 import lsst.afw.display.ds9 as ds9
 import lsst.afw.display.utils as displayUtils
@@ -82,7 +81,7 @@ def ViewIntensityArrayInDs9(intensity_array):
     ds9.mtv(makeImageFromArray(100*intensity_array/float(intensity_array.max())))
 
 
-DISPLAY = False
+DISPLAY = True
 
 glitch_threshold = 5000
 
@@ -186,7 +185,7 @@ if __name__ == '__main__':
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
 #     ViewMaskInDs9(pixel_mask)
-    
+#     exit()
     
     
     thresholdValue = 1
@@ -197,7 +196,6 @@ if __name__ == '__main__':
     cluster_sizes = []
     pixels_per_frame_list = []
     
-    test = 0
     display_num = 100
     for filenum, filename in enumerate(os.listdir(path)):
 #         OpenTimepixInDS9(path + filename)
@@ -205,7 +203,7 @@ if __name__ == '__main__':
         
 #         image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)
         image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
-#         print npix
+        print npix
         pixels_per_frame_list.append(npix)
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
@@ -219,7 +217,8 @@ if __name__ == '__main__':
             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
-#         if filenum == display_num: exit()
+        if filenum == display_num: exit()
+        if filenum == display_num: print npix
     
     
     histmax = 10
