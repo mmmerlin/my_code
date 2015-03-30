@@ -48,7 +48,7 @@ def MakeToFSpectrum():
 #     bins = ((tmax-tmin) -1) *50
      
     tmin = 0
-    tmax = 4200
+    tmax = 11810
     bins = (tmax-tmin) +1 
      
     #make the histogram of the timecodes
@@ -112,6 +112,9 @@ if __name__ == '__main__':
 #     path = 'Day 2/Run 11/'
     out_stem = '/mnt/hgfs/VMShared/output/oxford_march_2015/'
     
+    in_stem = '/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/last_1k/'
+    path = ''
+    
     from os import mkdir
 #     mkdir(out_stem + path)
 #     Make3DScatter()
@@ -123,8 +126,9 @@ if __name__ == '__main__':
 #     exit()
     
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=6960, t_max = 6980)
-    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3363, t_max = 3400)
-    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + '/voltage/3300-3500-1000.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 9)
+#     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3363, t_max = 3400)
+    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 5000, t_min=6750, t_max = 7000)
+    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + '/voltage/3300-3500-1000.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 40)
 #     import lsst.afw.display.ds9 as ds9
 #     try:
 #         ds9.initDS9(False)

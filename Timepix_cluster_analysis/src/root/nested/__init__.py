@@ -13,6 +13,8 @@ import lsst.afw.display.utils as displayUtils
 import lsst.afw.detection   as afwDetect
 from root_functions import ListToHist
 from lsst.afw.image import makeImageFromArray
+import matplotlib.pyplot as pl
+from my_functions import OpenTimepixInDS9
 
 
 def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.ones((1), dtype = np.float64)):
@@ -85,20 +87,21 @@ OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/'
 FILE_TYPE = ".png"
 
 if __name__ == '__main__':
-#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/old_sensor/'
-#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-4(120nm)400thr/'
-#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-2(200nm)/'
-#     path     = '/mnt/hgfs/VMShared/Data/chem_new_sensors_first_light/7343-6(50nm)/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-4(120nm)400thr/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-2(200nm)/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-6(50nm)/'
 
-#     path     = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
-    path     = '/mnt/hgfs/VMShared/Data/new_senors/7343-6(50nm_bad_bonds)/Run1/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_1/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_senors/OLD_SENSOR_2/Run3/'
-#     path = '/mnt/hgfs/VMShared/Data/new_senors/7153-6(300nm)/Run1/'
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7343-6(50nm_bad_bonds)/Run1/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_1/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_2/Run3/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7153-6(300nm)/Run1/'
 
 #     path     = '/mnt/hgfs/VMShared/Data/temp/temp/'
 
-    
+
+
     #########################
     c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
     
@@ -139,23 +142,39 @@ if __name__ == '__main__':
     
     
     
-#     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
-#     nfiles = len(os.listdir(path))
-#       
-#     for thr_range in range(1,1001):
-#         badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
-#         index = np.where(intensity_array <= badpixel_threshold)
-#         intensity_sum = intensity_array[index].sum(dtype = np.float64)
+    intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+    nfiles = len(os.listdir(path))
+    
+    xlist, ylist = [],[]
+    for thr_range in range(1,1001):
+        badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
+        index = np.where(intensity_array <= badpixel_threshold)
+        intensity_sum = intensity_array[index].sum(dtype = np.float64)
 #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-#       
-# #     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
-#     print 'done'
-#     exit()
+        xlist.append(thr_range/10.)
+        ylist.append(intensity_sum/nfiles)
+    
+    fig = pl.figure(figsize = (16,9), dpi = 72)
+    pl.subplot(2,1,1)
+    pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+    pl.ylabel('# Hit pixels')
+    pl.plot(xlist, ylist)
+    pl.subplot(2,1,2)
+    pl.xlim([0,10])
+    pl.plot(xlist, ylist)
+    pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+    pl.ylabel('#hit pixels')
+    pl.show()
+    fig.savefig(OUTPUT_PATH + 'Turn-on_curve.png')
+       
+#     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
+    print 'done'
+    exit()
 
 
 
 
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.017)    
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.03)    
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
 
@@ -168,9 +187,13 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     
-    display_num = 11
+    display_num = 100
     for filenum, filename in enumerate(os.listdir(path)):
         print filenum
+        
+#         OpenTimepixInDS9(path + filename)
+#         exit()
+        
 #         image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
         image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
         
