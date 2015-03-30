@@ -6,7 +6,8 @@ import string
                
 from ROOT import TCanvas, TF1, TH1F, TGraph
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
-from my_functions import GetXYTarray_SingleFile, MakeCompositeImage_Timepix
+from my_functions import GetXYTarray_SingleFile, MakeCompositeImage_Timepix,\
+    TimepixToExposure
 from math import floor
 import lsst.afw.display.ds9 as ds9
 import lsst.afw.display.utils as displayUtils
@@ -70,6 +71,14 @@ def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
     return mask_pixels
     
 
+def ViewMaskInDs9(mask_array):
+    ds9.mtv(makeImageFromArray(mask_array))
+    
+
+def ViewIntensityArrayInDs9(intensity_array):
+    ds9.mtv(makeImageFromArray(100*intensity_array/float(intensity_array.max())))
+
+
 DISPLAY = True
 
 glitch_threshold = 5000
@@ -92,13 +101,16 @@ if __name__ == '__main__':
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-2(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-6(50nm)/'
 
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7343-6(50nm_bad_bonds)/Run1/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_1/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_2/Run3/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7153-6(300nm)/Run1/'
 
-#     path     = '/mnt/hgfs/VMShared/Data/temp/temp/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A5(50nm)/'
 
 
 
@@ -141,9 +153,11 @@ if __name__ == '__main__':
 #     exit()
     
     
-    
-    intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
     nfiles = len(os.listdir(path))
+    
+#     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+    intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+#     ViewIntensityArrayInDs9(intensity_array)
     
     xlist, ylist = [],[]
     for thr_range in range(1,1001):
@@ -169,7 +183,7 @@ if __name__ == '__main__':
        
 #     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
     print 'done'
-    exit()
+#     exit()
 
 
 
@@ -177,8 +191,10 @@ if __name__ == '__main__':
     mask_list = GeneratePixelMaskListFromFileset(path, 0.03)    
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
-
-
+    ViewMaskInDs9(pixel_mask)
+    exit()
+    
+    
     
     thresholdValue = 1
     npixMin = 1
