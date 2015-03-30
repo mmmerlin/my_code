@@ -33,7 +33,7 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.on
         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
             my_array[y,x] = 1
         my_image = makeImageFromArray(my_array*mask_pixels.transpose())
-        return_npix = my_array.sum()
+        return_npix = (my_array*mask_pixels.transpose()).sum() #apply the mask, *then* sum!
     
     else:   
         x = data[:, 0] 
@@ -44,7 +44,7 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.on
                 my_array[y[pointnum],x[pointnum]] = 1
         
         my_image = makeImageFromArray(my_array*mask_pixels.transpose())
-        return_npix = my_array.sum()
+        return_npix = (my_array*mask_pixels.transpose()).sum() #apply the mask, *then* sum!
         
     return my_image, return_npix
 
@@ -66,7 +66,8 @@ def MaskBadPixels(data_array, mask_list):
     
     
 def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
-    intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+#     intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+    intensity_array = MakeCompositeImage_Timepix(path, xmin, xmax, ymin, ymax, 0, 9999, -99999, 99999, return_raw_array=True)
     nfiles = len(os.listdir(path))
     mask_pixels = np.where(intensity_array >= noise_threshold*(nfiles))
 
@@ -98,14 +99,14 @@ FILE_TYPE = ".png"
 
 if __name__ == '__main__':
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7343-6(50nm_bad_bonds)/Run1/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_1/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_2/Run3/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7153-6(300nm)/Run1/'
+   
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run1/'
+    ID = 'A1_run1'
+    
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A5(50nm)/'
 
 
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     pl.plot(xlist, ylist)
     pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
     pl.ylabel('#hit pixels')
-    fig.savefig(OUTPUT_PATH + 'Turn-on_curve.png')
+    fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
        
 
 
@@ -196,14 +197,13 @@ if __name__ == '__main__':
     cluster_sizes = []
     pixels_per_frame_list = []
     
-    display_num = 100
+    display_num = 10
     for filenum, filename in enumerate(os.listdir(path)):
 #         OpenTimepixInDS9(path + filename)
 #         exit()
         
 #         image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)
         image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
-        print npix
         pixels_per_frame_list.append(npix)
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
@@ -217,17 +217,15 @@ if __name__ == '__main__':
             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
-        if filenum == display_num: exit()
-        if filenum == display_num: print npix
+#         if filenum == display_num: exit()
     
     
-    histmax = 10
-    filename = 'first_light_old_sensor_with_mask'
-    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
-#     ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
+    histmax = 30
+    ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+#     ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
-    histmax = 50
-    ListToHist(pixels_per_frame_list, OUTPUT_PATH + filename + 'pixel_per_frame.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+    histmax = 300
+    ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + 'pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
     
     
     print '\n***End code***'      
