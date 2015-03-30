@@ -47,7 +47,7 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.on
         my_image = makeImageFromArray(my_array*mask_pixels.transpose())
         return_npix = my_array.sum()
         
-    return my_image, 
+    return my_image, return_npix
 
 
 
@@ -82,7 +82,7 @@ def ViewIntensityArrayInDs9(intensity_array):
     ds9.mtv(makeImageFromArray(100*intensity_array/float(intensity_array.max())))
 
 
-DISPLAY = True
+DISPLAY = False
 
 glitch_threshold = 5000
 
@@ -93,17 +93,11 @@ xmax = 254
 ymax = 254
 
 
-OUTPUT_PATH = '/mnt/hgfs/VMShared/output/chem_new_sensors_first_light/'
 OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/'
 
 FILE_TYPE = ".png"
 
 if __name__ == '__main__':
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-4(120nm)400thr/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-2(200nm)/'
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/7343-6(50nm)/'
-
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/7343-6(50nm_bad_bonds)/Run1/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/OLD_SENSOR_1/'
@@ -188,7 +182,7 @@ if __name__ == '__main__':
 
 
 
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)    
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.015)    
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
 #     ViewMaskInDs9(pixel_mask)
@@ -201,19 +195,18 @@ if __name__ == '__main__':
     isotropic = False
     
     cluster_sizes = []
+    pixels_per_frame_list = []
     
     test = 0
     display_num = 100
     for filenum, filename in enumerate(os.listdir(path)):
-        print filenum
-        
 #         OpenTimepixInDS9(path + filename)
 #         exit()
         
-#         image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask, return_npix=test)
-        print test
-        exit()
+#         image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)
+        image, npix = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
+#         print npix
+        pixels_per_frame_list.append(npix)
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
@@ -226,14 +219,16 @@ if __name__ == '__main__':
             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
             cluster_sizes.append(npix)
-        if filenum == display_num: exit()
+#         if filenum == display_num: exit()
     
     
     histmax = 10
-    filename = '7343-6(50nm_bad_bonds)_run1'
+    filename = 'first_light_old_sensor_with_mask'
     ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
-    ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
+#     ListToHist(cluster_sizes, OUTPUT_PATH + filename + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
+    histmax = 50
+    ListToHist(pixels_per_frame_list, OUTPUT_PATH + filename + 'pixel_per_frame.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
     
     
     print '\n***End code***'      
