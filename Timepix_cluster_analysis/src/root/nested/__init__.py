@@ -34,6 +34,7 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.on
         if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
             my_array[y,x] = 1
         my_image = makeImageFromArray(my_array*mask_pixels.transpose())
+        return_npix = my_array.sum()
     
     else:   
         x = data[:, 0] 
@@ -44,7 +45,9 @@ def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.on
                 my_array[y[pointnum],x[pointnum]] = 1
         
         my_image = makeImageFromArray(my_array*mask_pixels.transpose())
-    return my_image
+        return_npix = my_array.sum()
+        
+    return my_image, 
 
 
 
@@ -155,7 +158,7 @@ if __name__ == '__main__':
     
     nfiles = len(os.listdir(path))
     
-#     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
+#     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
     intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
 #     ViewIntensityArrayInDs9(intensity_array)
     
@@ -174,25 +177,21 @@ if __name__ == '__main__':
     pl.ylabel('# Hit pixels')
     pl.plot(xlist, ylist)
     pl.subplot(2,1,2)
-    pl.xlim([0,10])
+    xmax_zoom_percentage = 15
+    pl.xlim([0,xmax_zoom_percentage])
+    pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
     pl.plot(xlist, ylist)
     pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
     pl.ylabel('#hit pixels')
-    pl.show()
     fig.savefig(OUTPUT_PATH + 'Turn-on_curve.png')
        
-#     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
-    print 'done'
-#     exit()
 
 
 
-
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.03)    
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)    
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
-    ViewMaskInDs9(pixel_mask)
-    exit()
+#     ViewMaskInDs9(pixel_mask)
     
     
     
@@ -203,6 +202,7 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     
+    test = 0
     display_num = 100
     for filenum, filename in enumerate(os.listdir(path)):
         print filenum
@@ -211,7 +211,9 @@ if __name__ == '__main__':
 #         exit()
         
 #         image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax)#, mask_pixels=pixel_mask)
-        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask)
+        image = TimepixToExposure_binary(path + filename, xmin, xmax, ymin, ymax, mask_pixels=pixel_mask, return_npix=test)
+        print test
+        exit()
         
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
