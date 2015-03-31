@@ -4,7 +4,7 @@ from os import listdir
 import numpy as np
 import string        
                
-from ROOT import TCanvas, TF1, TH1F, TGraph
+from ROOT import TCanvas, TF1, TH1F, TGraph, TFile
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
 from my_functions import *
 from math import floor
@@ -37,6 +37,8 @@ if __name__ == '__main__':
     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
     ID = 'A1_run3'
     
+    rootfilename = OUTPUT_PATH + ID + '.root'
+    ROOTfile = TFile.Open(rootfilename, "UPDATE")
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
@@ -113,8 +115,14 @@ if __name__ == '__main__':
     pl.ylabel('# Hit pixels')
     fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
     
-    ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
-    ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+    gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
+    gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+    
+    gr1.Write()
+    gr2.Write()
+    ROOTfile.Close()
+    
+    del gr1, gr2
     exit()
 
 
@@ -162,6 +170,10 @@ if __name__ == '__main__':
     
     histmax = 300
     ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
+    
+    
+    
+    ROOTfile.Close()
     
     
     print '\n***End code***'      
