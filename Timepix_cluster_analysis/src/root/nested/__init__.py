@@ -33,13 +33,19 @@ FILE_TYPE = ".png"
 
 if __name__ == '__main__':
 
-#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
-   
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
-    ID = 'A1_run3'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
+#     ID = 'A1_run3'
+    
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run1/'
+#     ID = 'A1_run1'
+
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run1/'
+    ID = 'A2_run1'
+    
+    
     
     rootfilename = OUTPUT_PATH + ID + '.root'
-    ROOTfile = TFile.Open(rootfilename, "UPDATE")
+    ROOTfile = TFile.Open(rootfilename, "RECREATE")
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
