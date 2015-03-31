@@ -16,13 +16,11 @@ from lsst.afw.image import makeImageFromArray
 import matplotlib.pyplot as pl
 
 
-DISPLAY = True
+DISPLAY = False
 
 glitch_threshold = 5000
 
 # old sensor
-global xmin, ymin, xmax, ymax
-
 xmin = 1
 ymin = 1
 xmax = 254
@@ -34,6 +32,7 @@ OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/'
 FILE_TYPE = ".png"
 
 if __name__ == '__main__':
+
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
    
     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
@@ -126,12 +125,19 @@ if __name__ == '__main__':
     del gr1, gr2
 
 
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)    
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)  
+    pixel_mask = MakeMaskArray(mask_list)  
     print 'masking %s pixels'%len(mask_list[0])
-    pixel_mask = MakeMaskArray(mask_list)
+
+    if DISPLAY:
+        try:
+            ds9.initDS9(False)
+        except ds9.Ds9Error:
+            print 'DS9 launch bug error thrown away (probably)'
+
+
 #     ViewMaskInDs9(pixel_mask)
 #     exit()
-    
     
     thresholdValue = 1
     npixMin = 1
@@ -173,11 +179,11 @@ if __name__ == '__main__':
     
     histmax = 300
     name = 'pixels_per_frame'
-    h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
+    h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax, name = name)
     
     histmax = max(ions_per_frame)
     name = 'ions_per_frame'
-    h3 = ListToHist(ions_per_frame, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax)
+    h3 = ListToHist(ions_per_frame, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax, name = name)
     
     h1.Write()
     h2.Write()
