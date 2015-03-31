@@ -6,80 +6,14 @@ import string
                
 from ROOT import TCanvas, TF1, TH1F, TGraph
 from root_functions import GetFirstBinBelowX, DoubleGausFit, LanGausFit, LandauFit
-from my_functions import GetXYTarray_SingleFile, MakeCompositeImage_Timepix, TimepixToExposure
+from my_functions import *
 from math import floor
 import lsst.afw.display.ds9 as ds9
 import lsst.afw.display.utils as displayUtils
 import lsst.afw.detection   as afwDetect
-from root_functions import ListToHist
+from root_functions import ListToHist, ListVsList
 from lsst.afw.image import makeImageFromArray
 import matplotlib.pyplot as pl
-from my_functions import OpenTimepixInDS9
-
-
-def TimepixToExposure_binary(filename, xmin, xmax, ymin, ymax, mask_pixels=np.ones((1), dtype = np.float64)):
-    from lsst.afw.image import makeImageFromArray
-    data = np.loadtxt(filename)
-
-    my_array = np.zeros((256,256), dtype = np.int32)
-    
-    if data.shape == (0,):
-        my_image = makeImageFromArray(my_array)
-        
-    elif data.shape == (3,):
-        x = data[0] 
-        y = data[1] 
-        t = data[2]
-        if x >= xmin and x <= xmax and y >= ymin and y <= ymax:
-            my_array[y,x] = 1
-        my_image = makeImageFromArray(my_array*mask_pixels.transpose())
-        return_npix = (my_array*mask_pixels.transpose()).sum() #apply the mask, *then* sum!
-    
-    else:   
-        x = data[:, 0] 
-        y = data[:, 1] 
-        t = data[:, 2]
-        for pointnum in range(len(x)):
-            if x[pointnum] >= xmin and x[pointnum] <= xmax and y[pointnum] >= ymin and y[pointnum] <= ymax:
-                my_array[y[pointnum],x[pointnum]] = 1
-        
-        my_image = makeImageFromArray(my_array*mask_pixels.transpose())
-        return_npix = (my_array*mask_pixels.transpose()).sum() #apply the mask, *then* sum!
-        
-    return my_image, return_npix
-
-
-
-def MakeMaskArray(mask_list):
-    mask_array = np.ones((256,256), dtype = np.int32)
-    
-    for i in range(len(mask_list[0])):
-        y = mask_list[0][i]
-        x = mask_list[1][i]
-        mask_array[y][x] = 0
-    return mask_array
-
-
-def MaskBadPixels(data_array, mask_list):
-    mask_array = MakeMaskArray(mask_list)
-    data_array *= mask_array
-    
-    
-def GeneratePixelMaskListFromFileset(path, noise_threshold = 0.03):
-#     intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-    intensity_array = MakeCompositeImage_Timepix(path, xmin, xmax, ymin, ymax, 0, 9999, -99999, 99999, return_raw_array=True)
-    nfiles = len(os.listdir(path))
-    mask_pixels = np.where(intensity_array >= noise_threshold*(nfiles))
-
-    return mask_pixels
-    
-
-def ViewMaskInDs9(mask_array):
-    ds9.mtv(makeImageFromArray(mask_array))
-    
-
-def ViewIntensityArrayInDs9(intensity_array):
-    ds9.mtv(makeImageFromArray(100*intensity_array/float(intensity_array.max())))
 
 
 DISPLAY = True
@@ -100,8 +34,8 @@ FILE_TYPE = ".png"
 if __name__ == '__main__':
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run5/'
    
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run1/'
-    ID = 'A1_run1'
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
+    ID = 'A1_run3'
     
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
@@ -171,18 +105,20 @@ if __name__ == '__main__':
     pl.ylabel('# Hit pixels')
     pl.plot(xlist, ylist)
     pl.subplot(2,1,2)
-    xmax_zoom_percentage = 15
+    xmax_zoom_percentage = 6
     pl.xlim([0,xmax_zoom_percentage])
     pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
     pl.plot(xlist, ylist)
     pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
-    pl.ylabel('#hit pixels')
+    pl.ylabel('# Hit pixels')
     fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
-       
+    
+    ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
+    ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+    exit()
 
 
-
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.015)    
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)    
     print 'masking %s pixels'%len(mask_list[0])
     pixel_mask = MakeMaskArray(mask_list)
 #     ViewMaskInDs9(pixel_mask)
@@ -225,7 +161,7 @@ if __name__ == '__main__':
 #     ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
     histmax = 300
-    ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + 'pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
+    ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
     
     
     print '\n***End code***'      
