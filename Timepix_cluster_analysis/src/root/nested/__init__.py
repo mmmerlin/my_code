@@ -117,13 +117,11 @@ if __name__ == '__main__':
     
     gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
     gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
-    
+    gr1.SetName('Turn-on_curve')
+    gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
     gr1.Write()
     gr2.Write()
-    ROOTfile.Close()
-    
     del gr1, gr2
-    exit()
 
 
     mask_list = GeneratePixelMaskListFromFileset(path, 0.02)    
@@ -165,15 +163,23 @@ if __name__ == '__main__':
     
     
     histmax = 30
-    ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+    h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
 #     ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
     histmax = 300
-    ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
+    h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
+    
+    histmax = 300
+    h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
     
     
+    h1.SetName('Turn-on_curve')
+    h2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
     
+    h1.Write()
+    h2.Write()
+    h3.Write()
     ROOTfile.Close()
-    
+    del h1, h2, h3
     
     print '\n***End code***'      
