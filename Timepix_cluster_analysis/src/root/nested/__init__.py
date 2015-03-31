@@ -21,6 +21,8 @@ DISPLAY = True
 glitch_threshold = 5000
 
 # old sensor
+global xmin, ymin, xmax, ymax
+
 xmin = 1
 ymin = 1
 xmax = 254
@@ -138,6 +140,7 @@ if __name__ == '__main__':
     
     cluster_sizes = []
     pixels_per_frame_list = []
+    ions_per_frame = []
     
     display_num = 10
     for filenum, filename in enumerate(os.listdir(path)):
@@ -154,7 +157,8 @@ if __name__ == '__main__':
         footPrintSet = afwDetect.FootprintSet(image, threshold, npixMin)
         footPrintSet = afwDetect.FootprintSet(footPrintSet, grow, isotropic)
         footPrints = footPrintSet.getFootprints()
-
+        
+        ions_per_frame.append(len(footPrints))
         for footprint in footPrints:
             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
             npix = afwDetect.Footprint.getNpix(footprint)
@@ -163,18 +167,17 @@ if __name__ == '__main__':
     
     
     histmax = 30
-    h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax)
+    name = 'cluster_size'
+    h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax, name = name)
 #     ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
     
     histmax = 300
+    name = 'pixels_per_frame'
     h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
     
-    histmax = 300
-    h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1)/10, histmin = 1, histmax = histmax)
-    
-    
-    h1.SetName('Turn-on_curve')
-    h2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
+    histmax = max(ions_per_frame)
+    name = 'ions_per_frame'
+    h3 = ListToHist(ions_per_frame, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax)
     
     h1.Write()
     h2.Write()

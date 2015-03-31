@@ -31,6 +31,8 @@ if __name__ == '__main__':
 
     image = AssembleImage(filename, metadata_filename, True)
 #     image = AssembleImage(filename, subtract_background=True)# make image, subtract background and assemble exposure
+    
+#     image = GetImage_SingleAmp(filename, False, 8)
     ds9.mtv(image)
     
     exit()
