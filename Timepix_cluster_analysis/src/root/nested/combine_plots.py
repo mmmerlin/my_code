@@ -1,8 +1,6 @@
 from ROOT import TCanvas, TH1F, TFile, TLegend
 import ROOT
-
 from ROOT import *
-import ROOT
 
 
 gROOT.SetBatch(1) #don't show drawing on the screen along the way

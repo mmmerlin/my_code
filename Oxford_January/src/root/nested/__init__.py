@@ -40,15 +40,16 @@ def MakeToFSpectrum():
 #         for file in os.listdir(input_path):
 #     timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -???) #PEG?
 #     timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -186.5) #Crystal violet
-    timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -155.1) #OCS
+#     timecodes = GetTimecodes_AllFilesInDir(in_stem + path, xmin, xmax, ymin, ymax, -155.1) #OCS
+    timecodes = GetTimecodes_AllFilesInDir(in_stem + path, 0, 255, 0, 255, -215) #OCS
     print 'Total entries = %s' %len(timecodes)
      
-#     tmin = 70
-#     tmax = 160
+#     tmin = 0
+#     tmax = 100
 #     bins = ((tmax-tmin) -1) *50
-     
+      
     tmin = 0
-    tmax = 11810
+    tmax = 4500
     bins = (tmax-tmin) +1 
      
     #make the histogram of the timecodes
@@ -58,7 +59,8 @@ def MakeToFSpectrum():
     pl.hist(timecodes, bins = bins, range = [tmin,tmax])
 #     pl.ylim([0,2000])
     pl.xlim([tmin,tmax])
-    pl.xlabel('Timecodes', horizontalalignment = 'right' )
+#     pl.xlabel('Timecodes', horizontalalignment = 'right' )
+    pl.xlabel('ToF (us)', horizontalalignment = 'right' )
     pl.title('Timepix ToF Spectrum')
 
 #################################### 
@@ -112,8 +114,8 @@ if __name__ == '__main__':
 #     path = 'Day 2/Run 11/'
     out_stem = '/mnt/hgfs/VMShared/output/oxford_march_2015/'
     
-    in_stem = '/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/last_1k/'
-    path = ''
+    in_stem = '/mnt/hgfs/VMShared/temp/'
+    path = 'burt/'
     
     from os import mkdir
 #     mkdir(out_stem + path)
@@ -121,14 +123,14 @@ if __name__ == '__main__':
 #     exit()
 #     TimepixDirToPImMMSDatafile('/mnt/hgfs/VMShared/Data/oxford/PMT comp/', '/mnt/hgfs/VMShared/Data/oxford/pimms.txt')
     
-    MakeToFSpectrum()
-    print "Finished ToF Spectrum"
+#     MakeToFSpectrum()
+#     print "Finished ToF Spectrum"
 #     exit()
     
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=6960, t_max = 6980)
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 2000, t_min=3363, t_max = 3400)
-    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 5000, t_min=6750, t_max = 7000)
-    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + '/voltage/3300-3500-1000.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 40)
+    image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 5000, t_min=3380, t_max = 3395)
+    TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + '/voltage/all_timecodes.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None, zmax = 10)
 #     import lsst.afw.display.ds9 as ds9
 #     try:
 #         ds9.initDS9(False)
@@ -173,7 +175,7 @@ if __name__ == '__main__':
     
     
     MakeTimeSlices(in_stem + path, slicelist, out_stem + path)
-
+    
 
 #     image = MakeCompositeImage_Timepix(in_stem + path, maxfiles = 9999, t_min=0, t_max = 11810)
 #     TrackToFile_ROOT_2D_3D(image.getArray(), out_stem + path + '1.png', plot_opt='surf1', log_z = False, force_aspect= True, fitline = None)

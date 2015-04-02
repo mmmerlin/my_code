@@ -16,7 +16,7 @@ from lsst.afw.image import makeImageFromArray
 import matplotlib.pyplot as pl
 
 
-DISPLAY = False
+DISPLAY = True
 
 glitch_threshold = 5000
 
@@ -39,9 +39,18 @@ if __name__ == '__main__':
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run1/'
 #     ID = 'A1_run1'
 
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run1/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run1/'
     ID = 'A2_run1'
     
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)_eq_test/420/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
+#     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A5(50nm)/'
+    path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run1/'
+    
+    
+    
+    
+    ID = '___TEMP____'
     
     
     rootfilename = OUTPUT_PATH + ID + '.root'
@@ -98,6 +107,7 @@ if __name__ == '__main__':
 #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
     intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
 #     ViewIntensityArrayInDs9(intensity_array)
+#     exit()
     
     xlist, ylist = [],[]
     for thr_range in range(1,1001):
@@ -126,12 +136,12 @@ if __name__ == '__main__':
     gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
     gr1.SetName('Turn-on_curve')
     gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
-    gr1.Write()
-    gr2.Write()
+#     gr1.Write()
+#     gr2.Write()
     del gr1, gr2
 
 
-    mask_list = GeneratePixelMaskListFromFileset(path, 0.02)  
+    mask_list = GeneratePixelMaskListFromFileset(path, 0.015)  
     pixel_mask = MakeMaskArray(mask_list)  
     print 'masking %s pixels'%len(mask_list[0])
 
@@ -142,8 +152,8 @@ if __name__ == '__main__':
             print 'DS9 launch bug error thrown away (probably)'
 
 
-#     ViewMaskInDs9(pixel_mask)
-#     exit()
+    ViewMaskInDs9(-1*(pixel_mask-1))
+    exit()
     
     thresholdValue = 1
     npixMin = 1
