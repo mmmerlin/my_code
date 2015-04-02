@@ -38,8 +38,6 @@ def GetTimecodes_AllFilesInDir(path, winow_xmin = 0, winow_xmax = 999, winow_ymi
                     time_s = (11810. - timecode) * 20e-9
                     time_us = (time_s *1e6)- actual_offset_us
                     timecodes.append(time_us)
-#                     print time_us
-#                     exit()
                 else:
                     timecodes.append(timecode)
 
