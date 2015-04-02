@@ -162,6 +162,11 @@ if __name__ == '__main__':
     import os
     import numpy as np
     
+    from my_functions import OpenTimepixInDS9
+    OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/E404_50nm_newsample/420@133_1.txt')
+    exit()
+    
+    
     expids,durations = np.loadtxt('/mnt/hgfs/VMShared/temp/input.txt', delimiter = '\t', skiprows = 1, usecols = (0,1), unpack = True)
     
     for i in range(len(expids)):

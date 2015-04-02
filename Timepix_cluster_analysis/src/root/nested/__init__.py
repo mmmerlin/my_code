@@ -51,14 +51,14 @@ if __name__ == '__main__':
     
     
     
-    path     = '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_threshold/'
+    root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_threshold/'
     values = [410,415,418,420,421,422,423,424,425,426,427,428,429,430]
     ID = ''
     
     for val in values:
         ID = str(val)
-        path += str(val) + '/'
-        rootfilename = OUTPUT_PATH + str(val) + '_' + ID + '.root'
+        path = root_path + str(val) + '/'
+        rootfilename = OUTPUT_PATH + ID + '.root'
         ROOTfile = TFile.Open(rootfilename, "RECREATE")
     
     #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
@@ -107,54 +107,59 @@ if __name__ == '__main__':
     #     exit()
         
         
+        
+        
+        
+        
+        
         nfiles = len(os.listdir(path))
         
-    #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-        ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
-        
-        xlist, ylist = [],[]
-        for thr_range in range(1,1001):
-            badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
-            index = np.where(intensity_array <= badpixel_threshold)
-            intensity_sum = intensity_array[index].sum(dtype = np.float64)
-    #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-            xlist.append(thr_range/10.)
-            ylist.append(intensity_sum/nfiles)
-        
-        fig = pl.figure(figsize = (16,9), dpi = 72)
-        pl.subplot(2,1,1)
-        pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
-        pl.ylabel('# Hit pixels')
-        pl.plot(xlist, ylist)
-        pl.subplot(2,1,2)
-        xmax_zoom_percentage = 20
-        pl.xlim([0,xmax_zoom_percentage])
-        pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
-        pl.plot(xlist, ylist)
-        pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
-        pl.ylabel('# Hit pixels')
-        fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
-        
-        gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
-        gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
-        gr1.SetName('Turn-on_curve')
-        gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
-        gr1.Write()
-        gr2.Write()
-        del gr1, gr2
-    
-    
-        mask_list = GeneratePixelMaskListFromFileset(path, 0.15)  
+#     #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+#         intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+#         ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
+#         
+#         xlist, ylist = [],[]
+#         for thr_range in range(1,1001):
+#             badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
+#             index = np.where(intensity_array <= badpixel_threshold)
+#             intensity_sum = intensity_array[index].sum(dtype = np.float64)
+#     #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
+#             xlist.append(thr_range/10.)
+#             ylist.append(intensity_sum/nfiles)
+#         
+#         fig = pl.figure(figsize = (16,9), dpi = 72)
+#         pl.subplot(2,1,1)
+#         pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+#         pl.ylabel('# Hit pixels')
+#         pl.plot(xlist, ylist)
+#         pl.subplot(2,1,2)
+#         xmax_zoom_percentage = 20
+#         pl.xlim([0,xmax_zoom_percentage])
+#         pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
+#         pl.plot(xlist, ylist)
+#         pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+#         pl.ylabel('# Hit pixels')
+#         fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
+#         
+#         gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
+#         gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+#         gr1.SetName('Turn-on_curve')
+#         gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
+#         gr1.Write()
+#         gr2.Write()
+#         del gr1, gr2
+#     
+#     
+        mask_list = GeneratePixelMaskListFromFileset(path, 0.40)  
         pixel_mask = MakeMaskArray(mask_list)  
         print 'masking %s pixels'%len(mask_list[0])
-    
-        if DISPLAY:
-            try:
-                ds9.initDS9(False)
-            except ds9.Ds9Error:
-                print 'DS9 launch bug error thrown away (probably)'
-    
+#     
+#         if DISPLAY:
+#             try:
+#                 ds9.initDS9(False)
+#             except ds9.Ds9Error:
+#                 print 'DS9 launch bug error thrown away (probably)'
+#     
         ViewIntensityArrayInDs9(-1*(pixel_mask-1), savefile=OUTPUT_PATH + str(val) + '_pixel_mask.jpeg')
 
 
@@ -191,14 +196,14 @@ if __name__ == '__main__':
                 npix = afwDetect.Footprint.getNpix(footprint)
                 cluster_sizes.append(npix)
     #         if filenum == display_num: exit()
-        if DISPLAY and filenum == display_num: 
-            arg = 'saveimage jpeg ' + str(OUTPUT_PATH + str(val) + '_example_frame.jpeg') + ' 100'
-            ds9.ds9Cmd(arg)
+            if DISPLAY and filenum == display_num: 
+                arg = 'saveimage jpeg ' + str(OUTPUT_PATH + str(val) + '_example_frame.jpeg') + ' 100'
+                ds9.ds9Cmd(arg)
         
         
         histmax = 30
         name = 'cluster_size'
-        h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_1-10.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax, name = name)
+        h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_cluster_size.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax, name = name)
     #     ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_2-10.png', log_z = False, nbins = histmax-2, histmin = 2, histmax = histmax)
         
         histmax = 300
@@ -207,7 +212,7 @@ if __name__ == '__main__':
         
         histmax = max(ions_per_frame)
         name = 'ions_per_frame'
-        h3 = ListToHist(ions_per_frame, OUTPUT_PATH + ID + 'ions_per_frame.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax, name = name)
+        h3 = ListToHist(ions_per_frame, OUTPUT_PATH + ID + '_ions_per_frame.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax, name = name)
         
         h1.Write()
         h2.Write()
