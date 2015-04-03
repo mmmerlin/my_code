@@ -163,7 +163,9 @@ if __name__ == '__main__':
     import numpy as np
     
     from my_functions import OpenTimepixInDS9
-    OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/E404_50nm_newsample/420@133_1.txt')
+#     OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/E404_50nm_newsample/420@133_1.txt')
+#     OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/422_big_only_electrons/1@1_1.txt')
+    OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/422_big_only_ions/1@1_1.txt')
     exit()
     
     

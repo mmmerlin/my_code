@@ -32,6 +32,11 @@ OUTPUT_PATH = '/mnt/hgfs/VMShared/output/suny_01042015/big_runs/'
 FILE_TYPE = ".png"
 
 if __name__ == '__main__':
+    if DISPLAY:
+        try:
+            ds9.initDS9(False)
+        except ds9.Ds9Error:
+            print 'DS9 launch bug error thrown away (probably)'
 
 #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A1(50nm_bad_bonds)/Run3/'
 #     ID = 'A1_run3'
@@ -52,7 +57,9 @@ if __name__ == '__main__':
     
     root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/'
 #     values = [410,415,418,420,421,422,423,424,425,426,427,428,429,430]
-    values = ['422_big_only_ions']#, '422_big_only_electrons']
+#     values = ['422_big_only_ions']
+    values = ['422_big_only_electrons']
+#     values = ['422_big']
     ID = ''
     
     for val in values:
@@ -66,7 +73,7 @@ if __name__ == '__main__':
     #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/old_sensor/'
     #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A5(50nm)/'
     
-        MakeToFSpectrum(path,OUTPUT_PATH + ID, 1, 254, 1, 254, False, [3900,4400])
+#         MakeToFSpectrum(path,OUTPUT_PATH + ID, 1, 254, 1, 254, False, [3900,4400])
     
     
         #########################
@@ -116,9 +123,9 @@ if __name__ == '__main__':
         nfiles = len(os.listdir(path))
         
 #     #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 1000, -99999, 99999, return_raw_array=True)
         ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
-#         exit()
+        exit()
          
         xlist, ylist = [],[]
         for thr_range in range(1,1001):
@@ -144,7 +151,7 @@ if __name__ == '__main__':
         fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
          
         gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
-        gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_0-10.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+        gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_zoomed.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
         gr1.SetName('Turn-on_curve')
         gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
         gr1.Write()
@@ -152,23 +159,22 @@ if __name__ == '__main__':
         del gr1, gr2
      
      
-        mask_list = GeneratePixelMaskListFromFileset(path, 0.15)  
+        mask_list = GeneratePixelMaskListFromFileset(path, 0.40)  
         pixel_mask = MakeMaskArray(mask_list)  
         print 'masking %s pixels'%len(mask_list[0])
-#     
-#         if DISPLAY:
-#             try:
-#                 ds9.initDS9(False)
-#             except ds9.Ds9Error:
-#                 print 'DS9 launch bug error thrown away (probably)'
-#     
+
+
+
+
+
+  
         ViewIntensityArrayInDs9(-1*(pixel_mask-1), savefile=OUTPUT_PATH + str(val) + '_pixel_mask.jpeg')
 
 ###################################################################
         
         thresholdValue = 1
-        npixMin = 1
-        grow = 0
+        npixMin = 2
+        grow = 1
         isotropic = False
         
         cluster_sizes = []
@@ -211,15 +217,15 @@ if __name__ == '__main__':
         name = 'cluster_size'
         h1 = ListToHist(cluster_sizes, OUTPUT_PATH + ID + '_cluster_size.png', log_z = False, nbins = histmax-1, histmin = 1, histmax = histmax, name = name)
         
-        histmax = 101#20001
+        histmax = 20001#201
         name = 'pixels_per_frame'
-        h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixel_per_frame.png', log_z = False, nbins = 100, histmin = 1, histmax = histmax, name = name)
+        h2 = ListToHist(pixels_per_frame_list, OUTPUT_PATH + ID + '_pixels_per_frame.png', log_z = False, nbins = 100, histmin = 1, histmax = histmax, name = name)
         
-        histmax = 101#20001
+        histmax = 20001#20001
         name = 'footprint_pixels_per_frame'
         h4 = ListToHist(footprint_pixels_per_frame_list, OUTPUT_PATH + ID + '_footprint_pixels_per_frame.png', log_z = False, nbins = 100, histmin = 1, histmax = histmax, name = name)
         name = 'footprint_pixels_per_frame_big_bins'
-        h5 = ListToHist(footprint_pixels_per_frame_list, OUTPUT_PATH + ID + '_footprint_pixels_per_frame.png', log_z = False, nbins = 50, histmin = 1, histmax = histmax, name = name)
+        h5 = ListToHist(footprint_pixels_per_frame_list, OUTPUT_PATH + ID + '_footprint_pixels_per_frame_big_bins.png', log_z = False, nbins = 50, histmin = 1, histmax = histmax, name = name)
         
         histmax = max(ions_per_frame)
         name = 'ions_per_frame'
