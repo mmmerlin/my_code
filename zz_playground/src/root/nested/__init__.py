@@ -161,11 +161,22 @@ def test_lego():
 if __name__ == '__main__':
     import os
     import numpy as np
+    import lsst.afw.display.ds9 as ds9
+
+    try:
+        ds9.initDS9(False)
+    except ds9.Ds9Error:
+        print 'DS9 launch bug error thrown away (probably)'
     
     from my_functions import OpenTimepixInDS9
 #     OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/E404_50nm_newsample/420@133_1.txt')
 #     OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/422_big_only_electrons/1@1_1.txt')
-    OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/422_big_only_ions/1@1_1.txt')
+#     OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/422_big_only_ions/1@1_1.txt')
+    OpenTimepixInDS9('/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run4/1_0001.txt')
+ 
+    ds9.ds9Cmd('-scale limits 6400 6600')
+    ds9.ds9Cmd('-scale limits 6400 6600')
+    
     exit()
     
     

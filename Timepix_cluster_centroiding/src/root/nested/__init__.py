@@ -64,6 +64,10 @@ if __name__ == '__main__':
     ID = ''
     
     
+    root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/'
+    values = ['Run4/']
+    OUTPUT_PATH = '/mnt/hgfs/VMShared/output/temp/'
+    
     
     for val in values:
         ID = str(val)
@@ -123,55 +127,55 @@ if __name__ == '__main__':
         
         
         
-        nfiles = len(os.listdir(path))
-         
-#     #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 1000, -99999, 99999, return_raw_array=True)
-        ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
-        exit()
-          
-        xlist, ylist = [],[]
-        for thr_range in range(1,1001):
-            badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
-            index = np.where(intensity_array <= badpixel_threshold)
-            intensity_sum = intensity_array[index].sum(dtype = np.float64)
-    #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
-            xlist.append(thr_range/10.)
-            ylist.append(intensity_sum/nfiles)
-          
-        fig = pl.figure(figsize = (16,9), dpi = 72)
-        pl.subplot(2,1,1)
-        pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
-        pl.ylabel('# Hit pixels')
-        pl.plot(xlist, ylist)
-        pl.subplot(2,1,2)
-        xmax_zoom_percentage = 20
-        pl.xlim([0,xmax_zoom_percentage])
-        pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
-        pl.plot(xlist, ylist)
-        pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
-        pl.ylabel('# Hit pixels')
-        fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
-          
-        gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
-        gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_zoomed.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
-        gr1.SetName('Turn-on_curve')
-        gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
-        gr1.Write()
-        gr2.Write()
-        del gr1, gr2
-      
-      
-        mask_list = GeneratePixelMaskListFromFileset(path, 0.40)  
-        pixel_mask = MakeMaskArray(mask_list)  
-        print 'masking %s pixels'%len(mask_list[0])
- 
- 
-         
- 
- 
-   
-        ViewIntensityArrayInDs9(-1*(pixel_mask-1), savefile=OUTPUT_PATH + str(val) + '_pixel_mask.jpeg')
+#         nfiles = len(os.listdir(path))
+#         
+# #     #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
+#         intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 1000, -99999, 99999, return_raw_array=True)
+#         ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
+#         exit()
+#          
+#         xlist, ylist = [],[]
+#         for thr_range in range(1,1001):
+#             badpixel_threshold = (float(thr_range)/1000.)*(nfiles)
+#             index = np.where(intensity_array <= badpixel_threshold)
+#             intensity_sum = intensity_array[index].sum(dtype = np.float64)
+#     #         print str(thr_range/10.) + '\t' + str(intensity_sum/nfiles)
+#             xlist.append(thr_range/10.)
+#             ylist.append(intensity_sum/nfiles)
+#          
+#         fig = pl.figure(figsize = (16,9), dpi = 72)
+#         pl.subplot(2,1,1)
+#         pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+#         pl.ylabel('# Hit pixels')
+#         pl.plot(xlist, ylist)
+#         pl.subplot(2,1,2)
+#         xmax_zoom_percentage = 20
+#         pl.xlim([0,xmax_zoom_percentage])
+#         pl.ylim([0,1.1*max(ylist[0:xmax_zoom_percentage * 10])])
+#         pl.plot(xlist, ylist)
+#         pl.xlabel('Bad pixel hit threshold (%)', horizontalalignment = 'right' )
+#         pl.ylabel('# Hit pixels')
+#         fig.savefig(OUTPUT_PATH + ID + '_Turn-on_curve.png')
+#          
+#         gr1 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels')
+#         gr2 = ListVsList(xlist, ylist, OUTPUT_PATH + ID + '_Turn-on_curve_ROOT_zoomed.png', xtitle = 'Bad pixel hit threshold (%)', ytitle='# Hit pixels', xmax = xmax_zoom_percentage, ymin=0, ymax = 1.1*max(ylist[0:xmax_zoom_percentage * 10]), set_grid = True)
+#         gr1.SetName('Turn-on_curve')
+#         gr2.SetName('Turn-on_curve_0-' + str(xmax_zoom_percentage))
+#         gr1.Write()
+#         gr2.Write()
+#         del gr1, gr2
+#      
+#      
+#         mask_list = GeneratePixelMaskListFromFileset(path, 0.40)  
+#         pixel_mask = MakeMaskArray(mask_list)  
+#         print 'masking %s pixels'%len(mask_list[0])
+# 
+# 
+#         
+# 
+# 
+#   
+#         ViewIntensityArrayInDs9(-1*(pixel_mask-1), savefile=OUTPUT_PATH + str(val) + '_pixel_mask.jpeg')
 
 ###################################################################
         
@@ -209,6 +213,17 @@ if __name__ == '__main__':
                 npix = afwDetect.Footprint.getNpix(footprint)
                 cluster_sizes.append(npix)
                 footprint_pixels += npix
+                
+#                 footprint_data = afwDetect.HeavyFootprintF(footprint, maskedImg)
+#                 box = footprint.getBBox()
+#                 xmin = box.getMinX()
+#                 xmax = box.getMaxX() + 1
+#                 ymin = box.getMinY()
+#                 ymax = box.getMaxY() + 1
+#                 data = parent_image.getArray()[ymin:ymax,xmin:xmax]
+                
+#                 CentroidTimepixCluster(heavy_footprint.data)
+            
             
             footprint_pixels_per_frame_list.append(footprint_pixels)
     #         if filenum == display_num: exit()
