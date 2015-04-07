@@ -17,7 +17,7 @@ import matplotlib.pyplot as pl
 
 from ROOT import *
 import ROOT
-gROOT.SetBatch(0) #don't show drawing on the screen along the way
+gROOT.SetBatch(1) #don't show drawing on the screen along the way
 
 
 from my_functions import CentroidTimepixCluster
@@ -25,13 +25,15 @@ from my_functions import CentroidTimepixCluster
 DISPLAY = True
 
 
-xmin = 3
-ymin = 3
-xmax = 250
-ymax = 250
+xmin = 1
+ymin = 1
+xmax = 254
+ymax = 254
 
 GLOBAL_OUT = []
 GLOBAL_OUT_2 = []
+
+OFFSET = 6400
 
 
 if __name__ == '__main__':
@@ -41,26 +43,35 @@ if __name__ == '__main__':
         except ds9.Ds9Error:
             print 'DS9 launch bug error thrown away (probably)'
 
-    
-    
-    
-#     path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run4/'
-    path  = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
+    path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run4/'
+#     path  = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
     OUTPUT_PATH = '/mnt/hgfs/VMShared/output/temp/'
     
+#     OpenTimepixInDS9(path + '1_0002.txt')
+#     exit()
     
-    rootfilename = OUTPUT_PATH + 'temp.root'
-#         ROOTfile = TFile.Open(rootfilename, "RECREATE")
+    
+#     thresholdValue = 10
+#     npixMin = 1
+#     grow = 0
+#     isotropic = False
 
-    
-    thresholdValue = 1
-    npixMin = 1
-    grow = 0
-    isotropic = False
+    all_timecodes = []
+    centroided_timecodes = []
     
     display_num = 0
     for filenum, filename in enumerate(os.listdir(path)):
-        if filenum != 0: continue
+        if filenum%10==0: print 'Processing %s'%filenum
+#         if filename != '1_0002.txt': continue
+#         if filenum >= 50: continue
+
+
+        thresholdValue = 1
+        npixMin = 1
+        grow = 0
+        isotropic = False
+
+#         print filename
         image = TimepixToExposure(path + filename, xmin, xmax, ymin, ymax)
         if DISPLAY == True and filenum == display_num: ds9.mtv(image)
         
@@ -69,45 +80,48 @@ if __name__ == '__main__':
         footPrintSet = afwDetect.FootprintSet(footPrintSet, grow, isotropic)
         footPrints = footPrintSet.getFootprints()
         
-        footprint_pixels = 0
-        for footprint in footPrints:
-            if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
-            npix = afwDetect.Footprint.getNpix(footprint)
-            if npix != 1: continue
-#             if npix >= 9:
-#                 print npix
-#                 ds9.mtv(image)
-#                 displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5)
-#                 centroid_x, centroid_y = footprint.getCentroid()
-#                 ds9.zoom(100, centroid_x, centroid_y, 0) # use to zoom to a single point
-#                 ds9.ds9Cmd('scale log') 
-#                 ds9.ds9Cmd('scale limits 4100 4150')
-#                 exit()
+#         print "Found %s footprints in %s"%(len(footPrints), filename)
         
-            box = footprint.getBBox()
-            xmin = box.getMinX()
-            xmax = box.getMaxX() + 1
-            ymin = box.getMinY()
-            ymax = box.getMaxY() + 1
+        footprint_pixels = 0
+        for footprintnum, footprint in enumerate(footPrints):
+#             if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
+            npix = afwDetect.Footprint.getNpix(footprint)
+            if npix >= 4:
+                box = footprint.getBBox()
+                bbox_xmin = box.getMinX()
+                bbox_xmax = box.getMaxX() + 1
+                bbox_ymin = box.getMinY()
+                bbox_ymax = box.getMaxY() + 1
+                  
+                data = image.getArray()[bbox_ymin:bbox_ymax,bbox_xmin:bbox_xmax]        
+                centroid_x, centroid_y = footprint.getCentroid()
+                 
+#                 x,y,t,chisq = CentroidTimepixCluster(data, OUTPUT_PATH + str(footprintnum) + '.png')
+                x,y,t,chisq = CentroidTimepixCluster(data)
+                x += xmin
+                y += ymin
+                if chisq < 1.2:
+                    centroided_timecodes.append(t-OFFSET)
+                
+                for value in GetAllTimecodesInCluster(data):
+                    all_timecodes.append(value-OFFSET)
              
-            data = image.getArray()[ymin:ymax,xmin:xmax]        
-            centroid_x, centroid_y = footprint.getCentroid()
-            
-            x,y,t = CentroidTimepixCluster(data)
-            x += xmin
-            y += ymin
-            
-            GLOBAL_OUT.append(str(x) + '\t' + str(y) + '\t' + str(t))
-            GLOBAL_OUT_2.append(str(centroid_x) + '\t' + str(centroid_y) + '\t' + str(image.getArray()[ymin,xmin] ))
-#         
-#         ds9.zoom(100, centroid_x, centroid_y, 0) # use to zoom to a single point
-#         ds9.ds9Cmd('scale log') 
-#         ds9.ds9Cmd('scale limits 4830 4860')
-#         
-#         CentroidTimepixCluster(data, OUTPUT_PATH + 'test.png')
-#         
-#         
-#         if filenum == display_num: exit()
+                GLOBAL_OUT.append(str(x) + '\t' + str(y) + '\t' + str(t) + '\t' + str(chisq))
+                GLOBAL_OUT_2.append(str(centroid_x) + '\t' + str(centroid_y))# + '\t' + str(image.getArray()[ymin,xmin] ))
+            ####next footprint
+    ####next file
+    
+    
+    histmax = 400
+    name = 'raw_timecodes'
+    h1 = ListToHist(all_timecodes, OUTPUT_PATH + 'all_timecodes.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax, name = name)
+      
+#     histmax = max(centroided_timecodes)
+    histmax = 400
+    name = 'centroided_timecodes'
+    h1 = ListToHist(centroided_timecodes, OUTPUT_PATH + 'centroided_timecodes_chi_sq_cut.png', log_z = False, nbins = (histmax-1), histmin = 1, histmax = histmax, name = name)
+   
+
     for line in GLOBAL_OUT:
         print line
         
@@ -117,3 +131,47 @@ if __name__ == '__main__':
         print line
     
     print '\n***End code***'      
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+#             if npix >= 9:
+#                 print npix
+#                 ds9.mtv(image)
+#                 displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5)
+#                 centroid_x, centroid_y = footprint.getCentroid()
+#                 ds9.zoom(100, centroid_x, centroid_y, 0) # use to zoom to a single point
+#                 ds9.ds9Cmd('scale log') 
+#                 ds9.ds9Cmd('scale limits 4100 4150')
+#                 exit()
+
+
+
+
+#         ds9.zoom(100, centroid_x, centroid_y, 0) # use to zoom to a single point
+#         ds9.ds9Cmd('scale log') 
+#         ds9.ds9Cmd('scale limits 4830 4860')
+#         
+#         CentroidTimepixCluster(data, OUTPUT_PATH + 'test.png')
+#         
+#         
+#         if filenum == display_num: exit()
