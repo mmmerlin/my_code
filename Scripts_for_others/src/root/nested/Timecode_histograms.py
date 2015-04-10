@@ -1,4 +1,4 @@
-translate_to_us = True
+translate_to_us = False
 
 # for cropping the perimeter pixels as these often don't equalise
 xmin = 1
@@ -8,6 +8,9 @@ ymax = 254
 
 input_path =  '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_threshold/415/'
 output_path = '/mnt/hgfs/VMShared/temp/SUNY/'
+
+input_path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/100V_TOF/'
+
 
 def GetTimecodes_AllFilesInDir(path, winow_xmin = 0, winow_xmax = 999, winow_ymin = 0, winow_ymax = 999, offset_us = 0, translate_to_us = False):
     import string, os
@@ -57,10 +60,10 @@ def MakeToFSpectrum(translate_to_us = True):
         tmax = 25
         bins = (((tmax-tmin))*50) - 1 #1 timecode per bin
     else:
-#         tmin = 0         # full range
-#         tmax = 11810     # full range
-        tmin = 3900
-        tmax = 4400
+        tmin = 0         # full range
+        tmax = 11810     # full range
+#         tmin = 3900
+#         tmax = 4400
         bins = (tmax-tmin) +1 
      
     fig = pl.figure()

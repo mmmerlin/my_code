@@ -10,7 +10,7 @@ from my_functions import *
 from math import floor
 import lsst.afw.display.ds9 as ds9
 import lsst.afw.display.utils as displayUtils
-import lsst.afw.detection   as afwDetect
+import lsst.afw.detection as afwDetect
 from root_functions import ListToHist, ListVsList
 from lsst.afw.image import makeImageFromArray
 import matplotlib.pyplot as pl
@@ -22,25 +22,25 @@ import ROOT
 gROOT.SetBatch(1) #don't show drawing on the screen along the way
 
 
+from image_assembly import AssembleImage
 
 DISPLAY = True
 
-PICKLED = True
+PICKLED = False
 
-path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run4/'
-#     path  = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
-OUTPUT_PATH = '/mnt/hgfs/VMShared/output/temp/'
+# path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/24_03_2015/A2(300nm)/Run4/'
+# #     path  = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/temp/'
 
-# all_timecodes_pickle = OUTPUT_PATH + 'raw.pickle'
-all_timecodes_pickle = OUTPUT_PATH + 'raw_claire.pickle'
+path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/100V_TOF/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/bnl/4-9-15/100V_TOF/'
+
+all_timecodes_pickle = OUTPUT_PATH + 'raw_timecodes.pickle'
 min_timecodes_pickle = OUTPUT_PATH + 'min.pickle'
 max_timecodes_pickle = OUTPUT_PATH + 'max.pickle'
-
 p2_timecodes_pickle = OUTPUT_PATH + 'p2.pickle'
 p4_timecodes_pickle = OUTPUT_PATH + 'p4.pickle'
 gaus_timecodes_pickle = OUTPUT_PATH + 'gaus.pickle'
-
-centroided_timecodes_pickle = OUTPUT_PATH + 'claire.pickle'
 
 
 xmin = 1
@@ -63,7 +63,6 @@ centroided_timecodes = []
 
 
 if __name__ == '__main__':
-    
     if not PICKLED:
         
         if DISPLAY:
@@ -72,10 +71,26 @@ if __name__ == '__main__':
             except ds9.Ds9Error:
                 print 'DS9 launch bug error thrown away (probably)'
     
-#         OpenTimepixInDS9(path + '1_0002.txt')
-#         ds9.ds9Cmd('scale limits 6540 6580')
-#         
-#         exit()
+    
+#         Combine_and_pickle_dir(path, OUTPUT_PATH + 'raw_xyt.pickle')
+        data_array = Load_XYT_pickle(OUTPUT_PATH + 'raw_xyt.pickle')
+        histmax = 6700
+        histmin = 6500
+        hist_range = histmax - histmin
+        
+        index = np.where(abs(data_array[:,2]-histmin-hist_range/2.)<=hist_range/2.)
+#         h1 = ListToHist(data_array[index,2].flatten(), OUTPUT_PATH + 'ToF.png', log_y = False, nbins = range, histmin = histmin, histmax = histmax, name = 'ToF')
+        XYT_to_image(data_array, True)
+        print'done'
+        
+        
+        exit()
+    
+        OpenTimepixInDS9(path + 'eight_0004.txt')
+        ds9.ds9Cmd('scale limits 6400 6600')
+#         ds9.ds9Cmd('scale limits 6400 6600')
+         
+        exit()
         
         thresholdValue = 1
         npixMin = 1
@@ -135,8 +150,8 @@ if __name__ == '__main__':
      
 #         pickle.dump(min_timecode_list,      open(min_timecodes_pickle,          'wb'), pickle.HIGHEST_PROTOCOL)
 #         pickle.dump(max_timecode_list,      open(max_timecodes_pickle,          'wb'), pickle.HIGHEST_PROTOCOL)
-        pickle.dump(all_timecodes,          open(all_timecodes_pickle,          'wb'), pickle.HIGHEST_PROTOCOL)
-        pickle.dump(centroided_timecodes,   open(centroided_timecodes_pickle,   'wb'), pickle.HIGHEST_PROTOCOL)
+#         pickle.dump(all_timecodes,          open(all_timecodes_pickle,          'wb'), pickle.HIGHEST_PROTOCOL)
+#         pickle.dump(centroided_timecodes,   open(centroided_timecodes_pickle,   'wb'), pickle.HIGHEST_PROTOCOL)
     
     
     
@@ -158,9 +173,6 @@ if __name__ == '__main__':
         for item in pickle.load(open(gaus_timecodes_pickle, 'rb')):
             gaus_timecodes.append(item)
   
-        for item in pickle.load(open(centroided_timecodes_pickle, 'rb')):
-            centroided_timecodes.append(item)   
-
     
 
 
