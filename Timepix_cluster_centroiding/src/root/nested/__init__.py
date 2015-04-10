@@ -80,7 +80,7 @@ if __name__ == '__main__':
         
         index = np.where(abs(data_array[:,2]-histmin-hist_range/2.)<=hist_range/2.)
 #         h1 = ListToHist(data_array[index,2].flatten(), OUTPUT_PATH + 'ToF.png', log_y = False, nbins = range, histmin = histmin, histmax = histmax, name = 'ToF')
-        XYT_to_image(data_array, True)
+        XYT_to_image(data_array[index], True)
         print'done'
         
         
