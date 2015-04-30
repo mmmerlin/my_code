@@ -159,6 +159,23 @@ def test_lego():
 
     pylab.show()
 if __name__ == '__main__':
+
+    import sys
+    from time import sleep
+    
+    orig_stdout = sys.stdout
+    f = file('/mnt/hgfs/VMShared/temp/Claire.txt', 'w')
+    sys.stdout = f
+    print ""
+    f.flush()
+    sleep(20)
+    sys.stdout = orig_stdout
+    print "back to normal"
+    f.close()
+
+
+    exit()
+
     import os
     import numpy as np
     import lsst.afw.display.ds9 as ds9

@@ -28,7 +28,8 @@ ymax = 254
 
 
 # OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/'
-OUTPUT_PATH = '/mnt/hgfs/VMShared/output/suny_01042015/big_runs/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/suny_01042015/big_runs/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/temp/1/'
 
 FILE_TYPE = ".png"
 
@@ -56,20 +57,22 @@ if __name__ == '__main__':
     
     
     
-    root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/'
+#     root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/suny_01042015/50nm_big_runs/'
+    
 #     values = [410,415,418,420,421,422,423,424,425,426,427,428,429,430]
 #     values = ['422_big_only_ions']
-    values = ['422_big_only_electrons']
-#     values = ['422_big']
+
+    root_path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/'
+    values = ['100V_TOF']
     ID = ''
-    
-    
+   
+    FILE_LIMIT=1000
     
     for val in values:
         ID = str(val)
         path = root_path + str(val) + '/'
         rootfilename = OUTPUT_PATH + ID + '.root'
-        ROOTfile = TFile.Open(rootfilename, "RECREATE")
+#         ROOTfile = TFile.Open(rootfilename, "RECREATE")
     
     #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A3(200nm)/'
     #     path     = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/first_light/A4(120nm)400thr/'
@@ -80,53 +83,55 @@ if __name__ == '__main__':
     
     
         #########################
-        c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
-        
-    #     n_glitches = 0
-    #     n_goodframes = 0
-    #     n_pix_hits = 0
-    #     nfiles = 0.
-    #     
-    #     for filename in os.listdir(path):
-    #         xs, ys, ts = GetXYTarray_SingleFile(path + filename, xmin, xmax, ymin, ymax)
-    #         assert len(xs) == len(ys) == len(ts)
-    #         if len(xs) >= glitch_threshold: print "skipped glitch frame"; n_glitches +=1; continue
-    #         n_goodframes += 1
-    #         nfiles += 1
-    #         n_pix_hits += len(ts)
-    #          
-    #     pixels_per_frame = float(n_pix_hits) / float(n_goodframes)
-         
-         
-    #     intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, 9999, -99999, 99999, return_raw_array=True)
-    #     nfiles = len(os.listdir(path))
-    # #     intensity_array /= float(nfiles)
-    #     mask_pixels = np.where(intensity_array >= 0.03*(nfiles))
-    #     print mask_pixels
-    #     for element in mask_pixels:
-    #         print element
-    #          
-    #     print mask_pixels
-    #     print intensity_array[187][19]
+#         c1 = TCanvas( 'canvas', 'canvas', 500, 200, 700, 500 ) #create canvas
+#         
+#         n_glitches = 0
+#         n_goodframes = 0
+#         n_pix_hits = 0
+#         nfiles = 0.
+#         glitch_threshold = 20000
+#          
+#         for filename in os.listdir(path):
+#             xs, ys, ts = GetXYTarray_SingleFile(path + filename, xmin, xmax, ymin, ymax)
+#             assert len(xs) == len(ys) == len(ts)
+#             if len(xs) >= glitch_threshold: print "skipped glitch frame"; n_glitches +=1; continue
+#             n_goodframes += 1
+#             nfiles += 1
+#             n_pix_hits += len(ts)
+#               
+#         pixels_per_frame = float(n_pix_hits) / float(n_goodframes)
+#           
+#           
+#         intensity_array = MakeCompositeImage_Timepix(path, 1, 253, 1, 253, 0, FILE_LIMIT, -99999, 99999, return_raw_array=True)
+#         nfiles = len(os.listdir(path))
+#     #     intensity_array /= float(nfiles)
+#         mask_pixels = np.where(intensity_array >= 0.2*(nfiles))
+#         print mask_pixels
+#         for element in mask_pixels:
+#             print element
+#               
+#         print mask_pixels
+#         print intensity_array[187][19]
          
              
     
         
-    #     MaskBadPixels(intensity_array, pixel_mask)
-    #     temp = makeImageFromArray(intensity_array)
-    #     ds9.mtv(temp)
-    #     exit()
+#         MaskBadPixels(intensity_array, mask_pixels)
+#         temp = makeImageFromArray(intensity_array)
+#         ds9.mtv(temp)
+#         exit()
         
         
         
-        
-        
+#         OpenTimepixInDS9(path + 'eight_0001.txt')
+#         exit()
         
         
         nfiles = len(os.listdir(path))
          
 #     #     intensity_array = MakeCompositeImage_Timepix(path, 1, 255, 1, 255, 0, 9999, -99999, 99999, return_raw_array=True)
-        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, 1000, -99999, 99999, return_raw_array=True)
+        intensity_array = MakeCompositeImage_Timepix(path, 0, 255, 0, 255, 0, FILE_LIMIT, -99999, 99999, return_raw_array=True)
+        print OUTPUT_PATH + str(val) + '_composite.jpeg'
         ViewIntensityArrayInDs9(intensity_array, savefile=OUTPUT_PATH + str(val) + '_composite.jpeg')
         exit()
           
@@ -162,7 +167,7 @@ if __name__ == '__main__':
         del gr1, gr2
       
       
-        mask_list = GeneratePixelMaskListFromFileset(path, 0.40)  
+        mask_list = GeneratePixelMaskListFromFileset(path, 0.02, file_limit=FILE_LIMIT)  
         pixel_mask = MakeMaskArray(mask_list)  
         print 'masking %s pixels'%len(mask_list[0])
  
@@ -172,7 +177,7 @@ if __name__ == '__main__':
  
    
         ViewIntensityArrayInDs9(-1*(pixel_mask-1), savefile=OUTPUT_PATH + str(val) + '_pixel_mask.jpeg')
-
+        exit()
 ###################################################################
         
         thresholdValue = 1
