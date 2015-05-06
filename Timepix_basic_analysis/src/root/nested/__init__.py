@@ -1,3 +1,4 @@
+import os
 from os import listdir
 from os.path import expanduser, join
 import numpy as np
@@ -26,8 +27,24 @@ PICKLED = False
 # path  = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/100V_TOF/'
 # OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/bnl/4-9-15/100V_TOF/'
 
-path  = '/mnt/hgfs/VMShared/Data/new_sensors/suny_24042015/Run16/'
-OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/suny_24042015/Run16/'
+# path  = '/mnt/hgfs/VMShared/Data/new_sensors/suny_24042015/Run16/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/suny_24042015/Run16/'
+
+
+# spatial, exalite?
+# path  = '/mnt/hgfs/VMShared/Data/oxford/Day 1/PMT comp/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/oxford/Day 1/PMT comp/'
+
+# vmi, P47
+# path  = '/mnt/hgfs/VMShared/Data/oxford/Day 4/Run 2/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/oxford/Day 4/Run 2/'
+
+
+# path  = '/mnt/hgfs/VMShared/Data/new_sensors/oxford/march_2015/E404_50nm_20150326/'
+# OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/oxford/march_2015/E404_50nm_20150326/'
+
+path  = '/mnt/hgfs/VMShared/Data/new_sensors/suny_24042015/Run15/'
+OUTPUT_PATH = '/mnt/hgfs/VMShared/output/new_sensor_profiling/suny_24042015/Run15/'
 
 
 
@@ -38,12 +55,9 @@ ymax = 254
 
 
 
-
 if __name__ == '__main__':
     if not PICKLED:
-#         Combine_and_pickle_dir(path, OUTPUT_PATH + 'raw_xyt.pickle')
-#         print 'done'
-#         exit()
+        if not os.path.isfile(OUTPUT_PATH + 'raw_xyt.pickle'): Combine_and_pickle_dir(path, OUTPUT_PATH + 'raw_xyt.pickle')
         
         if DISPLAY:
             try:
@@ -52,32 +66,68 @@ if __name__ == '__main__':
                 print 'DS9 launch bug error thrown away (probably)'
     
     
-        OpenTimepixInDS9(path + '1_0001.txt')
-#         ds9.ds9Cmd('scale limits 7490 7510')
+#         OpenTimepixInDS9(path + '1_0100.txt')
+# #         ds9.ds9Cmd('scale limits 7490 7510')
+# #         ds9.ds9Cmd('scale limits 9750 9850')
 #         ds9.ds9Cmd('scale limits 9750 9850')
-        ds9.ds9Cmd('scale limits 9820 9840')
-        ds9.ds9Cmd('cmap rainbow')
-        exit()
+#         ds9.ds9Cmd('cmap rainbow')
+#         exit()
     
     
         data_array = Load_XYT_pickle(OUTPUT_PATH + 'raw_xyt.pickle')
-        histmin = 9700
-        histmax = 9900
+        histmin = 9800
+        histmax = 9850
+        xrange = [1,240]
+        yrange = [1,240]
+#         xrange = [1,130]
+#         yrange = [65,203]
+         
 #         histmin = 7490
 #         histmax = 7510
-        max_entries = 1e20
+        max_entries = 1e8
         hist_range = histmax - histmin
+
+        index = np.where(data_array[:,0]<=xrange[1])
+        data_array = data_array[index]
+        index = np.where(data_array[:,0]>=xrange[0])
+        data_array = data_array[index]
+        
+        index = np.where(data_array[:,1]<=yrange[1])
+        data_array = data_array[index]
+        index = np.where(data_array[:,1]>=yrange[0])
+        data_array = data_array[index]
+         
         index = np.where(abs(data_array[:,2]-histmin-hist_range/2.)<=hist_range/2.)
         print'loaded'
         data = data_array[index,2].flatten()[0:min(max_entries,len(data_array[index,2].flatten()))]
         rms = np.std(data)
         print "rms = %.3f"%rms
         print "(FWHM = %.3f)"%(2.355*rms)
-        h1 = ListToHist(data, OUTPUT_PATH + 'ToF_laser_linear.png', log_y = False, nbins = hist_range, histmin = histmin, histmax = histmax, name = 'ToF', fit_gaus = False, fit_to_percentage_of_peak=5, draw_fit_stats=False)
+        h1 = ListToHist(data, OUTPUT_PATH + 'ToF_ROI.png', log_y = False, nbins = hist_range, histmin = histmin, histmax = histmax, name = 'ToF', fit_gaus = False, fit_to_percentage_of_peak=5, draw_fit_stats=False)
+        h1 = ListToHist(data, OUTPUT_PATH + 'ToF_ROI_log.png', log_y = True, nbins = hist_range, histmin = histmin, histmax = histmax, name = 'ToF', fit_gaus = False, fit_to_percentage_of_peak=5, draw_fit_stats=False)
+  
+        from root_functions import GetLeftRightBinsAtPercentOfMax, GetLastBinAboveX, GetFirstBinBelowX
+        maxbin = h1.GetMaximumBin()
+        maxbinvalue = h1.GetBinContent(maxbin)
+        maxbincenter = h1.GetBinCenter(maxbin)
+        print maxbin
+        print maxbinvalue
+        print maxbincenter
 
+
+        dummy, ninety = GetLastBinAboveX(h1,0.9*maxbinvalue)
+        dummy, ten = GetLastBinAboveX(h1,0.1*maxbinvalue)
+	print ten
+	print type(ten)        
+	print "10-90% time = %s timecodes = ns"%ninety
+	#print "Found %s footprints in %s"%(filename)
+	exit()
+
+        
 #         Make3DScatter(data_array[:,0],data_array[:,1], data_array[:,2], tmin=histmin, tmax=histmax, savefile='')
-
+  
 #         image = XYT_to_image(data_array[index], True)
+        image = XYT_to_image(data_array, True)
 #         XYT_to_image(data_array, True)
         print'done'
         exit()
@@ -91,10 +141,10 @@ if __name__ == '__main__':
     
     
     
-        OpenTimepixInDS9(path + 'eight_0003.txt')
-#         ds9.ds9Cmd('scale limits 6400 6600')
-        ds9.ds9Cmd('scale limits 7490 7510')
-        exit()
+#         OpenTimepixInDS9(path + 'eight_0003.txt')
+# #         ds9.ds9Cmd('scale limits 6400 6600')
+#         ds9.ds9Cmd('scale limits 7490 7510')
+#         exit()
          
         
         
@@ -119,7 +169,7 @@ if __name__ == '__main__':
             
             footprint_pixels = 0
             for footprintnum, footprint in enumerate(footPrints):
-                if footprintnum>=100: exit()
+                if footprintnum>=50: exit()
 #                 if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
                 npix = afwDetect.Footprint.getNpix(footprint)
 #                 if npix >1:cluster_sizes.append(npix)
@@ -133,15 +183,15 @@ if __name__ == '__main__':
                       
                     data = image.getArray()[bbox_ymin:bbox_ymax,bbox_xmin:bbox_xmax]        
                     centroid_x, centroid_y = footprint.getCentroid()
-                    x,y,t,chisq = CentroidTimepixCluster(data, fit_function = 'gaus', save_path='/mnt/hgfs/VMShared/temp/3D_cluster_fits/'+str(footprintnum)+'.png')
+                    x,y,t,chisq = CentroidTimepixCluster(data, fit_function = 'p2', save_path='/mnt/hgfs/VMShared/temp/3D_cluster_fits/'+str(footprintnum)+'.png')
                     x += bbox_xmin
                     y += bbox_ymin
-                    if chisq < 1.2:
-                        centroided_timecodes.append(t-OFFSET)
-                        max_timecode_list.append(GetMaxClusterTimecode(data) - OFFSET)
-                    
-                    for value in GetAllTimecodesInCluster(data):
-                        all_cluster_timecodes.append(value-OFFSET)
+#                     if chisq < 1.2:
+#                         centroided_timecodes.append(t-OFFSET)
+#                         max_timecode_list.append(GetMaxClusterTimecode(data) - OFFSET)
+#                      
+#                     for value in GetAllTimecodesInCluster(data):
+#                         all_cluster_timecodes.append(value-OFFSET)
              
                 ####next footprint
         ####next file
