@@ -1,6 +1,7 @@
 from ROOT import TGraph2D,TCanvas,TH2F
 from decamutil import decaminfo
 import ROOT
+from ROOT import gStyle
 
 import numpy as np
 decam = decaminfo()
@@ -14,6 +15,7 @@ for i, name in enumerate(ns):
     names.append(name + str(int(ns_num[i])))
 del ns
 
+grad*= 100
 
 c1 = TCanvas( 'canvas', 'canvas', 1200, 1200)
 
@@ -52,13 +54,18 @@ for i in range(len(names)):
 # hist = TH2F('hist','hist',7,min(xs),max(xs),12,min(ys),max(ys))
 
 
-hist = TH2F('hist','hist',7,min(xs),max(xs),12,min(ys),max(ys))
+hist = TH2F('hist','hist',12,min(xs),max(xs),7,min(ys),max(ys))
 # hist.GetZaxis().SetRangeUser(min(grad), max(grad))
 hist.GetZaxis().SetRangeUser(min(sigma), max(sigma))
 # hist.GetZaxis().SetRangeUser(3.878711492, 4.425647785)
 graph.SetHistogram(hist)
 
+graph.SetTitle('')
+gStyle.SetOptStat(0)
+
+
 graph.Draw('colz')
-c1.SaveAs('/mnt/hgfs/VMShared/output/DES_analysis/focal_plane_grad.png')
+c1.SaveAs('/mnt/hgfs/VMShared/output/DES_analysis/focal_plane_sigma.png')
+# c1.SaveAs('/mnt/hgfs/VMShared/output/DES_analysis/focal_plane_grad.png')
 
 print "finished"
