@@ -1,0 +1,22 @@
+-- VERSION_4
+-- START DISKCACHE
+/mnt/hgfs/VMShared/Code/git/my_code/.metadata/.plugins/org.eclipse.core.resources/.projects/Iron 55 Timecodes/com.python.pydev.analysis/v2_indexcache
+root.nested.__init__|1436369119000|/mnt/hgfs/VMShared/Code/git/my_code/jon/Iron 55 Timecodes/src/root/nested/__init__.py
+root.__init__|1436369119000|/mnt/hgfs/VMShared/Code/git/my_code/jon/Iron 55 Timecodes/src/root/__init__.py
+-- END DISKCACHE
+-- START DICTIONARY
+1
+1=root.nested.__init__
+-- END DICTIONARY
+-- START TREE 1
+6
+get|1|GetTimecodes_AllFilesinDir!10@
+his|3|histmin!11@histrange!11@histmax!11@
+hom|1|home_dir!11@
+nbi|1|nbins!11@
+pat|1|path!11@
+tim|3|timecodes_lists!11@timecodes_flatten!11@timecodes!11@
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

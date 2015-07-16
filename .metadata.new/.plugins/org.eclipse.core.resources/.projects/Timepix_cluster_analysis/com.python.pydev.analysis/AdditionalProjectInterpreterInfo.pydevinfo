@@ -1,0 +1,52 @@
+-- VERSION_4
+-- START DISKCACHE
+/mnt/hgfs/VMShared/Code/git/my_code/.metadata/.plugins/org.eclipse.core.resources/.projects/Timepix_cluster_analysis/com.python.pydev.analysis/v2_indexcache
+root.nested.__init__|1428083840000|/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_analysis/src/root/nested/__init__.py
+-- END DISKCACHE
+-- START DICTIONARY
+1
+1=root.nested.__init__
+-- END DICTIONARY
+-- START TREE 1
+37
+ID|1|ID!11@
+arg|1|arg!11@
+c1|1|c1!11@
+clu|1|cluster_sizes!11@
+dis|2|display_num!11@DISPLAY!11@
+fil|1|FILE_TYPE!11@
+foo|4|footPrintSet!11@footprint_pixels!11@footprint_pixels_per_frame_list!11@footPrints!11@
+gli|1|glitch_threshold!11@
+gro|1|grow!11@
+h1|1|h1!11@
+h2|1|h2!11@
+h3|1|h3!11@
+h4|1|h4!11@
+h5|1|h5!11@
+his|1|histmax!11@
+id_|0|
+ima|1|image!11@
+ion|1|ions_per_frame!11@
+iso|1|isotropic!11@
+key|0|
+leg|0|
+mas|1|mask_list!11@
+nam|1|name!11@
+nfi|1|nfiles!11@
+npi|2|npix!11@npixMin!11@
+obj|0|
+out|1|OUTPUT_PATH!11@
+pat|1|path!11@
+pix|2|pixels_per_frame_list!11@pixel_mask!11@
+roo|3|ROOTfile!11@rootfilename!11@root_path!11@
+tem|0|
+thr|2|threshold!11@thresholdValue!11@
+val|1|values!11@
+xma|1|xmax!11@
+xmi|1|xmin!11@
+yma|1|ymax!11@
+ymi|1|ymin!11@
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

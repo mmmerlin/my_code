@@ -1,0 +1,29 @@
+-- VERSION_4
+-- START DISKCACHE
+/mnt/hgfs/VMShared/Code/git/my_code/.metadata/.plugins/org.eclipse.core.resources/.projects/Iron 55 Clusters/com.python.pydev.analysis/v2_indexcache
+root.nested.__init__|1436369119000|/mnt/hgfs/VMShared/Code/git/my_code/jon/Iron 55 Clusters/src/root/nested/__init__.py
+root.__init__|1436369119000|/mnt/hgfs/VMShared/Code/git/my_code/jon/Iron 55 Clusters/src/root/__init__.py
+-- END DISKCACHE
+-- START DICTIONARY
+1
+1=root.nested.__init__
+-- END DICTIONARY
+-- START TREE 1
+13
+cou|1|count!11@
+fil|1|files!11@
+foo|2|footPrintSet!11@footPrints!11@
+gro|1|grow!11@
+his|3|histmin!11@histrange!11@histmax!11@
+hom|1|home_dir!11@
+ima|1|image!11@
+iso|1|isotropic!11@
+nbi|1|nbins!11@
+npi|3|Npix_footprint!11@npixMin!11@npix_footprint!11@
+pat|1|path!11@
+thr|2|threshold!11@thresholdValue!11@
+tim|1|TimepixToExposure!10@
+-- END TREE
+-- START TREE 2
+0
+-- END TREE

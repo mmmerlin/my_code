@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workbench progressCount="33" version="2.0">
+<workbenchAdvisor/>
+<window height="709" maximized="true" width="1006" x="377" y="257">
+<fastViewData fastViewLocation="1024"/>
+<perspectiveBar>
+<itemSize x="160"/>
+</perspectiveBar>
+<coolbarLayout>
+<coolItem id="group.file" itemType="typeGroupMarker"/>
+<coolItem id="org.eclipse.ui.workbench.file" itemType="typeToolBarContribution" x="144" y="30"/>
+<coolItem id="additions" itemType="typeGroupMarker"/>
+<coolItem id="com.python.pydev.navigate.actionSet" itemType="typeToolBarContribution" x="40" y="30"/>
+<coolItem id="org.eclipse.debug.ui.launch.toolbar" itemType="typeToolBarContribution" x="-1" y="-1"/>
+<coolItem id="org.eclipse.debug.ui.launchActionSet" itemType="typeToolBarContribution" x="156" y="30"/>
+<coolItem id="org.eclipse.debug.ui.main.toolbar" itemType="typeToolBarContribution" x="-1" y="-1"/>
+<coolItem id="com.python.pydev.toolbars.evaluateActionSetterToolbar" itemType="typeToolBarContribution" x="40" y="30"/>
+<coolItem id="org.eclipse.search.searchActionSet" itemType="typeToolBarContribution" x="60" y="30"/>
+<coolItem id="group.nav" itemType="typeGroupMarker"/>
+<coolItem id="org.eclipse.ui.workbench.navigate" itemType="typeToolBarContribution" x="232" y="30"/>
+<coolItem id="group.editor" itemType="typeGroupMarker"/>
+<coolItem id="org.python.pydev.editor.PythonEditor" itemType="typeToolBarContribution" x="-1" y="-1"/>
+<coolItem id="group.help" itemType="typeGroupMarker"/>
+<coolItem id="org.eclipse.ui.workbench.help" itemType="typeToolBarContribution" x="-1" y="-1"/>
+</coolbarLayout>
+<page aggregateWorkingSetId="Aggregate for window 1432323504505" focus="true" label="Workspace - PyDev">
+<editors>
+<editorArea activeWorkbook="DefaultEditorWorkbook">
+<info part="DefaultEditorWorkbook">
+<folder appearance="1" expanded="2">
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+<part id="1"/>
+<part id="2"/>
+<part id="3"/>
+<part id="4"/>
+</presentation>
+</folder>
+</info>
+</editorArea>
+<editor activePart="true" focus="true" id="org.python.pydev.editor.PythonEditor" name="__init__.py" partName="nested (DESY.src.root)" path="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/__init__.py" title="nested (DESY.src.root)" tooltip="DESY/src/root/nested/__init__.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/DESY/src/root/nested/__init__.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1350" selectionTopPixel="479"/>
+</editor>
+<editor id="org.python.pydev.editor.PythonEditor" name="__init__.py" partName="nested (Oxford_June.src.root)" path="/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/__init__.py" title="nested (Oxford_June.src.root)" tooltip="Oxford_June/src/root/nested/__init__.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Oxford_June/src/root/nested/__init__.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="568" selectionTopPixel="0"/>
+</editor>
+<editor id="org.python.pydev.editor.PythonEditor" name="heatmaps.py" partName="heatmaps" path="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/heatmaps.py" title="heatmaps" tooltip="DESY/src/root/nested/heatmaps.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/DESY/src/root/nested/heatmaps.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="285" selectionTopPixel="0"/>
+</editor>
+<editor id="org.python.pydev.editor.PythonEditor" name="heatmaps_medipix.py" partName="heatmaps_medipix" path="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/heatmaps_medipix.py" title="heatmaps_medipix" tooltip="DESY/src/root/nested/heatmaps_medipix.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/DESY/src/root/nested/heatmaps_medipix.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="122" selectionOffset="178" selectionTopPixel="0"/>
+</editor>
+<editor id="org.python.pydev.editor.PythonEditor" name="cluster_analysis.py" partName="cluster_analysis" path="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/cluster_analysis.py" title="cluster_analysis" tooltip="DESY/src/root/nested/cluster_analysis.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/DESY/src/root/nested/cluster_analysis.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="4005" selectionTopPixel="1717"/>
+</editor>
+</editors>
+<views>
+<view id="org.eclipse.ui.navigator.ProjectExplorer" partName="Project Explorer">
+<viewState CommonNavigator.LINKING_ENABLED="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0"/>
+</view>
+<view id="org.eclipse.ui.console.ConsoleView" partName="Console">
+<viewState/>
+</view>
+<view id="org.python.pydev.debug.pyunit.pyUnitView" partName="PyUnit">
+<viewState/>
+</view>
+<view id="org.eclipse.ui.views.TaskList" partName="Tasks">
+<viewState PRIMARY_SORT_FIELD="org.eclipse.ui.ide.completionField" categoryGroup="none" markerContentGenerator="org.eclipse.ui.ide.tasksGenerator" partName="Tasks">
+<columnWidths org.eclipse.ui.ide.completionField="40" org.eclipse.ui.ide.descriptionField="350" org.eclipse.ui.ide.locationField="105" org.eclipse.ui.ide.markerType="641" org.eclipse.ui.ide.pathField="140" org.eclipse.ui.ide.priorityField="35" org.eclipse.ui.ide.resourceField="105"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.completionField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.priorityField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.descriptionField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.resourceField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.pathField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.locationField"/>
+<visible IMemento.internal.id="org.eclipse.ui.ide.markerType"/>
+</viewState>
+</view>
+<view id="org.python.pydev.navigator.view" partName="PyDev Package Explorer">
+<viewState CommonNavigator.LINKING_ENABLED="0" org.eclipse.ui.navigator.resources.workingSets.showTopLevelWorkingSets="0">
+<expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/DESY"/>
+<expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src"/>
+<expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root"/>
+<expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested"/>
+<selected IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/cluster_analysis.py"/>
+</viewState>
+</view>
+</views>
+<perspectives activePart="org.python.pydev.editor.PythonEditor" activePerspective="org.python.pydev.ui.PythonPerspective">
+<perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
+<descriptor class="org.eclipse.ui.internal.ide.application.ResourcePerspective" id="org.eclipse.ui.resourcePerspective" label="Resource"/>
+<alwaysOnActionSet id="org.eclipse.ui.cheatsheets.actionSet"/>
+<alwaysOnActionSet id="org.eclipse.search.searchActionSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.annotationNavigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.navigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo"/>
+<alwaysOnActionSet id="org.eclipse.ui.externaltools.ExternalToolsSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.keyBindings"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.openFiles"/>
+<alwaysOnActionSet id="org.eclipse.ui.NavigateActionSet"/>
+<show_view_action id="org.eclipse.ui.navigator.ProjectExplorer"/>
+<show_view_action id="org.eclipse.ui.views.BookmarkView"/>
+<show_view_action id="org.eclipse.ui.views.ContentOutline"/>
+<show_view_action id="org.eclipse.ui.views.PropertySheet"/>
+<show_view_action id="org.eclipse.ui.views.ProblemView"/>
+<show_view_action id="org.eclipse.ui.views.ProgressView"/>
+<show_view_action id="org.eclipse.ui.views.TaskList"/>
+<show_view_action id="org.eclipse.ant.ui.views.AntView"/>
+<show_view_action id="org.eclipse.pde.runtime.LogView"/>
+<new_wizard_action id="org.eclipse.ui.wizards.new.folder"/>
+<new_wizard_action id="org.eclipse.ui.wizards.new.file"/>
+<new_wizard_action id="org.eclipse.ui.editors.wizards.UntitledTextFileWizard"/>
+<perspective_action id="org.eclipse.jdt.ui.JavaPerspective"/>
+<perspective_action id="org.eclipse.jdt.ui.JavaBrowsingPerspective"/>
+<perspective_action id="org.eclipse.team.cvs.ui.cvsPerspective"/>
+<perspective_action id="org.eclipse.team.ui.TeamSynchronizingPerspective"/>
+<hide_toolbar_item_id id="org.eclipse.debug.ui.commands.RunToLine"/>
+<hide_toolbar_item_id id="org.eclipse.jdt.ui.actions.OpenProjectWizard"/>
+<hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
+<view id="org.eclipse.ui.navigator.ProjectExplorer"/>
+<view id="org.eclipse.ui.views.TaskList"/>
+<fastViewBars/>
+<layout>&#x0A;<mainWindow>&#x0A;<info folder="true" part="topLeft">&#x0A;<folder activePageID="org.eclipse.ui.navigator.ProjectExplorer" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.navigator.ProjectExplorer" label="Project Explorer"/>
+<page content="org.eclipse.ui.views.BookmarkView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.views.ResourceNavigator" label="LabelNotFound"/>
+<page content="org.eclipse.team.ccvs.ui.RepositoriesView" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="stickyFolderRight" ratio="0.7495049" ratioLeft="757" ratioRight="253" relationship="2" relative="topLeft">&#x0A;<folder appearance="2" expanded="2">&#x0A;<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
+<page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
+</folder>
+</info>
+<info part="org.eclipse.ui.editorss" ratio="0.22885032" ratioLeft="422" ratioRight="1422" relationship="2" relative="topLeft"/>
+<info folder="true" part="bottomRight" ratio="0.6596386" ratioLeft="438" ratioRight="226" relationship="4" relative="org.eclipse.ui.editorss">&#x0A;<folder activePageID="org.eclipse.ui.views.TaskList" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.TaskList" label="Tasks"/>
+<page content="org.eclipse.team.ui.GenericHistoryView" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="bottomLeft" ratio="0.5" ratioLeft="332" ratioRight="332" relationship="4" relative="topLeft">&#x0A;<folder appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.views.ContentOutline" label="LabelNotFound"/>
+<page content="org.eclipse.ant.ui.views.AntView" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory"/>
+</folder>
+</info>
+</mainWindow>
+</layout>
+</perspective>
+<perspective editorAreaTrimState="2" editorAreaVisible="1" fixed="0" version="0.016">
+<descriptor class="org.python.pydev.ui.perspective.PythonPerspectiveFactory" id="org.python.pydev.ui.PythonPerspective" label="PyDev"/>
+<alwaysOnActionSet id="org.eclipse.ui.cheatsheets.actionSet"/>
+<alwaysOnActionSet id="org.eclipse.search.searchActionSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.annotationNavigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.navigation"/>
+<alwaysOnActionSet id="org.eclipse.ui.edit.text.actionSet.convertLineDelimitersTo"/>
+<alwaysOnActionSet id="org.eclipse.ui.externaltools.ExternalToolsSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.keyBindings"/>
+<alwaysOnActionSet id="org.eclipse.ui.actionSet.openFiles"/>
+<alwaysOnActionSet id="org.eclipse.debug.ui.launchActionSet"/>
+<alwaysOnActionSet id="org.eclipse.ui.NavigateActionSet"/>
+<alwaysOnActionSet id="com.python.pydev.navigate.actionSet"/>
+<show_view_action id="org.python.pydev.views.PyCodeCoverageView"/>
+<show_view_action id="org.python.pydev.navigator.view"/>
+<show_view_action id="org.python.pydev.debug.pyunit.pyUnitView"/>
+<show_view_action id="org.eclipse.search.ui.views.SearchView"/>
+<show_view_action id="org.eclipse.ui.console.ConsoleView"/>
+<show_view_action id="org.eclipse.ui.views.ContentOutline"/>
+<show_view_action id="org.eclipse.ui.views.ProblemView"/>
+<show_view_action id="org.eclipse.pde.runtime.LogView"/>
+<show_view_action id="org.eclipse.ui.views.TaskList"/>
+<new_wizard_action id="org.python.pydev.ui.wizards.project.PythonProjectWizard"/>
+<new_wizard_action id="org.python.pydev.ui.wizards.files.PythonSourceFolderWizard"/>
+<new_wizard_action id="org.python.pydev.ui.wizards.files.PythonPackageWizard"/>
+<new_wizard_action id="org.python.pydev.ui.wizards.files.PythonModuleWizard"/>
+<new_wizard_action id="org.eclipse.ui.wizards.new.folder"/>
+<new_wizard_action id="org.eclipse.ui.wizards.new.file"/>
+<new_wizard_action id="org.eclipse.ui.editors.wizards.UntitledTextFileWizard"/>
+<hide_toolbar_item_id id="org.eclipse.debug.ui.commands.RunToLine"/>
+<hide_toolbar_item_id id="org.eclipse.jdt.ui.actions.OpenProjectWizard"/>
+<hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
+<view id="org.python.pydev.navigator.view"/>
+<view id="org.eclipse.ui.console.ConsoleView"/>
+<view id="org.python.pydev.debug.pyunit.pyUnitView"/>
+<fastViewBars/>
+<layout>
+<mainWindow>
+<info folder="true" part="topLeft">
+<folder activePageID="org.python.pydev.navigator.view" appearance="2" expanded="2">
+<page content="org.python.pydev.navigator.view" label="PyDev Package Explorer"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+</presentation>
+</folder>
+</info>
+<info folder="true" part="stickyFolderRight" ratio="0.74986464" ratioLeft="1385" ratioRight="462" relationship="2" relative="topLeft">
+<folder appearance="2" expanded="2">
+<page content="org.eclipse.help.ui.HelpView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
+<page content="org.eclipse.ui.cheatsheets.views.CheatSheetView" label="LabelNotFound"/>
+</folder>
+</info>
+<info part="org.eclipse.ui.editorss" ratio="0.2598809" ratioLeft="480" ratioRight="1367" relationship="2" relative="topLeft"/>
+<info folder="true" part="bottom" ratio="0.7493188" ratioLeft="825" ratioRight="276" relationship="4" relative="org.eclipse.ui.editorss">
+<folder activePageID="org.eclipse.ui.console.ConsoleView" appearance="2" expanded="2">
+<page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
+<page content="org.python.pydev.debug.pyunit.pyUnitView" label="PyUnit"/>
+<page content="org.eclipse.search.ui.views.SearchView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.views.BookmarkView" label="LabelNotFound"/>
+<page content="org.eclipse.ui.views.ProgressView" label="LabelNotFound"/>
+<presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">
+<part id="0"/>
+<part id="1"/>
+</presentation>
+</folder>
+</info>
+</mainWindow>
+</layout>
+</perspective>
+</perspectives>
+<workingSets/>
+<navigationHistory>
+<editors>
+<editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/DESY/src/root/nested/heatmaps_medipix.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Timepix_cluster_analysis/src/root/nested/__init__.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/DESY/src/root/nested/cluster_analysis.py"/>
+<editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/DESY/src/root/nested/__init__.py"/>
+</editors>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="764" y="16"/>
+</item>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="1142" y="30"/>
+</item>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="926" y="0"/>
+</item>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="839" y="86"/>
+</item>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="1054" y="0"/>
+</item>
+<item historyLabel="nested (Timepix_cluster_analysis.src.root)" index="2">
+<position info="not_deleted" x="0" y="10083"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position/>
+</item>
+<item historyLabel="heatmaps_medipix" index="1">
+<position info="not_deleted" x="178" y="122"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2548" y="2568"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4446" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4398" y="47"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2591" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2400" y="188"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="3436" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="3315" y="120"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2442" y="0"/>
+</item>
+<item historyLabel="my_functions" index="0">
+<position info="not_deleted" x="3994" y="0"/>
+</item>
+<item historyLabel="my_functions" index="0">
+<position info="not_deleted" x="4313" y="0"/>
+</item>
+<item historyLabel="my_functions" index="0">
+<position info="not_deleted" x="12572" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2431" y="0"/>
+</item>
+<item historyLabel="my_functions" index="0">
+<position info="not_deleted" x="3994" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2431" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="2400" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="930" y="1463"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="3203" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4398" y="47"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="3132" y="70"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4315" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4721" y="0"/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position info="not_deleted" x="21001" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4702" y="148"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="3064" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="5162" y="0"/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position info="not_deleted" x="21001" y="0"/>
+</item>
+<item historyLabel="my_functions" index="0">
+<position info="not_deleted" x="3994" y="0"/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position info="not_deleted" x="21001" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position info="not_deleted" x="21001" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="5132" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4274" y="0"/>
+</item>
+<item historyLabel="root_functions" index="4">
+<position info="not_deleted" x="21001" y="0"/>
+</item>
+<item historyLabel="cluster_analysis" index="3">
+<position info="not_deleted" x="4005" y="0"/>
+</item>
+<item historyLabel="nested (DESY.src.root)" index="5">
+<position info="not_deleted" x="273" y="65"/>
+</item>
+<item historyLabel="nested (DESY.src.root)" index="5">
+<position info="not_deleted" x="2525" y="61"/>
+</item>
+<item historyLabel="nested (DESY.src.root)" index="5">
+<position info="not_deleted" x="2602" y="0"/>
+</item>
+<item active="true" historyLabel="nested (DESY.src.root)" index="5">
+<position info="not_deleted" x="575" y="0"/>
+</item>
+</navigationHistory>
+<input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
+</page>
+<workbenchWindowAdvisor/>
+<actionBarAdvisor/>
+<trimLayout>
+<trimArea IMemento.internal.id="128">
+<trimItem IMemento.internal.id="org.eclipse.ui.internal.WorkbenchWindow.topBar"/>
+</trimArea>
+<trimArea IMemento.internal.id="1024">
+<trimItem IMemento.internal.id="org.eclise.ui.internal.FastViewBar"/>
+<trimItem IMemento.internal.id="org.eclipse.jface.action.StatusLineManager"/>
+<trimItem IMemento.internal.id="org.eclipse.ui.internal.progress.ProgressRegion"/>
+</trimArea>
+</trimLayout>
+</window>
+<mruList>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="root_functions.py" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py">
+<persistable uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="my_functions.py" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py">
+<persistable uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="cluster_analysis.py" tooltip="DESY/src/root/nested/cluster_analysis.py">
+<persistable path="/DESY/src/root/nested/cluster_analysis.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="Timepix_cluster_analysis/src/root/nested/__init__.py">
+<persistable path="/Timepix_cluster_analysis/src/root/nested/__init__.py"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="patches.py" tooltip="/usr/share/pyshared/matplotlib/patches.py">
+<persistable uri="file:/usr/share/pyshared/matplotlib/patches.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="heatmaps_medipix.py" tooltip="DESY/src/root/nested/heatmaps_medipix.py">
+<persistable path="/DESY/src/root/nested/heatmaps_medipix.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="heatmaps.py" tooltip="DESY/src/root/nested/heatmaps.py">
+<persistable path="/DESY/src/root/nested/heatmaps.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="Oxford_June/src/root/nested/__init__.py">
+<persistable path="/Oxford_June/src/root/nested/__init__.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="DESY/src/root/nested/__init__.py">
+<persistable path="/DESY/src/root/nested/__init__.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="mcp_overlay.py" tooltip="DESY/src/root/nested/mcp_overlay.py">
+<persistable path="/DESY/src/root/nested/mcp_overlay.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="ROOT_example.py" tooltip="Example_scipts/ROOT_example.py">
+<persistable path="/Example_scipts/ROOT_example.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="cosmic_analysis_DES/src/root/nested/__init__.py">
+<persistable path="/cosmic_analysis_DES/src/root/nested/__init__.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="focal_plane_plots.py" tooltip="cosmic_analysis_DES/src/root/nested/focal_plane_plots.py">
+<persistable path="/cosmic_analysis_DES/src/root/nested/focal_plane_plots.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="DM_example.py" tooltip="Example_scipts/DM_example.py">
+<persistable path="/Example_scipts/DM_example.py"/>
+</file>
+</mruList>
+</workbench>

@@ -1,0 +1,13 @@
+INSTUProot.nested.combine_plots
+/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_analysis/src/root/nested/combine_plots.py
+INFOS:&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0&&3|8|2|0&&3|9|2|0&&3|10|2|0
+c1=9
+legend=10
+ID_list=4
+path=1
+temp=8
+key_list=5
+root.nested.combine_plots=2
+object_list=6
+outpath=3
+rootfile=7

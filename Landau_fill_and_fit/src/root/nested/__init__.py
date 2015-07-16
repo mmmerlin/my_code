@@ -3,12 +3,13 @@ import numpy as np
 import ROOT
 from ROOT import TCanvas, TF1, TH1F
 
+
 import root_functions
 from root_functions import LanGausFit, LandauFit
 
 if __name__ == '__main__':
     
-    filename = "/home/mmmerlin/useful/landau.txt"
+    filename = "/home/user01/Desktop/example_files/landau.txt"
     data = np.loadtxt(filename, dtype = float)
        
     histmin = 0
@@ -36,7 +37,7 @@ if __name__ == '__main__':
     landau_func.Draw("same")
     
     
-    c1.SaveAs('/home/mmmerlin/temp/test_landau.pdf')
+    c1.SaveAs('/home/user01/Desktop/example_files/test_landau.pdf')
     del c1
     del landau_hist
     

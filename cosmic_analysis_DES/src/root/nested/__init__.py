@@ -31,6 +31,7 @@ import TrackFitting_DES
 
 
 
+
 ##########################################################################################
 ##########################################################################################
 # things that won't really change
@@ -147,6 +148,8 @@ def DoAnalysis(input_path, pickle_file, SINGLE_FILE = True, SPECIFIC_FILE = None
         if SINGLE_FILE == True: exit()
             
             
+                        
+                      
 
 #===============================================================================
 
@@ -259,6 +262,37 @@ def CollatePickles():
         print message
         GLOBAL_OUT.append(message)
         del datalist
+        
+    for line in GLOBAL_OUT: print line
+    print "Finished."
+    
+    
+def CombineCollatedPickles():
+    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+
+    in_path_1  = "/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_collated_2/"
+    in_path_2  = "/mnt/hgfs/VMShared/Data/DES_analysis/newset_collated/"
+    out_path = "/mnt/hgfs/VMShared/Data/DES_analysis/all_data/" 
+
+    for filter in filter_list:
+        filename = filter +'.pickle'
+        datalist = []
+        print "Loading %s"%(filename)
+        ntracks = 0
+        for item in pickle.load(open(in_path_1 + filename, 'rb')):
+            ntracks += 1
+            datalist.append(item)
+        for item in pickle.load(open(in_path_2 + filename, 'rb')):
+            ntracks += 1
+            datalist.append(item)
+            
+        pickle.dump(datalist, open(out_path + filter + '.pickle', 'wb'), pickle.HIGHEST_PROTOCOL)
+        print "Finished collating %s"%filter
+        message = '%s tracks for sensor %s'%(ntracks, filter)
+        print message
+        GLOBAL_OUT.append(message)
+        del datalist
+        
         
     for line in GLOBAL_OUT: print line
     print "Finished."
@@ -618,6 +652,103 @@ def ReDrawAllGraphsInROOTFILE(filename, rootfilename_for_comparison = None):
         c4.SaveAs(OUTPUT_PATH + 'dataset_corellation_grads' + '.png')
         
         for line in GLOBAL_OUT: print line
+        
+        
+        
+def RefitGraphsFromRootfile(filename):
+    rootfile = TFile.Open(filename, "READ")
+        
+    filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+#     filter_list = ['N01']
+    boule_1 = ['S28','S23','S22','S01','N06','N01','N28','N27','N30','N24']
+    
+    graphlist = {}
+    
+    for i, filter in enumerate(filter_list):
+        temp = rootfile.Get(filter)
+        if repr(temp) != '<ROOT.TObject object at 0x(nil)>':
+            graphlist[filter] = temp
+        else:
+            print "Skipped %s from set1"%filter
+    
+    for filter in filter_list:
+        c_each = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+        graph = graphlist[filter]
+        function = graph.GetFunction('line')
+        function.SetLineColor(0)        
+        
+        xmin = 0
+        xmax = 250
+
+#         const = 4.330127019
+
+#         fit_func_2 = TF1("line","TMath::Sqrt(([1]*[1]) + [0]*x  + [2]*x*x)", xmin, xmax)
+        fit_func_2 = TF1("line","TMath::Sqrt((4.330127019*4.330127019) + [0]*x+ [2]*x*x)", xmin, xmax)
+    
+
+        fit_func_2.SetParameter(0,0.25)
+        fit_func_2.SetParameter(1,4.3)
+        fit_func_2.SetParLimits(1,0.1,10)
+        fit_func_2.SetNpx(1000)
+        graph.Fit(fit_func_2, "ME", "")
+        chisqred = fit_func_2.GetChisquare() / fit_func_2.GetNDF()
+        
+        sigma_0 = fit_func_2.GetParameter(1) 
+        sigma_0_error = fit_func_2.GetParError(1)
+        diff_const = fit_func_2.GetParameter(0) 
+        diff_const_error = fit_func_2.GetParError(0)
+     
+        test = fit_func_2.GetParameter(2) 
+     
+        legend_text = []
+        legend_text.append('#sigma_{0} = '         + str(round(sigma_0,2))    + ' #pm ' + str(round(sigma_0_error,2)) + ' #mum')
+        legend_text.append('Diffusion constant = ' + str(round(diff_const,3)) + ' #pm ' + str(round(diff_const_error,3)))
+        legend_text.append('#chi^{2}_{red} = ' + str(round(chisqred,3)))
+        textbox = TPaveText(0.48,0.25,0.88,0.45,"NDC")
+        for line in legend_text:
+            textbox.AddText(line)
+        textbox.SetFillColor(0)
+        textbox.SetTextAlign(11)
+        textbox.SetTextColor(1)
+        textbox.SetTextSize(1.4* textbox.GetTextSize())
+    
+        graph.SetLineColor(4)
+        graph.SetMarkerColor(4)
+        graph.Draw("AP")
+        textbox.Draw("same")
+        
+        c_each.SaveAs(OUTPUT_PATH + filter + '.png')
+        
+        line = '%s\t%s\t%s\t%s\t%s\t'%(filter, sigma_0, diff_const, chisqred, test)
+        GLOBAL_OUT.append(line)
+        
+        
+    #all plots on top of each other
+    c3 = TCanvas( 'canvas', 'canvas', CANVAS_WIDTH, CANVAS_HEIGHT)
+    xmin = 0.
+    xmax = 250.
+    ymin = 0.
+    ymax = float(10.)
+    gr_scale_dummy = TGraph()
+    gr_scale_dummy.SetPoint(0,xmin,ymin)
+    gr_scale_dummy.SetPoint(1,xmax,ymax)
+    gr_scale_dummy.SetMarkerColor(0)
+    gr_scale_dummy.SetMarkerSize(0)
+    gr_scale_dummy.Draw("AP")
+    for filter in filter_list:
+        graph = graphlist[filter]
+        graph.SetLineColor(4)
+        graph.SetMarkerColor(4)
+        graph.Draw("Psame")
+    gr_scale_dummy.GetXaxis().SetTitle('Average sensor depth (#mum)')
+    gr_scale_dummy.GetYaxis().SetTitle('PSF #sigma (#mum)')
+    c3.SaveAs(OUTPUT_PATH + 'all_plots_together' + '.png')
+    c3.SaveAs(OUTPUT_PATH + 'all_plots_together' + '.pdf')
+   
+
+    for line in GLOBAL_OUT:
+        print line
+
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -651,11 +782,19 @@ if __name__ == '__main__':
     
     
     
+#     CombineCollatedPickles()
+#     exit()
+    
 #     CollatePickles()
 #     exit()
      
     
-    OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/temp/'
+    OUTPUT_PATH = '/mnt/hgfs/VMShared/output/DES_analysis/combined_analysis/'
+    
+    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/all_data.root'
+    RefitGraphsFromRootfile(rootfilename)
+    exit()
+    
     
 #     rootfilename_for_comparison = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
 #     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
@@ -664,19 +803,18 @@ if __name__ == '__main__':
     rootfilename_for_comparison = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
      
 #     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/new_analysis.root'
-    ReDrawAllGraphsInROOTFILE(rootfilename, rootfilename_for_comparison)
-    print "Finished combining graphs"
-    exit()
+#     ReDrawAllGraphsInROOTFILE(rootfilename, rootfilename_for_comparison)
+#     print "Finished combining graphs"
+#     exit()
  
-    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/AllGraphs_202080_thr50_gr2.root'
-#     rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/temp/temp.root'
+    rootfilename = '/mnt/hgfs/VMShared/output/DES_analysis/all_data.root'
     
 #     filter_list = ['N01','N02','N03','N04','N05','N06','N07','N08','N09','N10','N11','N12','N13','N14','N15','N16','N17','N18','N19','N20','N21','N22','N23','N24','N25','N26','N27','N28','N29','N30','N31','S01','S02','S03','S04','S05','S06','S07','S08','S09','S10','S11','S12','S13','S14','S15','S16','S17','S18','S19','S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
-    filter_list = ['N05','S23','S24','S29']
+    filter_list = ['S20','S21','S22','S23','S24','S25','S26','S27','S28','S29','S30','S31']
+
     for filter in filter_list:
 #         try:
-#         DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/newset_collated/' + filter + '.pickle', filter, rootfilename)
-        DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/20208080_thr50_gr2_collated_2/' + filter + '.pickle', filter, rootfilename)
+        DoPSF_Analysis('/mnt/hgfs/VMShared/Data/DES_analysis/all_data/' + filter + '.pickle', filter, rootfilename)
 #         except:
 #             GLOBAL_OUT.append('Failed %s'%filter)
           
