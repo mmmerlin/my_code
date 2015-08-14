@@ -122,7 +122,7 @@ if __name__ == '__main__':
             footprint_pixels = 0
             for footprintnum, footprint in enumerate(footPrints):
                 if footprintnum>=100: exit()
-#                 if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
+                if DISPLAY and filenum == display_num: displayUtils.drawBBox(footprint.getBBox(), borderWidth=0.5) # border to fully encompass the bbox and no more
                 npix = afwDetect.Footprint.getNpix(footprint)
 #                 if npix >1:cluster_sizes.append(npix)
                 

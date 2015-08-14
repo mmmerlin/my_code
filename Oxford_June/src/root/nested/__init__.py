@@ -15,9 +15,8 @@ exp_type = ''
 day = ''
 run = ''
 in_path = ''
-out_path = '/mnt/hgfs/VMShared/output/oxford_june_2015/temp/'
+out_path = '/mnt/hgfs/VMShared/output/oxford/2015_june/temp/'
 
-in_path = '/mnt/hgfs/VMShared/Data/DESY/vacuum_gauge/'
 
 
 # OpenTimepixInDS9( '/mnt/hgfs/VMShared/Data/oxford/Day 4/Run 20/1_0002.txt')
@@ -199,10 +198,6 @@ run = 'run8'
 
 
 
-conversion_in  = '/mnt/hgfs/VMShared/Data/oxford/june_2015/Day3/pimms/run8/'
-conversion_out = '/mnt/hgfs/VMShared/Data/oxford/june_2015/Day3/pimms_to_timepix/run8/'
-
-
 day = 'day3'
 run = 'run7'
 
@@ -230,7 +225,7 @@ tmax = 8160
 def PlotREMPI():
     max_loops = 16
     loop_length = 999
-    box_size = 10
+    box_size = 1
     
     files = os.listdir(in_path)
 
@@ -260,9 +255,9 @@ def PlotREMPI():
     intensity = BoxcarAverage1DArray(intensity,box_size)
     assert len(wavelength)==len(intensity)
     
-    plotname = out_path + day + run + exp_type + 'REMPI.png'
-    ListVsList(wavelength, intensity, plotname, plot_opt='AC')
-    exit()
+    plotname = day + run + exp_type + 'REMPI.png'
+    ListVsList(wavelength, intensity, out_path + plotname, plot_opt='AC')
+#     exit()
     
     fig2 = pl.figure()
     pl.plot(wavelength,intensity)
@@ -339,22 +334,11 @@ if __name__ == '__main__':
     print in_path
 
 
-#     for i, filename in enumerate(os.listdir(conversion_in)):
-#         TranslatePImMSToTimepix(conversion_in + filename, i, conversion_out)
-#     print 'finished translating %s'%conversion_in
-#     exit()
-
-
 #     image = MakeCompositeImage_Timepix(in_path, maxfiles = 5000, t_min=tmin, t_max = tmax)
 #     ShowImage(image)
 # #     TrackToFile_ROOT_2D_3D(image.getArray(), out_path + 'comp.png', plot_opt='colz', log_z = False, force_aspect= True, fitline = None, zmax = 500)
 #     exit()
 #      
-     
-     
-     
-     
-     
      
      
      
@@ -365,6 +349,7 @@ if __name__ == '__main__':
     
     PlotREMPI()
     exit()
+
 
 
 #     MakeToFSpectrum()
