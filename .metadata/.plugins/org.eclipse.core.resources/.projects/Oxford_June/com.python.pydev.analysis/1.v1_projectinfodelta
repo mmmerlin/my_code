@@ -1,15 +1,1 @@
-INSTUProot.nested.T_res_voltage
-/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res_voltage.py
-INFOS:&&3|1|2|0&&3|3|2|0&&3|4|2|0&&3|5|2|0&&3|6|2|0&&3|7|2|0&&3|8|2|0&&3|9|2|0&&3|10|2|0&&3|11|2|0&&2|12|2|0
-MakeToFSpectrum=12
-timepix_path=8
-voltages=11
-out_path=7
-finetune_1=10
-xmin=3
-xmax=4
-root.nested.T_res_voltage=2
-ymin=5
-ymax=6
-GLOBAL_OUT=1
-offset=9
+DELSTRroot.nested.T_res_voltage
