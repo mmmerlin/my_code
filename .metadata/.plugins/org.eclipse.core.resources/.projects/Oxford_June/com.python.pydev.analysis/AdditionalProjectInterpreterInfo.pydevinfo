@@ -1,32 +1,12 @@
 -- VERSION_4
 -- START DISKCACHE
 /mnt/hgfs/VMShared/Code/git/my_code/.metadata/.plugins/org.eclipse.core.resources/.projects/Oxford_June/com.python.pydev.analysis/v2_indexcache
-root.nested.T_res|1439503385000|/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res.py
-root.nested.T_res_laser|1439566572000|/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res_laser.py
 -- END DISKCACHE
 -- START DICTIONARY
-2
-2=root.nested.T_res
-1=root.nested.T_res_laser
+0
 -- END DICTIONARY
 -- START TREE 1
-16
-cen|2|centroid_offset_1!11@centroid_offset_2!11@
-fin|2|finetune_1!11@finetune_2!11@
-glo|2|GLOBAL_OUT!19@GLOBAL_OUT!11@
-mak|2|MakeToFSpectrum!10@MakeToFSpectrum!18@
-out|2|out_path!19@out_path!11@
-pim|3|pimms_path!11@pimms_path!19@pimms_offset!19@
-raw|1|raw_offset!11@
-sho|2|ShowRawToF!10@ShowRawToF!18@
-tim|5|timepix_path!11@timepix_offset!19@timepix_max_offset!19@timepix_max_offset!11@timepix_path!19@
-tma|0|
-tmi|0|
-tp_|2|tp_max_finetune!19@tp_finetune!19@
-xma|2|xmax!19@xmax!11@
-xmi|2|xmin!11@xmin!19@
-yma|2|ymax!11@ymax!19@
-ymi|2|ymin!11@ymin!19@
+0
 -- END TREE
 -- START TREE 2
 0

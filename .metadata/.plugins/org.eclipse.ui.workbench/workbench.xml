@@ -54,9 +54,9 @@
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Oxford_June/src/root/nested/REMPI_overlay.py"/>
 <editorState selectionHorizontalPixel="0" selectionLength="23" selectionOffset="4995" selectionTopPixel="2720"/>
 </editor>
-<editor activePart="true" focus="true" id="org.python.pydev.editor.PythonEditor" name="my_functions.py" partName="my_functions" title="my_functions" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py" workbook="DefaultEditorWorkbook">
+<editor id="org.python.pydev.editor.PythonEditor" name="my_functions.py" partName="my_functions" title="my_functions" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="11933" selectionTopPixel="5994"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="10761" selectionTopPixel="5516"/>
 </editor>
 <editor id="org.python.pydev.editor.PythonEditor" name="sensitivity.py" partName="sensitivity" path="/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/sensitivity.py" title="sensitivity" tooltip="Oxford_June/src/root/nested/sensitivity.py" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Oxford_June/src/root/nested/sensitivity.py"/>
@@ -64,11 +64,11 @@
 </editor>
 <editor id="org.python.pydev.editor.PythonEditor" name="mcp_overlay.py" partName="mcp_overlay" path="/mnt/hgfs/VMShared/Code/git/my_code/DESY/src/root/nested/mcp_overlay.py" title="mcp_overlay" tooltip="DESY/src/root/nested/mcp_overlay.py" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/DESY/src/root/nested/mcp_overlay.py"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1032" selectionTopPixel="493"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1032" selectionTopPixel="504"/>
 </editor>
-<editor id="org.python.pydev.editor.PythonEditor" name="T_res.py" partName="T_res" path="/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res.py" title="T_res" tooltip="Oxford_June/src/root/nested/T_res.py" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Oxford_June/src/root/nested/T_res.py"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="694" selectionTopPixel="340"/>
+<editor activePart="true" focus="true" id="org.python.pydev.editor.PythonEditor" name="T_res_voltage.py" partName="T_res_voltage" path="/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res_voltage.py" title="T_res_voltage" tooltip="Oxford_June/src/root/nested/T_res_voltage.py" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/Oxford_June/src/root/nested/T_res_voltage.py"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="1282" selectionTopPixel="510"/>
 </editor>
 </editors>
 <views>
@@ -103,7 +103,7 @@
 <expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_centroiding/src"/>
 <expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_centroiding/src/root"/>
 <expanded IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_centroiding/src/root/nested"/>
-<selected IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/Timepix_cluster_centroiding/src/root/nested/__init__.py"/>
+<selected IMemento.internal.id="/mnt/hgfs/VMShared/Code/git/my_code/Oxford_June/src/root/nested/T_res_voltage.py"/>
 </viewState>
 </view>
 </views>
@@ -245,162 +245,159 @@
 <editors>
 <editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/my_functions.py"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/T_res.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/DESY/src/root/nested/mcp_overlay.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/REMPI_overlay.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/Just_ToF.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/sensitivity.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/heatmaps.py"/>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Timepix_cluster_centroiding/src/root/nested/__init__.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/T_res_laser.py"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" path="/Oxford_June/src/root/nested/T_res_voltage.py"/>
+<editor factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" uri="file:/usr/lib/python2.7/posixpath.py"/>
 </editors>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1003" y="67"/>
+<position info="not_deleted" x="3685" y="0"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="2763" y="21"/>
+<position info="not_deleted" x="3658" y="26"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1003" y="67"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position/>
+<position info="not_deleted" x="3897" y="0"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1003" y="67"/>
-</item>
-<item historyLabel="mcp_overlay" index="2">
-<position info="not_deleted" x="448" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="10229" y="0"/>
+<position info="not_deleted" x="3731" y="77"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1397" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1397" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="10169" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1397" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="418" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="541" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="697" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="10317" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="821" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="9972" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="821" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1978" y="143"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1961" y="0"/>
-</item>
-<item historyLabel="mcp_overlay" index="2">
-<position info="not_deleted" x="448" y="0"/>
-</item>
-<item historyLabel="REMPI_overlay" index="3">
-<position info="not_deleted" x="4995" y="23"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="1528" y="0"/>
-</item>
-<item historyLabel="REMPI_overlay" index="3">
-<position info="not_deleted" x="4995" y="23"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="0" y="0"/>
-</item>
-<item historyLabel="T_res" index="1">
-<position info="not_deleted" x="2071" y="0"/>
+<position info="not_deleted" x="3809" y="88"/>
 </item>
 <item historyLabel="T_res" index="1">
 <position info="not_deleted" x="1478" y="0"/>
 </item>
-<item historyLabel="Just_ToF" index="4">
-<position info="not_deleted" x="3042" y="0"/>
-</item>
-<item historyLabel="REMPI_overlay" index="3">
-<position info="not_deleted" x="4995" y="23"/>
-</item>
-<item historyLabel="sensitivity" index="5">
-<position info="not_deleted" x="45" y="0"/>
-</item>
-<item historyLabel="mcp_overlay" index="2">
-<position info="not_deleted" x="1032" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="9972" y="0"/>
-</item>
-<item historyLabel="heatmaps" index="6">
-<position info="not_deleted" x="2008" y="17"/>
+<item historyLabel="T_res" index="1">
+<position/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="394" y="0"/>
-</item>
-<item historyLabel="heatmaps" index="6">
-<position info="not_deleted" x="1282" y="33"/>
+<position info="not_deleted" x="1478" y="0"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="688" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="9707" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="10086" y="0"/>
-</item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11265" y="0"/>
+<position info="not_deleted" x="2093" y="0"/>
 </item>
 <item historyLabel="T_res" index="1">
-<position info="not_deleted" x="694" y="0"/>
+<position info="not_deleted" x="2446" y="7"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1738" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1803" y="78"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1786" y="0"/>
 </item>
 <item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="9707" y="0"/>
+<position info="not_deleted" x="10761" y="0"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11729" y="0"/>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1786" y="0"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11678" y="0"/>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="2161" y="0"/>
 </item>
-<item historyLabel="nested" index="7">
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="4115" y="31"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="4174" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="4208" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="4174" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="4152" y="21"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="2101" y="59"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1625" y="112"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1476" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1302" y="173"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="934" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="848" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1674" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
 <position info="not_deleted" x="0" y="0"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11678" y="0"/>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2914" y="0"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11679" y="24"/>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="0" y="0"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11704" y="24"/>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2162" y="320"/>
 </item>
-<item historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11957" y="0"/>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="0" y="0"/>
 </item>
-<item active="true" historyLabel="my_functions" index="0">
-<position info="not_deleted" x="11463" y="0"/>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2981" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2758" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2578" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2493" y="84"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2758" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2668" y="89"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2981" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2860" y="0"/>
+</item>
+<item historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="T_res_laser" index="2">
+<position info="not_deleted" x="2860" y="0"/>
+</item>
+<item historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="T_res" index="1">
+<position info="not_deleted" x="1674" y="0"/>
+</item>
+<item historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="0" y="0"/>
+</item>
+<item historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="3491" y="693"/>
+</item>
+<item historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="676" y="0"/>
+</item>
+<item historyLabel="posixpath" index="4">
+<position info="not_deleted" x="9867" y="0"/>
+</item>
+<item active="true" historyLabel="T_res_voltage" index="3">
+<position info="not_deleted" x="676" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -419,6 +416,21 @@
 </trimLayout>
 </window>
 <mruList>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="posixpath.py" tooltip="/usr/lib/python2.7/posixpath.py">
+<persistable uri="file:/usr/lib/python2.7/posixpath.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="T_res_voltage.py" tooltip="Oxford_June/src/root/nested/T_res_voltage.py">
+<persistable path="/Oxford_June/src/root/nested/T_res_voltage.py"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="T_res_laser.py" tooltip="Oxford_June/src/root/nested/T_res_laser.py">
+<persistable path="/Oxford_June/src/root/nested/T_res_laser.py"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="root_functions.py" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py">
+<persistable uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py"/>
+</file>
+<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="ROOT.py" tooltip="/usr/local/src/root/lib/ROOT.py">
+<persistable uri="file:/usr/local/src/root/lib/ROOT.py"/>
+</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="Timepix_cluster_centroiding/src/root/nested/__init__.py">
 <persistable path="/Timepix_cluster_centroiding/src/root/nested/__init__.py"/>
 </file>
@@ -448,21 +460,6 @@
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="__init__.py" tooltip="NSLS Timecodes 2/src/root/nested/__init__.py">
 <persistable path="/NSLS Timecodes 2/src/root/nested/__init__.py"/>
-</file>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="ds9.py" tooltip="/home/user01/lsst/Linux64/afw/10.1+1/python/lsst/afw/display/ds9.py">
-<persistable uri="file:/home/user01/lsst/Linux64/afw/10.1+1/python/lsst/afw/display/ds9.py"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="REMPI_overlay.py" tooltip="Oxford_June/src/root/nested/REMPI_overlay.py">
-<persistable path="/Oxford_June/src/root/nested/REMPI_overlay.py"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="Just_ToF.py" tooltip="Oxford_June/src/root/nested/Just_ToF.py">
-<persistable path="/Oxford_June/src/root/nested/Just_ToF.py"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="heatmaps.py" tooltip="Oxford_June/src/root/nested/heatmaps.py">
-<persistable path="/Oxford_June/src/root/nested/heatmaps.py"/>
-</file>
-<file factoryID="org.eclipse.ui.ide.FileStoreEditorInputFactory" id="org.python.pydev.editor.PythonEditor" name="root_functions.py" tooltip="/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py">
-<persistable uri="file:/mnt/hgfs/VMShared/Code/git/my_functions/root_functions.py"/>
 </file>
 </mruList>
 </workbench>
