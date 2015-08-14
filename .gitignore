@@ -6,3 +6,4 @@
 .deps
 *.so
 .sconsign.dblite
+.metadata

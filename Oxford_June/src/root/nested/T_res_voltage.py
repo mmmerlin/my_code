@@ -1,6 +1,7 @@
 import pylab as pl
 from my_functions import *
 import os
+from collections import OrderedDict
 
 GLOBAL_OUT = []
 
@@ -17,46 +18,52 @@ timepix_path = '/mnt/hgfs/VMShared/Data/oxford/June_2015/Day4/timepix/'
 offset     = 5282 #bigger moves left
 finetune_1 = 0
 
-# voltages = dict(run3=49,run4=100,run5=9,run6=20,run7=29,run8=40,run9=60,run10=69,run11=89,run12=80,run13=80)
-voltages = dict(run3=49,run4=100)
+
+# voltages = OrderedDict(run5=9,run6=20,run7=29,run8=40,run3=49,run9=60,run10=69,run12=80,run11=89,run4=100)
+voltages = dict(run5=10,run6=20,run7=30,run8=40,run3=50,run9=60,run10=70,run12=80,run11=90,run4=100)
+hist_values = OrderedDict(run5=[],run6=[],run7=[],run8=[],run3=[],run9=[],run10=[],run12=[],run11=[],run4=[])
+
+order = ['run5','run6','run7','run8','run3','run9','run10','run12','run11','run4']
+
+# voltages = OrderedDict(run3=49,run4=100)
+# hist_values = OrderedDict(run3=[],run4=[])
+
+line_styles = ['k-o','b-o','g-o','r-o','c-o','m-o','y-o','k--o','b--o','g--o']
+
 
 NORMALISE = True
 
 
 def MakeToFSpectrum():
     
-    xpoints = []
-    yseries = []
-    
     for key in voltages:
         print key, voltages.get(key)
         path = os.path.join(timepix_path, key, '')
     
         timepix_timecodes_raw = GetTimecodes_AllFilesInDir(path, xmin, xmax, ymin, ymax, 0, checkerboard_phase = None)
+#         timepix_timecodes_raw =  GetMaxClusterTimecodes_AllFilesInDir(path, xmin, xmax, ymin, ymax, checkerboard_phase = None, npix_min = 4)
     
         for i,code in enumerate(timepix_timecodes_raw):
             timepix_timecodes_raw[i] = (11810. - code) - offset
             timepix_timecodes_raw[i] *= 20
             
         timepix_nbins = 100
-        
-        fig = pl.figure(figsize=(14,10))
        
-        values, bins, patches = pl.hist(timepix_timecodes_raw, bins = timepix_nbins, range = [0,2000])
+        hist_values[key], bins, patches = pl.hist(timepix_timecodes_raw, bins = timepix_nbins, range = [0,2000])
     
-        pl.clf()
-        bins = bins[:-1] 
         
-        if NORMALISE == True:
-            pl.plot(bins-finetune_1, values/max(values), 'k-.o', label="Timepix Raw")
-        else:
-            pl.plot(bins-finetune_1, values,             'k-.o', label="Timepix Raw")
         
-        print "Peak height raw = %s"%max(values)
+    #== Data analysed, now plot ============================================================
+    bins = bins[:-1] 
         
+    pl.clf()
+    fig = pl.figure(figsize=(14,10))
+    
+    for i,key in enumerate(order):
+        pl.plot(bins, hist_values.get(key)/max(hist_values.get(key)), line_styles[i], label=str(voltages.get(key)) + ' V, 4pix clusters')
         
     pl.legend()
-    pl.xlim([100,1100])
+    pl.xlim([250,1250])
     pl.ylim([0,1.1])
     pl.xlabel('Time (ns)', horizontalalignment = 'right' )
 
