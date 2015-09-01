@@ -19,5 +19,9 @@ args = '/mnt/hgfs/VMShared/useful/ITL_1100.fits --displayTrimmed --doGainCorrect
 # args = '/mnt/hgfs/VMShared/useful/114-04_ITL_fe55.fits --displayTrimmed'
 
 
+
+args = '/mnt/hgfs/VMShared/data/temp/davis_raw.fits --displayUnTrimmed'
+
+
 os.system(script + ' ' + args)
 print 'done'

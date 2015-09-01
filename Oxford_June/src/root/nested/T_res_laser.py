@@ -22,6 +22,7 @@ finetune_1 = 0
 finetune_2 = -20
 
 
+
 def MakeToFSpectrum():
     timepix_timecodes_raw = GetTimecodes_AllFilesInDir(timepix_path, xmin, xmax, ymin, ymax, 0, checkerboard_phase = None)
     timepix_centroided_1 =  GetMaxClusterTimecodes_AllFilesInDir(timepix_path, xmin, xmax, ymin, ymax, checkerboard_phase = None, npix_min = 4)
@@ -63,7 +64,7 @@ def MakeToFSpectrum():
         pl.plot(tp_bins-finetune_1,     n_raw,          'k-.o', label="Timepix Raw")
         pl.plot(pm_bins,                n_centroided_1, 'b--o', label="4 pixel clusters")
         pl.plot(tp_bins_max-finetune_2, n_centroided_2, 'r-o',  label="9 pixel clusters")
-    
+        
     print "Peak height raw = %s"%max(n_raw)
     print "Peak height 4pix = %s"%max(n_centroided_1)
     print "Peak height 9pix = %s"%max(n_centroided_2)
@@ -74,7 +75,7 @@ def MakeToFSpectrum():
     pl.xlabel('Time (ns)', horizontalalignment = 'right' )
 
     pl.tight_layout()
-    fig.savefig(out_path + 'T_res_laser.png')
+    fig.savefig(out_path + 'temp.png')
     pl.show()
     
     print "finished"
@@ -110,6 +111,7 @@ if __name__ == '__main__':
     
     MakeToFSpectrum()
     print "Finished ToF Spectrum"
+    
     exit()
     
 
