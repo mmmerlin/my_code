@@ -15,166 +15,21 @@ in_path = '/mnt/hgfs/VMShared/Data/oxford/June_2015/Day1/timepix/run1/'
 x, y = [],[]
 
 xmin, xmax, ymin, ymax,tmin,tmax=10,245,10,245,0,15000
-
-
-def PlotREMPI_new():
-    max_loops = 16
-    loop_length = 999
-    box_size = 1
-    
-    files = os.listdir(in_path)
-
-    wavelength = range(999)
-    intensity = np.zeros(999)
-    total_codes = 0
-    run_intensity = np.zeros(max_loops)
-
-#     image_array = []
-#     for i in range(999):
-#         image = MakeCompositeImage_Timepix(in_path + files[0], xmin, xmax, ymin, ymax, t_min = tmin, t_max=tmax, return_raw_array=False)
-#         image_array.append(image)
-#         image_array[i] -= image
-        
-
-    for i,filename in enumerate(files):
-        if str(filename).find('.DS')!=-1:continue
-        run_num = float(str.split(filename,'_')[0])
-        shot_num = float(str.split(str.split(filename,'_')[1],'.')[0])-1
-        if shot_num >= 999: continue
-        
-        codes = GetRawTimecodes_SingleFile(in_path+filename, xmin, xmax, ymin, ymax, tmin, tmax, 0)
-        ncodes = len(codes[0:])
-        intensity[shot_num] += ncodes
-        total_codes += ncodes
-        run_intensity[run_num] += ncodes
-        
-        if i>=(max_loops*loop_length): break
-        
-    print 'Total codes = %s\n'%total_codes
-    for i in range(max_loops):
-        GLOBAL_OUT.append('run %s = %s'%(i,run_intensity[i]))
-        print 'run %s =\t%s'%(i,run_intensity[i])
-        
-    wavelength = wavelength[0:999-box_size+1]
-    intensity = BoxcarAverage1DArray(intensity,box_size)
-    assert len(wavelength)==len(intensity)
-    
-    if exp_type == 'timepix':
-        ax1.plot(wavelength,intensity)
-        ax1.set_xlabel('Wavelength (a.u./nm)')
-        ax3.errorbar(range(max_loops), run_intensity, run_intensity**0.5, fmt='o')
-        ax3.set_ylim([0, max(run_intensity)*1.1])
-        ax3.set_xlabel('Relative REMPI intensity (pixs/frame)')
-        
-        print 'Finished REMPI / Timepix'
-    elif exp_type =='pimms_to_timepix':
-        ax2.plot(wavelength,intensity)
-        ax2.set_xlabel('Wavelength (a.u./nm)')
-        ax4.errorbar(range(max_loops), run_intensity, run_intensity**0.5, fmt='o')
-        ax4.set_ylim([0, max(run_intensity)*1.1])
-        ax4.set_xlabel('Relative REMPI intensity (pixs/frame)')
-       
-        print 'Finished REMPI / PImMS'
-        
-    
-    tot_int = 0.
-    n_points = 0.
-    for i in range(len(run_intensity)):
-        if run_intensity[i] <> 0:
-            tot_int += run_intensity[i]
-            n_points += 1.
-    av_int = tot_int / n_points
-    
-    
-    print 'average intensity = %.2f'%(av_int)
-    GLOBAL_OUT.append('average intensity = %.2f'%(av_int))
-    
-    
-def MakeToFSpectrum():
-    print in_path
-    exit()
-    timecodes = GetTimecodes_AllFilesInDir(in_path, xmin, xmax, ymin, ymax, 0) #OCS
-    print 'Total entries = %s' %len(timecodes)
-     
-    #make the histogram of the timecodes
-    fig2 = pl.figure()
-    pl.hist(timecodes, bins = 11811, range = [tmin,tmax])
-    pl.xlim([tmin,tmax])
-    pl.xlabel('ToF (timecodes)', horizontalalignment = 'right' )
-    pl.title('ToF Spectrum')
-
-    fig2.savefig(out_path + day + run + exp_type + 'ToF.png')
-    pl.show()
-
-
-def PlotREMPI():
-    max_loops = 16
-    loop_length = 999
-    box_size = 10
-    
-    files = os.listdir(in_path)
-
-    wavelength = range(999)
-    intensity = np.zeros(999)
-    total_codes = 0
-    run_intensity = np.zeros(max_loops)
-
-    for i,filename in enumerate(files):
-        run_num = float(str.split(filename,'_')[0])
-        shot_num = float(str.split(str.split(filename,'_')[1],'.')[0])-1
-        if shot_num >= 999: continue
-
-        codes = GetRawTimecodes_SingleFile(in_path+filename, xmin, xmax, ymin, ymax, tmin, tmax, 0)
-        ncodes = len(codes[0:])
-        intensity[shot_num] += ncodes
-        total_codes += ncodes
-        run_intensity[run_num] += ncodes
-        
-        if i>=(max_loops*loop_length): break
-        
-    print 'Total codes = %s\n'%total_codes
-    for i in range(max_loops):
-        print 'run %s = %s'%(i,run_intensity[i])
-        
-    wavelength = wavelength[0:999-box_size+1]
-    intensity = BoxcarAverage1DArray(intensity,box_size)
-    assert len(wavelength)==len(intensity)
-    
-    plotname = out_path + day + run + exp_type + 'REMPI.png'
-    ListVsList(wavelength, intensity, plotname, plot_opt='AC')
-    exit()
-    
-    fig2 = pl.figure()
-    pl.plot(wavelength,intensity)
-    pl.xlabel('Wavelength (a.u./nm)', horizontalalignment = 'right' )
-    fig2.savefig(out_path+plotname+'.png')
-#     pl.show()
-    
-    fig3, ax = pl.subplots(nrows=1, ncols=1, sharex=True)
-    ax.errorbar(range(max_loops), run_intensity, run_intensity**0.5, fmt='o')
-    
-    tot_int = 0.
-    n_points = 0.
-    for i in range(len(run_intensity)):
-        if run_intensity[i] <> 0:
-            tot_int += run_intensity[i]
-            n_points += 1.
-    av_int = tot_int / n_points
-    
-    print 'average intensity = %.2f'%(av_int)
-    pl.show()
     
 
-
-def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax):
+def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix):
+    from root_functions import ListVsList_fit
+   
     global x,y
-    
+    retval = ''
     print in_path
-    offset = 3650
-    npix_min = 9
+#     offset = 3650
+    offset = 3540
     
-    timepix_timecodes_max = GetMaxClusterTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None, npix_min=npix_min)
-#     timepix_timecodes_max = GetTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None)
+    if raw:
+        timepix_timecodes_max = GetTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None)
+    else:
+        timepix_timecodes_max = GetMaxClusterTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None, npix_min=npix)
 
     for i,code in enumerate(timepix_timecodes_max):
         timepix_timecodes_max[i] = (11810. - code)-offset
@@ -191,13 +46,19 @@ def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax
     
     pl.plot(tp_bins_max,n_tp_max, 'r-o',  label="Timepix Clustered")
     
+    x = []
+    y = []
     x.extend(tp_bins_max)
     y.extend(n_tp_max)
+    
+    sigma, hist1 = ListVsList_fit(x, y, out_path + 'temp.png', fitmin = 50, fitmax = 500)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
     
     nclusters = len(timepix_timecodes_max)
     peak_height = max(n_tp_max)
     print "peak_height = %s"%peak_height
     print "n_clusters = %s"%nclusters
+    
+    retval += str(nclusters) + '\t' + str(peak_height) + '\t' + str(sigma)
     
     pl.legend()
 #     pl.xlim([0,1100])
@@ -205,25 +66,29 @@ def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax
     pl.xlabel('Time (ns)', horizontalalignment = 'right' )
 
     pl.tight_layout()
-    fig.savefig(out_path + 'temp.png')
-    pl.show(block = True)
+#     fig.savefig(out_path + 'temp.png')
+    pl.show(block = False)
   
-      
+    return retval
 
-def AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax):
+def AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw):
+    from root_functions import ListVsList_fit
     global x,y
     
     print in_path
     offset = 1200
+    retval = ''
     
-    mask_pixels = GeneratePixelMaskListFromFileset(in_path, noise_threshold = 0.05, xmin = 0, xmax = 255, ymin = 0, ymax = 255, file_limit = 1e6)
-    print mask_pixels
-    print '---'
-    print len(mask_pixels[0])
-    mask_array = MakeMaskArray(mask_pixels)
-    ViewMaskInDs9(mask_array)
-#     exit()
-#     mask_array = None
+    if raw:
+        mask_array = None
+        n_masked_pix = 0
+    else:
+        mask_pixels = GeneratePixelMaskListFromFileset(in_path, noise_threshold = 0.05, xmin = 0, xmax = 255, ymin = 0, ymax = 255, file_limit = 1e6)
+        print mask_pixels
+        print '---'
+        n_masked_pix = len(mask_pixels[0])
+        mask_array = MakeMaskArray(mask_pixels)
+#         ViewMaskInDs9(mask_array)
     
     pimms_timecodes_raw = GetTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None, noise_mask=mask_array)
 
@@ -241,13 +106,20 @@ def AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax):
     
     pl.plot(tp_bins_max,n_tp_max, 'r-o',  label="Timepix Clustered")
     
+    x = []
+    y = []
     x.extend(tp_bins_max)
     y.extend(n_tp_max)
+    
+    sigma, hist1 = ListVsList_fit(x, y, out_path + 'temp.png', fitmin = 50, fitmax = 500)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
+    
     
     nclusters = len(pimms_timecodes_raw)
     peak_height = max(n_tp_max)
     print "peak_height = %s"%peak_height
     print "n_clusters = %s"%nclusters
+    
+    retval += str(nclusters) + '\t' + str(peak_height) + '\t' + str(sigma) + '\t' + str(n_masked_pix)
     
     pl.legend()
 #     pl.xlim([0,1100])
@@ -255,29 +127,24 @@ def AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax):
     pl.xlabel('Time (ns)', horizontalalignment = 'right' )
 
     pl.tight_layout()
-    fig.savefig(out_path + 'temp.png')
+#     fig.savefig(out_path + 'temp.png')
     pl.show(block = True)
+    
+    
+    return retval
+    
     
 if __name__ == '__main__':
 
-    #===============================================================================
-    timepix_path = '/mnt/hgfs/VMShared/Data/oxford/June_2015/Day1/timepix/run2/'
-    pimms_path =   '/mnt/hgfs/VMShared/Data/oxford/June_2015/Day1/pimms_to_timepix/run2/'
-    timepix_offset     = 3651 #bigger moves left
-    timepix_max_offset = 3651 #bigger moves left
-    pimms_offset       = 1200 #smaller moves left
-    tp_finetune = 2.5
-    tp_max_finetune = -17.5
-    #===============================================================================
 
     out_path = '/mnt/hgfs/VMShared/output/oxford/2015_june/temp/'
 
     day = 'day3'
-    run = 'run3'
+    run = 'run8'
     
     in_path = '/mnt/hgfs/VMShared/Data/oxford/june_2015/'
-    exp_type = 'timepix'
-#     exp_type = 'pimms_to_timepix'
+#     exp_type = 'timepix'
+    exp_type = 'pimms_to_timepix'
     in_path += day + '/'
     in_path += exp_type + '/'
     in_path += run + '/'
@@ -286,19 +153,39 @@ if __name__ == '__main__':
     tp_xmax = 245
     tp_ymin = 10
     tp_ymax = 245
-    tp_tmin = 8060
-    tp_tmax = 8160
     
-#     MakeToFSpectrum()
+#     raw = True
+#     npix = 1
+#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+#     GLOBAL_OUT.append(line)
+#     raw = False
+#     npix = 1
+#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+#     GLOBAL_OUT.append(line)
+#     npix = 4
+#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+#     GLOBAL_OUT.append(line)
+#     npix = 9
+#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+#     GLOBAL_OUT.append(line)
+# 
+#     for line in GLOBAL_OUT:
+#         print line
+# 
 #     exit()
+
+    raw = True
+    line = AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw)
+    GLOBAL_OUT.append(line)
+    raw = False
+    line = AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw)
+    GLOBAL_OUT.append(line)
     
-    AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax)
-#     AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, tp_tmin, tp_tmax)
     
-    from root_functions import ListVsList_fit
-    
-    hist1 = ListVsList_fit(x, y, out_path + 'temp.png', fitmin = 150, fitmax = 700)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
-    
+    for line in GLOBAL_OUT:
+        print line
+    exit()
+ 
     print 'max value = %s'%max(y)
     
     
@@ -315,10 +202,6 @@ if __name__ == '__main__':
      
      
      
-     
-     
-    PlotREMPI()
-    exit()
 
 
 #     MakeToFSpectrum()
