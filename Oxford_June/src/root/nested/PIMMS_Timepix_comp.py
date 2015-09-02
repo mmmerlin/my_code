@@ -23,8 +23,8 @@ def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix):
     global x,y
     retval = ''
     print in_path
-#     offset = 3650
-    offset = 3540
+    offset = 3650
+#     offset = 3540
     
     if raw:
         timepix_timecodes_max = GetTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None)
@@ -139,8 +139,8 @@ if __name__ == '__main__':
 
     out_path = '/mnt/hgfs/VMShared/output/oxford/2015_june/temp/'
 
-    day = 'day3'
-    run = 'run8'
+    day = 'day4'
+    run = 'run1'
     
     in_path = '/mnt/hgfs/VMShared/Data/oxford/june_2015/'
 #     exp_type = 'timepix'
@@ -168,10 +168,10 @@ if __name__ == '__main__':
 #     npix = 9
 #     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
 #     GLOBAL_OUT.append(line)
-# 
+#  
 #     for line in GLOBAL_OUT:
 #         print line
-# 
+#  
 #     exit()
 
     raw = True
