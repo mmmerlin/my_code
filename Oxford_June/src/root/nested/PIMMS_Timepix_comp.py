@@ -23,8 +23,8 @@ def AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix):
     global x,y
     retval = ''
     print in_path
-    offset = 3650
-#     offset = 3540
+#     offset = 3650
+    offset = 2650
     
     if raw:
         timepix_timecodes_max = GetTimecodes_AllFilesInDir(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, checkerboard_phase = None)
@@ -136,15 +136,16 @@ def AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw):
     
 if __name__ == '__main__':
 
-
+    
     out_path = '/mnt/hgfs/VMShared/output/oxford/2015_june/temp/'
 
-    day = 'day4'
-    run = 'run1'
+    day = 'day3'
+    run = 'run8'
     
     in_path = '/mnt/hgfs/VMShared/Data/oxford/june_2015/'
-#     exp_type = 'timepix'
-    exp_type = 'pimms_to_timepix'
+    exp_type = 'timepix'
+#     exp_type = 'pimms_to_timepix'
+
     in_path += day + '/'
     in_path += exp_type + '/'
     in_path += run + '/'
@@ -154,25 +155,29 @@ if __name__ == '__main__':
     tp_ymin = 10
     tp_ymax = 245
     
-#     raw = True
-#     npix = 1
-#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
-#     GLOBAL_OUT.append(line)
-#     raw = False
-#     npix = 1
-#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
-#     GLOBAL_OUT.append(line)
-#     npix = 4
-#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
-#     GLOBAL_OUT.append(line)
-#     npix = 9
-#     line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
-#     GLOBAL_OUT.append(line)
-#  
-#     for line in GLOBAL_OUT:
-#         print line
-#  
+    
+#     MakeToFSpectrum(in_path, out_path + 'tof', tp_xmin, tp_xmax, tp_ymin, tp_ymax, False, time_zoom_region=[8000,8200])
 #     exit()
+
+    raw = True
+    npix = 1
+    line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+    GLOBAL_OUT.append(line)
+    raw = False
+    npix = 1
+    line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+    GLOBAL_OUT.append(line)
+    npix = 4
+    line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+    GLOBAL_OUT.append(line)
+    npix = 9
+    line = AnalyseTimepix(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw, npix)
+    GLOBAL_OUT.append(line)
+  
+    for line in GLOBAL_OUT:
+        print line
+  
+    exit()
 
     raw = True
     line = AnalysePImMS(in_path, tp_xmin, tp_xmax, tp_ymin, tp_ymax, raw)
