@@ -1,6 +1,6 @@
 import os
 
-script = 'python DMImageAssembly.py'
+script = 'python my_DMImageAssembly.py'
 
 
 # args = '/mnt/hgfs/VMShared/useful/ITL_400.fits --displayTrimmed --doGainCorrection'
@@ -22,6 +22,12 @@ args = '/mnt/hgfs/VMShared/useful/new_e2v_400.fits --displayTrimmed'
 
 # args = '/mnt/hgfs/VMShared/data/temp/davis_raw.fits --displayUnTrimmed'
 
+
+# args = '/mnt/hgfs/VMShared/data/temp/ITL_new.fits --displayTrimmed'
+# args = '/mnt/hgfs/VMShared/data/temp/XEDShadowImageITL.fits --displayTrimmed'
+# args = '/mnt/hgfs/VMShared/data/temp/XEDShadowImageITL.fits --displayTrimmed'
+
+args = '/mnt/hgfs/VMShared/useful/new_e2v_400.fits --displayTrimmed'
 
 
 
