@@ -17,6 +17,6 @@ for i in range(len(filenames)):
 #     print newname
 #     exit()
     
-    os.rename(oldname, newname)
+    os.rename(oldname, newname) 
     
 print "Finished!"
