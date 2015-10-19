@@ -39,7 +39,7 @@ timepix_path_1 = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/100V_TOF/'
 # timepix_path_1 = '/mnt/hgfs/VMShared/Data/new_sensors/bnl/4-9-15/temp/'
 timepix_offset     = 4300 #bigger moves left
 tp_finetune = 0
-tp_max_finetune = -70
+tp_max_finetune = 0
 
 
 
@@ -57,7 +57,7 @@ def MakeToFSpectrum():
     global x,y,x2,y2
     
     timepix_timecodes_raw = GetTimecodes_AllFilesInDir(timepix_path_1, xmin, xmax, ymin, ymax, 0, checkerboard_phase = None)
-#     timepix_timecodes_max = GetMaxClusterTimecodes_AllFilesInDir(timepix_path_1, xmin, xmax, ymin, ymax, checkerboard_phase = None, npix_min = 16)
+#     timepix_timecodes_max = GetMaxClusterTimecodes_AllFilesInDir(timepix_path_1, xmin, xmax, ymin, ymax, checkerboard_phase = None, npix_min = 1)
 
     for i,code in enumerate(timepix_timecodes_raw):
         timepix_timecodes_raw[i] = (11810. - code) - timepix_offset
@@ -75,24 +75,24 @@ def MakeToFSpectrum():
 #     n_tp_max, tp_bins_max, patches  = pl.hist(timepix_timecodes_max, bins = timepix_nbins, range = [0,timepix_nbins*20])
 
 
-#     pl.clf()
-#     tp_bins     = tp_bins[:-1] 
+    pl.clf()
+    tp_bins     = tp_bins[:-1] 
 #     tp_bins_max = tp_bins_max[:-1] 
     
     
-#     if NORMALISE:
-#         pl.plot(tp_bins-tp_finetune,        n_tp/max(n_tp),         'k-.o', label="Timepix Raw")
+    if NORMALISE:
+        pl.plot(tp_bins-tp_finetune,        n_tp/max(n_tp),         'k-.o', label="Timepix Raw")
 #         pl.plot(tp_bins_max-tp_max_finetune,n_tp_max/max(n_tp_max), 'r-o',  label="Timepix Clustered")
-#     else:
-#         pl.plot(tp_bins-tp_finetune,        n_tp,         'k-.o', label="Timepix Raw")
+    else:
+        pl.plot(tp_bins-tp_finetune,        n_tp,         'k-.o', label="Timepix Raw")
 #         pl.plot(tp_bins_max-tp_max_finetune,n_tp_max, 'r-o',  label="Timepix Clustered")
-# 
-#     
+ 
+     
 #     x.extend(tp_bins_max-tp_max_finetune)
 #     y.extend(n_tp_max/max(n_tp_max))
-#     
-#     x2.extend(tp_bins-tp_finetune)
-#     y2.extend(n_tp/max(n_tp))
+     
+    x2.extend(tp_bins-tp_finetune)
+    y2.extend(n_tp/max(n_tp))
     
     
     
@@ -153,8 +153,8 @@ if __name__ == '__main__':
     
     from root_functions import ListVsList_fit
     
-    hist1 = ListVsList_fit(x, y,   out_path + 'laser_clustered.png',      fitmin = 0, fitmax = 500)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
-    hist1 = ListVsList_fit(x2, y2, out_path + 'laser_raw.png',      fitmin = 0, fitmax = 500)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
+#     hist1 = ListVsList_fit(x, y,   out_path + 'laser_clustered.png',      fitmin = 50, fitmax = 350)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
+    hist1 = ListVsList_fit(x2, y2, out_path + 'laser_raw.png',      fitmin = 150, fitmax = 350)#, xmin, xmax, xtitle, ytitle, setlogy, ymin, ymax, marker_color, set_grid, marker_style, marker_size, plot_opt)
     
     print 'max value = %s'%max(y)
     

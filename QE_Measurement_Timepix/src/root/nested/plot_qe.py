@@ -9,6 +9,7 @@ if __name__ == '__main__':
     print "running"
     
     filename = '/mnt/hgfs/VMShared/output/QE_Timepix/Sensors/calibrated_diode_1/calib_diode_1_clipped.txt'
+#     filename = '/mnt/hgfs/VMShared/output/QE_Timepix/Sensors/calibrated_diode_1/calib_diode_1_raw.txt'
     wavelengths, qe, resp, respcal, residuals, rel_errors = np.loadtxt(filename, skiprows = 1, delimiter = '\t', unpack = True)
     
 

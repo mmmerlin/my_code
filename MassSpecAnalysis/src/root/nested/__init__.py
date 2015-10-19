@@ -14,26 +14,37 @@ if __name__ == '__main__':
 
     home_dir = expanduser("~")
 #    input_path = home_dir + '/Desktop/DMStack VM Shared/Data/Chem_09-06-14/Molecular_oxygen_3us_delay/'
-    input_path = home_dir + '/Desktop/DMStack VM Shared/Data/Chem_09-06-14/Butanone_2us_330/'
-
+#     input_path = home_dir + '/Desktop/DMStack VM Shared/Data/Chem_09-06-14/Butanone_2us_330/'
+    input_path = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
+    
+#     ShowRawToF_whole_dir(input_path)
+#     exit()
     
     #===========================================================================
     # 3D Scattergram
     #===========================================================================    
-    if False:
-        xs, ys, ts = GetXYTarray_AllFilesInDir(input_path, 25, 252, 3, 252, 3, 3, 30)
+    if True:
+        xs, ys, ts = GetXYTarray_AllFilesInDir(input_path, 25, 252, 3, 252, -219, 0, 25, maxfiles = 250)
+#         GetXYTarray_AllFilesInDir(path, winow_xmin, winow_xmax, winow_ymin, winow_ymax, offset_us, tmin_us, tmax_us, maxfiles)
         print 'Number of X,Y,T points = %s'%len(xs)
         
         fig = pl.figure()
         ax = fig.add_subplot(111, projection='3d')
         ax.scatter(xs, ys, ts)
+        
+        
+        pl.xlim([70,170])
+        pl.ylim([40,140])
+        
+        pl.tight_layout()
+        
         pl.show()
-
+        exit()
 
     #===========================================================================
     # Histograms vs. PMT Spectra 
     #===========================================================================
-    if False:
+    if True:
         timecodes = GetTimecodes_AllFilesInDir(input_path, 3, 252, 3, 252, 2)
         print 'Total entries = %s' %len(timecodes)
         
@@ -44,11 +55,11 @@ if __name__ == '__main__':
         pl.title('Oxygen - Timepix')
      
         #plot PMT data
-        data = pl.loadtxt(home_dir + '/Desktop/DMStack VM Shared/Data/Chem_09-06-14/oxygen_pmt.txt')
+        data = pl.loadtxt('/mnt/hgfs/VMShared/Data/Chem_09-06-14/oxygen_pmt.txt')
         pl.subplot(2,1,2)
         pl.plot(data[:,0], data[:,1])
         pl.title('Oxygen - PMT')
-    #    pl.show()
+        pl.show()
 
 
     #===========================================================================

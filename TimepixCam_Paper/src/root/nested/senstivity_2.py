@@ -17,33 +17,41 @@ if __name__ == '__main__':
     xmax = 1100
     
     fig = pl.figure(figsize=(14,10))
+    ax = fig.add_subplot(1,1,1)
 
+    ax.plot(x, nm_50,  'b-D', label="50nm passivation")
 
-    pl.plot(x, nm_50,  'b-o', label="50nm passivation")
-
-    pl.plot(x, nm_500,  'r-o', label="500nm passivation")
+    ax.plot(x, nm_500,  'r-s', label="500nm passivation")
     
     
-    pl.plot(x, LSST, 'kD', label="LSST CCDs")
+    ax.plot(x, LSST, 'ko', label="LSST CCDs")
     interp_LSST = interp1d(x, LSST, kind='cubic')
     t_new = np.linspace(min(x), max(x), len(x)*20)
     pl.plot(t_new,interp_LSST(t_new),'k-')
 
 
 
+    font = {'family' : 'serif',
+            'color'  : 'darkred',
+            'weight' : 'normal',
+            'size'   : 106,
+            }
 
 
 
 
-
-    pl.legend()
-    pl.xlim([250,1125])
+    ax.legend()
+    pl.xlim([300,1135])
 #     pl.ylim([0,1.1])
-    pl.xlabel('Wavelength (nm)', horizontalalignment = 'right' )
-    pl.ylabel('Quantum Efficiency', horizontalalignment = 'right' )
+
+    pl.xlabel('Wavelength (nm)', horizontalalignment = 'right' , fontsize=25)
+    pl.ylabel('Quantum Efficiency', horizontalalignment = 'right' , fontsize=25)
+
+    ax.tick_params(axis='x', labelsize=20)
+    ax.tick_params(axis='y', labelsize=20)
 
     pl.tight_layout()
-    fig.savefig(out_path + 'sensitivity_2.pdf')
+    fig.savefig(out_path + 'sensitivity_2_new.pdf')
     pl.show()    
     
     

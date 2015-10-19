@@ -1,12 +1,5 @@
 
 
-fig = plt.figure()
-ax = plt.axes(projection='3d')
+from my_functions import ShowToF_for_dir
 
-z = np.linspace(0, 1, 100)
-x = z * np.sin(20 * z)
-y = z * np.cos(20 * z)
-
-c = x + y
-
-ax.scatter(x, y, z, c=c)
+input_path = '/mnt/hgfs/VMShared/Data/Chem_09-06-14/Butanone_2us_delay/'
