@@ -26,7 +26,7 @@ master_calib        = '/mnt/hgfs/VMShared/data/QE_Timepix/20151014/master_calibr
  
  
 data_file = '/mnt/hgfs/VMShared/data/QE_Timepix/20151014/fixed.txt'
- 
+
  
 thorlabs_calib_file = '/mnt/hgfs/VMShared/data/QE_Timepix/20151014/thorlabs_calib_data.txt'
 dut_area = 25
@@ -157,7 +157,6 @@ thorlabs_wls, thorlabs_calib = np.loadtxt(thorlabs_calib_file, unpack = True)
 pl.plot(thorlabs_wls,thorlabs_calib*100,'ob')
 
 pl.show(block = True)
-
 
 
 
