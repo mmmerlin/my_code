@@ -20,7 +20,7 @@ args = '/mnt/hgfs/VMShared/useful/ITL_1100.fits --displayTrimmed --doGainCorrect
 
 
 
-args = '/mnt/hgfs/VMShared/data/temp/davis_raw.fits --displayUnTrimmed'
+args = '/mnt/hgfs/VMShared/data/useful/g08_gal.fits --displayUnTrimmed'
 
 
 os.system(script + ' ' + args)

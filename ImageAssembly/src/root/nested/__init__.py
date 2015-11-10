@@ -14,19 +14,22 @@ from image_assembly import AssembleImage, MakeBiasImage, GetImage_SingleAmp
 if __name__ == '__main__':
 #    filename = '/home/mmmerlin/Desktop/VMShared/temp/ITL.fits'
 #     filename = '/home/mmmerlin/Desktop/VMShared/temp/phosim.fits'
-    filename = '/home/mmmerlin/Desktop/VMShared/data/temp/grid.fits'
-    filename = '/home/mmmerlin/Desktop/VMShared/temp/120.00sec_frame_103.1.fits.fixed'
+#     filename = '/home/mmmerlin/Desktop/VMShared/data/temp/grid.fits'
+#     filename = '/home/mmmerlin/Desktop/VMShared/temp/120.00sec_frame_103.1.fits.fixed'
     
     
-    try: # initialise DS9, deal with a bug in its launching
-        ds9.initDS9(False)
-    except ds9.Ds9Error:
-        print 'DS9 launch bug error thrown away (probably)'
-    print 'called ds9 to display' 
+    filename = '/home/user01/Desktop/example_files/e2v_fringes.fits'
+    
+    
+#     try: # initialise DS9, deal with a bug in its launching
+#     ds9.initDS9(False)
+#     except ds9.Ds9Error:
+#         print 'DS9 launch bug error thrown away (probably)'
+#     print 'called ds9 to display' 
         
 #    print "Processing %s..." %filename
 
-    metadata_filename = '/home/mmmerlin/useful/herring_bone.fits'
+    metadata_filename = '/home/user01/Desktop/example_files/e2v_herring_bone.fits'
 
 
 #     gains = [3.863893926,3.889311364,3.839592821,3.880267774,3.829443828,3.859452995,3.8523837,3.826228492,3.913972084,3.952911679,3.844514444,3.9919436,3.897239172,3.957293714,3.879582217,3.888644858] #112-04 900 file set gains
