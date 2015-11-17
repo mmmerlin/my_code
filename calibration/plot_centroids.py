@@ -11,7 +11,7 @@ ax = fig.add_subplot(111)
 
 i = 1
 for text,x,y in zip(data[:,0],data[:,1],data[:,2]):
-    if text == 'nominal':
+    if textt == 'nominal':
         pl.plot(x,y,'ro')
         ax.annotate(str(i), xy=[x,y])
     else:
