@@ -4,8 +4,8 @@ def DrawFootprint(bbox,x,y):
 
 
 import lsst.afw.display.ds9 as ds9
-from lsst.display.ds9 import ds9Cmd
-from lsst.display.ds9 import initDS9
+# from lsst.display.ds9 import ds9Cmd
+# from lsst.display.ds9 import initDS9
 # import lsst.display.ds9.ds9 as ds9
 
 import lsst.afw.image as afwImage
